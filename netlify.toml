@@ -1,5 +1,3 @@
-plugins = []
-redirects = []
 
 # منع الكاش على ملفات JS و HTML — يضمن وصول التحديثات لكل المستخدمين فوراً
 [[headers]]
@@ -12,24 +10,5 @@ redirects = []
   [headers.values]
     Cache-Control = "no-cache, must-revalidate"
 
-[functions]
-
-  [functions."*"]
-
 [build]
 publish = "."
-command = "npm run build"
-
-  [build.environment]
-
-  [build.processing]
-
-    [build.processing.css]
-
-    [build.processing.html]
-
-    [build.processing.images]
-
-    [build.processing.js]
-
-  [build.services]

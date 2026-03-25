@@ -3,9 +3,10 @@
 const CACHE_VERSION = 'quran-v3';
 
 const STATIC_ASSETS = [
-  '/', '/index.html', '/browse.html', '/stats.html',
-  '/stats-roots.html', '/stats-words.html',
-  '/manifest.json', '/icons/icon-192.png', '/icons/icon-512.png'
+  '/', '/index.html', '/browse.html', '/roots.html', '/fields.html',
+  '/stats.html', '/stats-roots.html', '/stats-words.html',
+  '/offline.html', '/manifest.json',
+  '/icons/icon-192.png', '/icons/icon-512.png'
 ];
 
 self.addEventListener('install', function(e) {
@@ -55,7 +56,7 @@ self.addEventListener('fetch', function(e) {
         caches.open(CACHE_VERSION).then(function(c) { c.put(e.request, cl); });
         return r;
       }).catch(function() {
-        return caches.match(e.request).then(function(c) { return c || caches.match('/index.html'); });
+        return caches.match(e.request).then(function(c) { return c || caches.match('/offline.html'); });
       })
     );
     return;
