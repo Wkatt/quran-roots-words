@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مستكشف القرآن العظيم</title>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#6b3a1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مستكشف القرآن">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DGJW3108XZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DGJW3108XZ');
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family: 'KFGQPC HAFS Uthmanic Script Regular'; src: url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.woff2') format('woff2'), url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.ttf') format('truetype'); font-display: swap; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Amiri', 'Traditional Arabic', serif; background: #f5f0e8; color: #2c1a0e; min-height: 100vh; direction: rtl; }
+  body.dark { background: #1a1208; color: #e8d8b8; }
+
+  .header { background: linear-gradient(135deg, #6b3a1f, #3d1f0a); border-bottom: 3px solid #c9a84c; padding: 16px 30px 12px; text-align: center; position: relative; }
+  .header h1 { font-size: 2rem; color: #f5e6c8; padding: 0 80px; }
+  .header p { color: #d4b896; font-size: 0.9rem; margin-top: 4px; }
+  .header-controls { position: absolute; left: 16px; top: 18px; display: flex; gap: 8px; }
+  .hc-btn { background: #ffffff22; border: 1px solid #ffffff33; border-radius: 8px; color: #f5e6c8; padding: 6px 10px; cursor: pointer; font-size: 1rem; transition: background .2s; }
+  .hc-btn:hover { background: #ffffff33; }
+  /* أزرار الإحصائيات - سطر مستقل أسفل العنوان */
+  .header-stats-links { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+  .hc-stats-btn { display: inline-flex; align-items: center; gap: 5px; background: #ffffff18; border: 1px solid #ffffff2a; border-radius: 8px; color: #f5e6c8; padding: 5px 12px; cursor: pointer; font-size: 0.78rem; font-family: 'Amiri', serif; text-decoration: none; transition: background .2s; white-space: nowrap; }
+  .hc-stats-btn:hover { background: #ffffff30; }
+  body.dark .hc-stats-btn { background: #ffffff15; border-color: #ffffff22; color: #e8d8b8; }
+
+
+  /* font size slider */
+  .font-bar { max-width:900px; margin:0 auto 8px; padding:0 20px; display:none; align-items:center; gap:12px; font-size:.9rem; color:#7a5c3a; }
+  body.dark .font-bar { color:#b09070; }
+  .font-bar input[type=range] { flex:1; accent-color:#c9a84c; }
+
+  .init-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; padding:40px 20px; text-align:center; }
+  .init-icon { font-size:4rem; margin-bottom:20px; }
+  .init-title { font-size:1.4rem; color:#6b3a1f; margin-bottom:10px; }
+  body.dark .init-title { color:#c9a84c; }
+  .init-sub { color:#9a7a5a; font-size:0.95rem; margin-bottom:30px; }
+  .init-btn { background:linear-gradient(135deg,#c9a84c,#a07830); color:#fff; border:none; padding:14px 40px; border-radius:10px; font-family:inherit; font-size:1.1rem; cursor:pointer; box-shadow:0 4px 15px #c9a84c44; transition:all .2s; }
+  .init-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px #c9a84c66; }
+  .init-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+  .progress-bar { width:300px; height:8px; background:#e0d0b8; border-radius:4px; margin-top:20px; overflow:hidden; display:none; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,#c9a84c,#a07830); border-radius:4px; width:0%; transition:width .3s; }
+  .progress-text { color:#8b4513; font-size:0.9rem; margin-top:10px; display:none; }
+
+  .search-container { max-width:800px; margin:0 auto 16px; padding:0 20px; display:none; }
+  .search-tabs { display:flex; border-radius:10px 10px 0 0; overflow:hidden; border:1px solid #c9a84c66; border-bottom:none; }
+  .tab-btn { flex:1; padding:10px; background:#ede3d4; border:none; color:#7a5c3a; font-family:inherit; font-size:1rem; cursor:pointer; transition:all .2s; }
+  body.dark .tab-btn { background:#2a1f0e; color:#b09070; }
+  /* الكلمة - بني دائماً */
+  .tab-btn.word-tab { color:#8b4513; background:#fff8f0; }
+  body.dark .tab-btn.word-tab { background:#2c1f0e; color:#c9a84c; }
+  .tab-btn.word-tab.active { font-weight:bold; box-shadow:inset 0 -3px 0 #8b4513; }
+  /* الجذر - أخضر دائماً */
+  .tab-btn.root-tab { color:#1a6b4a; background:#f0faf5; }
+  body.dark .tab-btn.root-tab { background:#0e2a1a; color:#4ab880; }
+  .tab-btn.root-tab.active { font-weight:bold; box-shadow:inset 0 -3px 0 #1a6b4a; }
+  /* العبارة - أزرق دائماً */
+  .tab-btn.phrase-tab { color:#2b4c8c; background:#eef2ff; }
+  body.dark .tab-btn.phrase-tab { background:#1a2040; color:#8ab0f0; }
+  .tab-btn.phrase-tab.active { font-weight:bold; box-shadow:inset 0 -3px 0 #2b4c8c; }
+  /* active عام - لو مفيش class خاص */
+  .tab-btn.active { font-weight:bold; }
+  .search-bar { display:flex; gap:10px; align-items:center; background:#fff8f0; border:1px solid #c9a84c88; border-radius:0 0 10px 10px; padding:10px 16px; }
+  body.dark .search-bar { background:#2c1f0e; border-color:#7a5c3a; }
+  .search-bar.root-mode { background:#f0faf5; border-color:#2a9a6a88; }
+  body.dark .search-bar.root-mode { background:#0e2a1a; border-color:#2a6a44; }
+  .search-bar.phrase-mode { background:#eef2ff; border-color:#7a9ae888; }
+  body.dark .search-bar.phrase-mode { background:#1a2040; }
+  .search-bar input { flex:1; background:transparent; border:none; outline:none; color:#2c1a0e; font-size:1.3rem; font-family:inherit; direction:rtl; }
+  body.dark .search-bar input { color:#e8d8b8; }
+  .search-bar input::placeholder { color:#b09070; }
+
+  /* ✕ Clear button */
+  #clearBtn { background:none; border:none; cursor:pointer; font-size:1.15rem; color:#b09070; padding:0 4px 0 0; line-height:1; transition:color .15s; flex-shrink:0; }
+  body.dark #clearBtn { color:#7a6050; }
+  #clearBtn:hover { color:#8b4513; }
+  body.dark #clearBtn:hover { color:#c9a84c; }
+  /* Root autocomplete dropdown */
+  .root-ac { position:absolute; top:100%; right:0; left:0; background:#fff8f0; border:1px solid #c9a84c66; border-top:none; border-radius:0 0 10px 10px; box-shadow:0 6px 18px #0002; z-index:300; max-height:260px; overflow-y:auto; }
+  body.dark .root-ac { background:#2c1f0e; border-color:#7a5c3a88; }
+  .root-ac-item { padding:10px 18px; cursor:pointer; font-size:1rem; color:#1a6b4a; transition:background .12s; direction:rtl; text-align:right; border-bottom:1px solid #e8d8b822; }
+  body.dark .root-ac-item { color:#4ab880; border-color:#3a2a1022; }
+  .root-ac-item:last-child { border-bottom:none; }
+  .root-ac-item:hover { background:#f0faf5; }
+  body.dark .root-ac-item:hover { background:#0e2a1a; }
+  /* search-bar needs relative positioning for autocomplete */
+  .search-bar { position:relative; }
+    .stats-bar { max-width:800px; margin:0 auto 16px; padding:0 20px; color:#8a6a4a; font-size:0.85rem; display:none; }
+  body.dark .stats-bar { color:#9a8060; }
+  .chips-area { max-width:800px; margin:0 auto 20px; padding:0 20px; display:flex; flex-wrap:wrap; gap:10px; }
+  .chip { background:#fff8f0; border:1px solid #c9a84c66; border-radius:20px; padding:6px 16px; cursor:pointer; font-size:1rem; color:#8b4513; transition:background .15s,color .15s; }
+  body.dark .chip { background:#2a1f0e; color:#c9a84c; border-color:#7a5c3a55; }
+  .chip.word-chip { color:#1a6b4a; border-color:#2a9a6a44; }
+  body.dark .chip.word-chip { color:#4ab880; }
+  .chip.word-chip:hover,.chip.word-chip.active { background:#2a7a55; color:#fff; border-color:#2a7a55; }
+
+  .results-area { max-width:900px; margin:0 auto; padding:0 0 40px; }
+  .root-header { background:linear-gradient(135deg,#fff8f0,#fdf0dc); border:1px solid #c9a84c; border-radius:12px; padding:16px 24px; margin-bottom:20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; box-shadow:0 2px 10px #c9a84c22; }
+  body.dark .root-header { background:linear-gradient(135deg,#2c1f0e,#3a2a10); border-color:#7a5c3a; }
+  .root-header.phrase-header { background:linear-gradient(135deg,#eef2ff,#dde6ff); border-color:#7a9ae8; }
+  body.dark .root-header.phrase-header { background:linear-gradient(135deg,#1a2040,#202840); border-color:#4a6ab0; }
+  .root-title { font-size:2.2rem; color:#8b4513; }
+  body.dark .root-title { color:#c9a84c; }
+  .root-title.phrase-title { font-size:1.6rem; color:#2b4c8c; }
+  .root-meta { color:#7a5c3a; font-size:0.9rem; line-height:1.7; }
+  body.dark .root-meta { color:#9a8060; }
+
+  .entry-card { background:#fff; border:1px solid #e0d0b8; border-radius:12px; margin-bottom:20px; overflow:hidden; box-shadow:0 2px 8px #c9a84c11; transition:box-shadow .2s; }
+  body.dark .entry-card { background:#221508; border-color:#4a3520; }
+  .entry-card:hover { box-shadow:0 4px 16px #c9a84c22; }
+  .entry-header { background:#fdf5e6; padding:12px 20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-bottom:1px solid #e8d8b8; }
+  body.dark .entry-header { background:#2a1c0a; border-color:#4a3520; }
+  .entry-word { font-size:1.6rem; color:#8b4513; font-weight:bold; }
+  body.dark .entry-word { color:#c9a84c; }
+  .badge { background:#fff8f0; border:1px solid #c9a84c55; border-radius:6px; padding:3px 10px; font-size:0.8rem; color:#7a5c3a; }
+  body.dark .badge { background:#2a1c0a; color:#9a8060; border-color:#7a5c3a44; }
+  .badge.green { border-color:#2a9a6a44; color:#1a6b4a; }
+  body.dark .badge.green { color:#4ab880; }
+  .badge.blue { border-color:#7a9ae855; color:#2b4c8c; background:#eef2ff; }
+  body.dark .badge.blue { background:#1a2040; color:#8ab0f0; }
+
+  .ayah-section { padding:16px 20px; background:#fff; }
+  body.dark .ayah-section { background:#221508; }
+  .ayah-text { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; line-height:2.3; color:#1a1a1a; margin-bottom:12px; background:#fffdf8; border-radius:8px; padding:16px 20px; border-right:4px solid #c9a84c; position:relative; }
+  body.dark .ayah-text { background:#2a1c0a; color:#e8d8b8; }
+
+  .copy-btn { position:absolute; left:10px; top:10px; background:#f5e6cc; border:1px solid #c9a84c66; border-radius:6px; padding:4px 10px; font-size:0.8rem; color:#8b4513; cursor:pointer; opacity:0; transition:opacity .2s; font-family:inherit; }
+  .ayah-text:hover .copy-btn { opacity:1; }
+  body.dark .copy-btn { background:#3a2a10; color:#c9a84c; }
+  .copy-btn.copied { background:#2a7a55; color:#fff; border-color:#2a7a55; }
+
+  .context-toggle { font-size:0.95rem; color:#8b4513; margin-bottom:6px; padding:7px 14px; background:#fdf5e6; border:1px solid #d4b89688; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; user-select:none; }
+  body.dark .context-toggle { background:#2a1c0a; color:#c9a84c; border-color:#7a5c3a55; }
+  .context-toggle:hover { background:#f5e6cc; }
+  .context-body { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; font-size:1.05rem; line-height:2.1; color:#4a3a2a; background:#f8f3ea; border-radius:8px; padding:12px 16px; margin-bottom:10px; border-right:3px solid #d4b896; display:none; margin-top:4px; }
+  body.dark .context-body { background:#2a1c0a; color:#c0a870; border-color:#7a5c3a; }
+
+  .no-results { text-align:center; padding:60px 20px; color:#9a7a5a; font-size:1.1rem; }
+  .loading-overlay { position:fixed; inset:0; background:#f5f0e8ee; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:999; }
+  body.dark .loading-overlay { background:#1a1208ee; }
+  .loading-spinner { width:60px; height:60px; border:4px solid #e0d0b8; border-top-color:#c9a84c; border-radius:50%; animation:spin 1s linear infinite; margin-bottom:20px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { color:#8b4513; font-size:1.2rem; }
+  .loading-sub { color:#9a7a5a; font-size:0.9rem; margin-top:8px; }
+
+  .sura-group-header { background:linear-gradient(135deg,#f5f0e8,#ede3d4); border:1px solid #d4b896; border-radius:10px; padding:8px 18px; margin:20px 0 10px; display:flex; align-items:center; gap:10px; font-size:1rem; color:#6b3a1f; font-weight:bold; }
+  body.dark .sura-group-header { background:linear-gradient(135deg,#2a1c0a,#3a2a10); border-color:#7a5c3a; color:#c9a84c; }
+
+  .root-filter-bar { max-width:900px; margin:0 auto 16px; padding:0 20px; display:none; }
+  .root-filter-inner { background:#fff8f0; border:1px solid #c9a84c88; border-radius:10px; padding:12px 16px; }
+  body.dark .root-filter-inner { background:#2a1c0a; border-color:#7a5c3a; }
+  .root-filter-label { font-size:0.9rem; color:#7a5c3a; margin-bottom:8px; }
+  body.dark .root-filter-label { color:#9a8060; }
+  .root-filter-chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .root-filter-chip { background:#fff; border:1px solid #c9a84c66; border-radius:18px; padding:5px 14px; cursor:pointer; font-size:0.95rem; color:#8b4513; transition:all .2s; user-select:none; }
+  body.dark .root-filter-chip { background:#2a1c0a; color:#c9a84c; border-color:#7a5c3a55; }
+  .root-filter-chip:hover { background:#fdf0dc; border-color:#c9a84c; }
+  .root-filter-chip.active { background:#8b4513; color:#fff; border-color:#8b4513; }
+  .root-filter-chip-all { background:#fff; border:1px solid #2a7a5566; border-radius:18px; padding:5px 14px; cursor:pointer; font-size:0.95rem; color:#2a7a55; transition:all .2s; user-select:none; }
+  body.dark .root-filter-chip-all { background:#2a1c0a; color:#4ab880; }
+  .root-filter-chip-all:hover { background:#f0faf5; }
+  .root-filter-chip-all.active { background:#2a7a55; color:#fff; border-color:#2a7a55; }
+
+  .sort-bar { max-width:900px; margin:0 auto 12px; padding:0 20px; display:none; align-items:center; gap:10px; font-size:0.9rem; color:#7a5c3a; }
+  body.dark .sort-bar { color:#9a8060; }
+  .sort-btn { background:#fff8f0; border:1px solid #c9a84c66; border-radius:16px; padding:4px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; color:#8b4513; transition:all .2s; }
+  body.dark .sort-btn { background:#2a1c0a; color:#c9a84c; border-color:#7a5c3a55; }
+  .sort-btn.active { background:#8b4513; color:#fff; border-color:#8b4513; }
+
+  .toolbar { max-width:900px; margin:0 auto 8px; padding:0 20px; display:none; justify-content:flex-start; gap:8px; flex-wrap:wrap; }
+  .tool-btn { display:inline-flex; align-items:center; gap:6px; background:#fff8f0; border:1px solid #c9a84c66; border-radius:8px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.9rem; color:#8b4513; transition:all .2s; }
+  body.dark .tool-btn { background:#2a1c0a; color:#c9a84c; border-color:#7a5c3a55; }
+  .tool-btn:hover { background:#f5e6cc; border-color:#c9a84c; }
+  .export-menu { position:relative; display:inline-block; }
+  .export-dropdown { display:none; position:absolute; top:110%; right:0; background:#fff; border:1px solid #c9a84c88; border-radius:10px; box-shadow:0 4px 20px #0002; z-index:100; min-width:200px; overflow:hidden; }
+  body.dark .export-dropdown { background:#2a1c0a; border-color:#7a5c3a; }
+  .export-dropdown.open { display:block; }
+  .export-item { display:flex; align-items:center; gap:10px; padding:10px 16px; cursor:pointer; font-size:0.95rem; color:#2c1a0e; transition:background .15s; }
+  body.dark .export-item { color:#e8d8b8; }
+  .export-item:hover { background:#fdf5e6; }
+  body.dark .export-item:hover { background:#3a2a10; }
+  .export-sep { border-top:1px solid #e8d8b8; margin:4px 0; }
+  body.dark .export-sep { border-color:#4a3520; }
+  .export-label { padding:5px 16px; font-size:0.78rem; color:#9a7a5a; }
+
+  /* ===== زر المفضلة على كل كرت ===== */
+  .fav-btn { background:transparent; border:none; cursor:pointer; font-size:1.2rem; padding:2px 6px; line-height:1; opacity:0.45; transition:opacity .2s, transform .2s; flex-shrink:0; }
+  .fav-btn:hover { opacity:1; transform:scale(1.2); }
+  .fav-btn.faved { opacity:1; }
+
+  /* ===== وضع القراءة المركّزة ===== */
+  .fr-overlay { display:none; position:fixed; inset:0; background:#1a1208f0; z-index:2000; flex-direction:column; align-items:center; justify-content:center; }
+  .fr-overlay.open { display:flex; }
+  body:not(.dark) .fr-overlay { background:#f5f0e8f5; }
+
+  .fr-box { width:min(780px,95vw); display:flex; flex-direction:column; align-items:center; gap:0; }
+
+  /* شريط أعلى */
+  .fr-top { display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom:18px; }
+  .fr-ref { font-family:'Amiri',serif; font-size:1rem; color:#c9a84c; letter-spacing:0.03em; }
+  .fr-top-btns { display:flex; gap:8px; align-items:center; }
+  .fr-icon-btn { background:#ffffff18; border:1px solid #ffffff22; border-radius:10px; color:#f5e6c8; padding:7px 13px; cursor:pointer; font-size:1rem; transition:background .2s; font-family:'Amiri',serif; white-space:nowrap; }
+  body:not(.dark) .fr-icon-btn { background:#6b3a1f18; border-color:#6b3a1f33; color:#3d1f0a; }
+  .fr-icon-btn:hover { background:#ffffff30; }
+  body:not(.dark) .fr-icon-btn:hover { background:#6b3a1f30; }
+  .fr-icon-btn.faved { color:#f5c842; border-color:#f5c84266; }
+
+  /* نص الآية */
+  .fr-ayah { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; line-height:2.5; text-align:center; color:#1a1a1a; background:#fffdf8; border-radius:16px; padding:32px 36px; border:2px solid #c9a84c44; box-shadow:0 4px 32px #00000022; width:100%; }
+  body.dark .fr-ayah { background:#2a1c0a; color:#f0e4c0; border-color:#c9a84c33; }
+
+  /* أزرار التنقل */
+  .fr-nav { display:flex; align-items:center; justify-content:space-between; width:100%; margin-top:22px; }
+  .fr-nav-btn { background:#c9a84c22; border:2px solid #c9a84c55; border-radius:12px; color:#c9a84c; padding:10px 22px; cursor:pointer; font-family:'Amiri',serif; font-size:1.1rem; transition:all .2s; display:flex; align-items:center; gap:8px; }
+  .fr-nav-btn:hover:not(:disabled) { background:#c9a84c; color:#fff; }
+  .fr-nav-btn:disabled { opacity:0.25; cursor:not-allowed; }
+  body:not(.dark) .fr-nav-btn { background:#c9a84c22; color:#6b3a1f; border-color:#c9a84c88; }
+  .fr-counter { font-family:'Amiri',serif; font-size:0.9rem; color:#c9a84c99; }
+
+  /* شريط تكبير الخط داخل القراءة */
+  .fr-font-bar { display:flex; align-items:center; gap:10px; margin-top:14px; }
+  .fr-font-bar input[type=range] { width:120px; accent-color:#c9a84c; }
+  .fr-font-lbl { font-family:'Amiri',serif; font-size:0.85rem; color:#c9a84c88; min-width:30px; text-align:center; }
+
+  /* ===== صفحة المفضلة ===== */
+  .favpage-overlay { display:none; position:fixed; inset:0; background:#f5f0e8; z-index:1900; flex-direction:column; overflow-y:auto; }
+  body.dark .favpage-overlay { background:#1a1208; }
+  .favpage-overlay.open { display:flex; }
+  .favpage-header { background:linear-gradient(135deg,#6b3a1f,#3d1f0a); border-bottom:3px solid #c9a84c; padding:16px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:10; flex-shrink:0; }
+  .favpage-header h2 { color:#f5e6c8; font-size:1.4rem; flex:1; margin:0; }
+  .favpage-close { background:#ffffff18; border:1px solid #ffffff22; border-radius:8px; color:#f5e6c8; padding:7px 14px; cursor:pointer; font-size:1rem; font-family:'Amiri',serif; }
+  .favpage-close:hover { background:#ffffff30; }
+  .favpage-body { padding:24px 20px; max-width:900px; margin:0 auto; width:100%; }
+  .favpage-empty { text-align:center; padding:80px 20px; color:#9a7a5a; font-size:1.1rem; }
+  .favpage-section { margin-bottom:32px; }
+  .favpage-section-title { font-size:1rem; color:#8b4513; border-bottom:2px solid #c9a84c44; padding-bottom:6px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  body.dark .favpage-section-title { color:#c9a84c; }
+  .fav-card { background:#fff; border:1px solid #e0d0b8; border-radius:12px; padding:16px 20px; margin-bottom:12px; display:flex; align-items:flex-start; gap:14px; transition:box-shadow .2s; }
+  body.dark .fav-card { background:#221508; border-color:#4a3520; }
+  .fav-card:hover { box-shadow:0 4px 16px #c9a84c22; }
+  .fav-card-body { flex:1; min-width:0; }
+  .fav-card-ref { font-size:0.85rem; color:#7a5c3a; margin-bottom:8px; display:flex; gap:8px; flex-wrap:wrap; }
+  body.dark .fav-card-ref { color:#9a8060; }
+  .fav-card-ref .badge { background:#fff8f0; border:1px solid #c9a84c55; border-radius:6px; padding:2px 10px; font-size:0.8rem; color:#7a5c3a; }
+  body.dark .fav-card-ref .badge { background:#2a1c0a; color:#9a8060; }
+  .fav-card-ayah { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; font-size:1.15rem; line-height:2.2; color:#1a1a1a; }
+  body.dark .fav-card-ayah { color:#f0e4c0; }
+  .fav-card-root { font-size:0.85rem; color:#1a6b4a; margin-top:6px; }
+  body.dark .fav-card-root { color:#4ab880; }
+  .fav-card-actions { display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+  .fav-action-btn { background:#fff8f0; border:1px solid #c9a84c66; border-radius:8px; padding:6px 12px; cursor:pointer; font-family:'Amiri',serif; font-size:0.85rem; color:#8b4513; transition:all .2s; white-space:nowrap; }
+  body.dark .fav-action-btn { background:#2a1c0a; color:#c9a84c; border-color:#7a5c3a55; }
+  .fav-action-btn:hover { background:#f5e6cc; }
+  .fav-action-btn.del { color:#c0392b; border-color:#c0392b44; }
+  body.dark .fav-action-btn.del { color:#e05040; border-color:#e0504044; }
+  .fav-action-btn.del:hover { background:#ffeaea; }
+
+  /* إحصائيات السور */
+  .stats-chart { max-width:900px; margin:0 auto 20px; padding:0 20px; display:none; }
+  .stats-chart-inner { background:#fff8f0; border:1px solid #c9a84c88; border-radius:12px; padding:16px; }
+  body.dark .stats-chart-inner { background:#2a1c0a; border-color:#7a5c3a; }
+  .stats-chart-title { font-size:0.95rem; color:#7a5c3a; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+  body.dark .stats-chart-title { color:#9a8060; }
+  .bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:0.85rem; }
+  .bar-label { width:90px; text-align:right; color:#7a5c3a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
+  body.dark .bar-label { color:#9a8060; }
+  .bar-track { flex:1; background:#e8d8b8; border-radius:4px; height:14px; overflow:hidden; }
+  body.dark .bar-track { background:#3a2a10; }
+  .bar-fill { height:100%; background:linear-gradient(90deg,#c9a84c,#a07830); border-radius:4px; transition:width .4s; }
+  .bar-count { width:30px; text-align:left; color:#8b4513; font-size:0.8rem; flex-shrink:0; }
+  body.dark .bar-count { color:#c9a84c; }
+
+  /* رابط المشاركة */
+  .share-bar { max-width:900px; margin:0 auto 8px; padding:0 20px; display:none; align-items:center; gap:8px; }
+  .share-input { flex:1; background:#fff8f0; border:1px solid #c9a84c66; border-radius:8px; padding:6px 12px; font-size:0.85rem; color:#7a5c3a; direction:ltr; font-family:monospace; outline:none; }
+  body.dark .share-input { background:#2a1c0a; color:#9a8060; border-color:#7a5c3a; }
+  .share-copy-btn { background:#c9a84c; color:#fff; border:none; border-radius:8px; padding:6px 14px; cursor:pointer; font-family:inherit; font-size:0.85rem; white-space:nowrap; }
+  .share-copy-btn:hover { background:#a07830; }
+
+  /* ===== سايدبار سجل البحث ===== */
+  .main-with-sidebar { display:flex; gap:20px; max-width:1300px; margin:0 auto; padding:0 20px 40px; }
+  .main-content-col { flex:1; min-width:0; }
+  .sidebar-col { width:300px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; position:sticky; top:16px; align-self:flex-start; }
+  .sidebar-panel { background:#fff8f0; border:2px solid #c9a84c88; border-radius:14px; padding:0; overflow:hidden; box-shadow:0 2px 12px #c9a84c15; }
+  body.dark .sidebar-panel { background:#221508; border-color:#7a5c3a88; }
+  .sidebar-panel-header { text-align:center; padding:14px 16px 10px; border-bottom:1px solid #e8d8b8; }
+  body.dark .sidebar-panel-header { border-color:#4a3520; }
+  .sidebar-panel-header h3 { font-size:1.1rem; color:#6b3a1f; margin:0; font-family:'Amiri',serif; }
+  body.dark .sidebar-panel-header h3 { color:#c9a84c; }
+  .sidebar-list { list-style:none; padding:8px 0; margin:0; }
+  .sidebar-list li { display:flex; align-items:center; padding:8px 16px; gap:10px; cursor:pointer; transition:background .15s; font-size:.95rem; color:#2c1a0e; }
+  body.dark .sidebar-list li { color:#e8d8b8; }
+  .sidebar-list li:hover { background:#fdf0dc; }
+  body.dark .sidebar-list li:hover { background:#3a2a10; }
+  .sidebar-list li .sh-num { color:#b09070; font-size:.85rem; min-width:22px; text-align:center; flex-shrink:0; }
+  .sidebar-list li .sh-query { flex:1; font-family:'Amiri',serif; font-weight:bold; color:#4a3020; }
+  body.dark .sidebar-list li .sh-query { color:#e0c898; }
+  .sidebar-list li .sh-badge { background:#fff; border:1px solid #c9a84c66; border-radius:6px; padding:2px 10px; font-size:.75rem; color:#7a5c3a; white-space:nowrap; }
+  body.dark .sidebar-list li .sh-badge { background:#2a1c0a; color:#9a8060; border-color:#7a5c3a44; }
+  .sidebar-list li .sh-count { background:#fdf5e6; border:1px solid #c9a84c66; border-radius:6px; padding:2px 10px; font-size:.78rem; color:#8b4513; min-width:22px; text-align:center; white-space:nowrap; }
+  body.dark .sidebar-list li .sh-count { background:#2a1c0a; color:#c9a84c; }
+  .sidebar-list li.sh-highlight { background:#fdf0dc; }
+  body.dark .sidebar-list li.sh-highlight { background:#3a2a10; }
+  .sidebar-empty { text-align:center; padding:20px 16px; color:#b09070; font-size:.9rem; }
+  .sidebar-clear { text-align:center; padding:8px; border-top:1px solid #e8d8b8; }
+  body.dark .sidebar-clear { border-color:#4a3520; }
+  .sidebar-clear span { font-size:.78rem; color:#b04020; cursor:pointer; opacity:.7; }
+  .sidebar-clear span:hover { opacity:1; }
+  @media(max-width:1100px){
+    .main-with-sidebar { flex-direction: column; }
+    .sidebar-col { width: 100%; position: static; flex-direction: row; flex-wrap: wrap; gap: 16px; }
+    .sidebar-col .sidebar-panel { flex: 1; min-width: 280px; }
+  }
+
+  /* ===== Word Popup ===== */
+  .wp-overlay{display:none;position:fixed;inset:0;background:#00000066;z-index:1000;align-items:center;justify-content:center;}
+  .wp-overlay.open{display:flex;}
+  .wp-box{background:#fff8f0;border:2px solid #c9a84c;border-radius:16px;width:420px;max-width:93vw;box-shadow:0 8px 40px #00000033;overflow:hidden;animation:wpIn .22s ease-out;}
+  body.dark .wp-box{background:#221508;border-color:#7a5c3a;}
+  @keyframes wpIn{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .wp-head{background:linear-gradient(135deg,#6b3a1f,#3d1f0a);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
+  .wp-word{font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif;font-size:1.8rem;color:#f5e6c8;}
+  .wp-close{background:#ffffff22;border:1px solid #ffffff33;border-radius:50%;width:32px;height:32px;color:#f5e6c8;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .wp-close:hover{background:#ffffff44;}
+  .wp-body{padding:20px;}
+  .wp-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #e8d8b844;}
+  .wp-row:last-child{border-bottom:none;}
+  .wp-lbl{font-size:.85rem;color:#9a7a5a;min-width:80px;}
+  .wp-val{font-size:1.05rem;color:#4a3020;font-weight:bold;}
+  body.dark .wp-val{color:#e0c898;}
+  .wp-badge{background:#c9a84c22;color:#8b4513;border:1px solid #c9a84c44;border-radius:20px;padding:2px 14px;font-size:.95rem;}
+  body.dark .wp-badge{background:#c9a84c15;color:#c9a84c;}
+  .wp-badge-root{background:#2a7a5522;color:#1a5c3a;border-color:#2a7a5544;}
+  body.dark .wp-badge-root{background:#2a7a5515;color:#5abf8a;}
+  .wp-stat-row{background:#fdf8f0;border-radius:8px;margin:2px 0;}
+  body.dark .wp-stat-row{background:#1e1408;}
+  .wp-ayah{font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif;font-size:1.05rem;line-height:2;color:#4a3a2a;background:#f5f0e8;border-radius:8px;padding:12px 16px;margin-top:12px;border-right:4px solid #c9a84c;}
+  body.dark .wp-ayah{background:#1a1208;color:#c0a870;}
+  .wp-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .wp-btn{flex:1;min-width:90px;padding:9px 12px;border-radius:10px;border:none;font-family:inherit;font-size:.9rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .wp-btn-root{background:#2a7a55;color:#fff;}
+  .wp-btn-root:hover{transform:translateY(-1px);box-shadow:0 4px 12px #2a7a5544;}
+  .wp-btn-word{background:linear-gradient(135deg,#8b4513,#6b3a1f);color:#fff;}
+  .wp-btn-word:hover{transform:translateY(-1px);box-shadow:0 4px 12px #8b451344;}
+  .wp-btn-copy{background:#fff;border:1px solid #c9a84c66;color:#8b4513;}
+  body.dark .wp-btn-copy{background:#2a1c0a;color:#c9a84c;}
+  .wp-btn-copy:hover{background:#fdf5e6;}
+  /* كلمات الآية clickable */
+  .aw{cursor:pointer;padding:1px 3px;border-radius:3px;display:inline;}
+  .aw:hover{color:#c9a84c;background:#c9a84c18;}
+
+  /* ===== زر مشاركة الآية ===== */
+  .share-ayah-btn{margin-right:auto;background:transparent;border:1px solid #c9a84c55;border-radius:8px;padding:3px 10px;font-size:0.82rem;cursor:pointer;color:#8b4513;transition:all .18s;flex-shrink:0;}
+  body.dark .share-ayah-btn{color:#c9a84c;border-color:#7a5c3a55;}
+  .share-ayah-btn:hover{background:#c9a84c18;border-color:#c9a84c;}
+  /* ===== Share Modal ===== */
+  .smo{display:none;position:fixed;inset:0;background:#00000077;z-index:2000;align-items:flex-end;justify-content:center;}
+  .smo.open{display:flex;}
+  @media(min-width:600px){.smo.open{align-items:center;}}
+  .smb{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:520px;padding-bottom:env(safe-area-inset-bottom,0);animation:smUp .22s ease;font-family:'Amiri',serif;direction:rtl;}
+  @media(min-width:600px){.smb{border-radius:20px;}}
+  body.dark .smb{background:#221508;}
+  @keyframes smUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  .smh-bar{width:40px;height:4px;background:#c9a84c44;border-radius:2px;margin:12px auto 0;}
+  .smh{padding:14px 20px 10px;border-bottom:1px solid #e8d8b8;display:flex;align-items:center;justify-content:space-between;}
+  body.dark .smh{border-color:#4a3520;}
+  .smh span{font-size:1.05rem;color:#6b3a1f;font-weight:bold;}
+  body.dark .smh span{color:#c9a84c;}
+  .smh button{background:#f5ece0;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:1rem;color:#8b4513;}
+  body.dark .smh button{background:#3a2a10;color:#c9a84c;}
+  .sm-prev{margin:12px 20px 4px;background:#fdf8f0;border-right:4px solid #c9a84c;border-radius:8px;padding:12px 16px;font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif;font-size:1.05rem;line-height:2;color:#2c1a0e;max-height:120px;overflow:hidden;}
+  body.dark .sm-prev{background:#2a1c0a;color:#e8d8b8;}
+  .sm-ref{margin:0 20px 12px;font-size:0.82rem;color:#9a7a5a;}
+  .sm-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 20px;}
+  .sm-btn{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:14px;border:none;cursor:pointer;font-family:'Amiri',serif;font-size:0.95rem;font-weight:bold;transition:all .18s;}
+  .sm-btn:hover{transform:translateY(-2px);filter:brightness(1.07);}
+  .sm-wa{background:#25D366;color:#fff;}
+  .sm-tg{background:#229ED9;color:#fff;}
+  .sm-tw{background:#000;color:#fff;}
+  .sm-cp{background:#f5ece0;color:#8b4513;border:1px solid #c9a84c55;}
+  body.dark .sm-cp{background:#3a2a10;color:#c9a84c;}
+  .sm-nv{grid-column:1/-1;background:linear-gradient(135deg,#6b3a1f,#3d1f0a);color:#f5e6c8;justify-content:center;}
+  .sm-icon{font-size:1.15rem;}
+
+  @media print {
+    body * { visibility:hidden; }
+    #printArea, #printArea * { visibility:visible; }
+    #printArea { position:fixed; inset:0; background:#fff; padding:20px; direction:rtl; font-family:'Amiri',serif; }
+    .print-header { text-align:center; margin-bottom:20px; border-bottom:2px solid #c9a84c; padding-bottom:12px; }
+    .print-header h2 { font-size:1.4rem; color:#6b3a1f; }
+    .print-card { border:1px solid #ccc; border-radius:6px; margin-bottom:16px; padding:12px 16px; page-break-inside:avoid; }
+    .print-card-meta { font-size:0.85rem; color:#7a5c3a; margin-bottom:8px; }
+    .print-card-ayah { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; font-size:1.2rem; line-height:2.2; border-right:3px solid #c9a84c; padding-right:12px; }
+    .print-context { background:#f8f3ea; border-right:3px solid #d4b896; padding:8px 12px; margin:6px 0; border-radius:4px; }
+    .ctx-label { font-size:.8rem; color:#9a7a5a; margin-bottom:4px; font-weight:bold; }
+    .ctx-text { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; font-size:1rem; line-height:2; }
+  }
+
+  /* ===== الحقل الدلالي في Word Popup ===== */
+  .wp-field-section{margin-top:12px;border-top:1px solid #e8d8b855;padding-top:10px;}
+  body.dark .wp-field-section{border-color:#4a352033;}
+  .wp-field-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #e8d8b833;cursor:pointer;user-select:none;}
+  body.dark .wp-field-row{border-color:#4a352022;}
+  .wp-field-row:last-of-type{border-bottom:none;}
+  .wp-field-toggle{width:22px;height:22px;border-radius:50%;background:#2b4c8c18;border:1px solid #2b4c8c44;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#2b4c8c;flex-shrink:0;transition:background .15s,transform .2s;}
+  body.dark .wp-field-toggle{background:#2b4c8c22;border-color:#4a6ab066;color:#8ab0f0;}
+  .wp-field-row:hover .wp-field-toggle{background:#2b4c8c;color:#fff;}
+  .wp-field-toggle.open{background:#2b4c8c;color:#fff;transform:rotate(45deg);}
+  .wp-field-name{font-size:.95rem;color:#1a3a6a;font-weight:bold;flex:1;}
+  body.dark .wp-field-name{color:#a0c4f0;}
+  .wp-field-expanded{padding:6px 0 8px 0;padding-right:30px;display:none;}
+  .wp-field-roots{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+  .wp-field-root-chip{background:#fff;border:1px solid #2b4c8c33;border-radius:14px;padding:3px 11px;font-size:.85rem;color:#2b4c8c;cursor:pointer;transition:all .15s;}
+  body.dark .wp-field-root-chip{background:#0e1a2e;color:#8ab0f0;border-color:#4a6ab044;}
+  .wp-field-root-chip:hover{background:#2b4c8c;color:#fff;border-color:#2b4c8c;}
+  .wp-field-root-chip.wp-cur{background:#2b4c8c22;border-color:#2b4c8c88;color:#1a3a6a;font-weight:bold;cursor:default;}
+  body.dark .wp-field-root-chip.wp-cur{background:#2b4c8c33;color:#c0d8f8;}
+  .wp-field-save-btn{display:inline-flex;align-items:center;gap:5px;color:#fff;border:none;border-radius:8px;padding:5px 14px;font-family:inherit;font-size:.82rem;cursor:pointer;transition:opacity .15s;}
+  .wp-field-save-btn:hover{opacity:.85;}
+  .wp-field-save-summary{background:#1a6b4a;}
+  .wp-field-save-detail{background:#2b4c8c;}
+  .wp-field-save-detail:disabled{opacity:.5;cursor:not-allowed;}
+  .wp-field-btns{display:flex;gap:6px;flex-wrap:wrap;}
+</style>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPA_URL = 'https://vsmpqiqmlnbxiihebtoo.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzbXBxaXFtbG5ieGlpaGVidG9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MjIyNzIsImV4cCI6MjA4OTE5ODI3Mn0.kyEiJ17zAIBVCWuqSovpHEXQokxHuwD5gUMBKHEmdso';
+  const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  async function logSearchToSupabase(query, tab) {
+    try {
+      await supa.from('search_logs').insert({ query: query, tab: tab });
+    } catch(e) {
+      console.warn('Supabase log error:', e);
+    }
+  }
+</script>
+</head>
+<body>
+
+<div class="header">
+  <h1>&#x1F54C; مستكشف القرآن العظيم</h1>
+  <p>ابحث بالجذر أو بالكلمة أو بعبارة قرآنية</p>
+  <div class="header-controls">
+    <a href="https://forms.gle/Uub3PD5d8bxh4ZtM9" target="_blank" class="hc-btn" title="تواصل معنا" style="text-decoration:none;">✉️</a>
+    <button class="hc-btn" onclick="openFavPage()" id="favPageBtn" title="المفضلة">⭐</button>
+    <button class="hc-btn" onclick="toggleDark()" id="darkBtn" title="وضع ليلي">🌙</button>
+  </div>
+</div>
+
+
+
+<div class="init-screen" id="initScreen">
+  <div class="init-icon">📖</div>
+  <div class="init-title">مرحباً بك في مستكشف القرآن العظيم</div>
+  <div class="init-sub">اضغط الزر لتحميل البيانات — مرة واحدة فقط ثم تُحفظ تلقائياً</div>
+  <button class="init-btn" id="initBtn" onclick="initLoad()">تحميل البيانات والبدء</button>
+  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText"></div>
+  <div style="margin-top:24px;">
+    <span id="localUploadToggle" onclick="document.getElementById('localUploadArea').style.display='block';this.style.display='none';" style="font-size:0.78rem;color:#b09070;cursor:pointer;text-decoration:underline dotted;opacity:0.7;">&#x1F4C2; أو تحميل ملف محلي (للعمل بدون إنترنت)</span>
+    <div id="localUploadArea" style="display:none;text-align:center;">
+      <label for="localFileInput" style="font-size:0.78rem;color:#9a7a5a;display:block;margin-bottom:6px;">اختر ملف data.xlsx من جهازك:</label>
+      <input type="file" id="localFileInput" accept=".xlsx,.xls" onchange="initLoadLocal(this)" style="font-size:0.78rem;color:#7a5c3a;max-width:260px;">
+    </div>
+  </div>
+</div>
+
+<div class="search-container" id="searchContainer">
+  <div class="search-tabs">
+    <button class="tab-btn word-tab active" id="tabWord" onclick="switchTab('word')">بحث بالكلمة</button>
+    <button class="tab-btn root-tab" id="tabRoot" onclick="switchTab('root')">بحث بالجذر</button>
+    <button class="tab-btn phrase-tab" id="tabPhrase" onclick="switchTab('phrase')">&#x1F50D; بحث بالعبارة</button>
+  </div>
+  <div class="search-bar" id="searchBar">
+    <input type="text" id="searchInput"
+      placeholder="كلمة... (مثال: لعلكم، قرآن، عظيم)"
+      oninput="onSearchInput()"
+      onkeydown="if(event.key==='Enter'){handleSearch();hideRootAC();}else if(event.key==='Escape'){clearSearch();}">
+    <button id="clearBtn" onclick="clearSearch()" title="مسح البحث" aria-label="مسح البحث" style="display:none;">✕</button>
+    <div id="rootAutocomplete" class="root-ac" style="display:none;"></div>
+  </div>
+</div>
+
+<div class="stats-bar" id="statsBar"></div>
+<div class="chips-area" id="chipsArea"></div>
+
+<div class="root-filter-bar" id="rootFilterBar">
+  <div class="root-filter-inner">
+    <div class="root-filter-label">&#x1F50D; تصفية حسب الجذر:</div>
+    <div class="root-filter-chips" id="rootFilterChips"></div>
+  </div>
+</div>
+
+<div class="sort-bar" id="sortBar">
+  <span>ترتيب:</span>
+  <button class="sort-btn active" id="sortByOrder" onclick="setSort('order')">ترتيب المصحف</button>
+  <button class="sort-btn" id="sortBySura" onclick="setSort('sura')">حسب السورة</button>
+</div>
+
+<!-- شريط حجم الخط -->
+<div class="font-bar" id="fontBar">
+  <span>🔡 حجم الخط:</span>
+  <input type="range" min="1" max="2.2" step="0.05" value="1.35" id="fontSlider" oninput="changeFontSize(this.value)">
+  <span id="fontVal">متوسط</span>
+</div>
+
+<!-- إحصائيات السور -->
+<div class="stats-chart" id="statsChart">
+  <div class="stats-chart-inner">
+    <div class="stats-chart-title">
+      <span>📊 توزيع النتائج على السور</span>
+      <span id="chartToggle" style="cursor:pointer;font-size:.85rem;color:#c9a84c;" onclick="toggleChart()">▲ إخفاء</span>
+    </div>
+    <div id="chartBars"></div>
+  </div>
+</div>
+
+<!-- رابط المشاركة -->
+<div class="share-bar" id="shareBar">
+  <span style="font-size:.85rem;color:#7a5c3a;white-space:nowrap;">🔗 رابط مباشر:</span>
+  <input class="share-input" id="shareInput" readonly>
+  <button class="share-copy-btn" onclick="copyShareLink(event)">نسخ</button>
+</div>
+
+<div class="toolbar" id="toolbar">
+  <button class="tool-btn" onclick="printResults()">&#x1F5A8; طباعة</button>
+  <div class="export-menu" id="exportMenu">
+    <button class="tool-btn" onclick="toggleExportMenu()">&#x1F4BE; حفظ النتائج &#9660;</button>
+    <div class="export-dropdown" id="exportDropdown">
+      <div class="export-item" onclick="exportPDF()"><span>📄</span> PDF</div>
+      <div class="export-item" onclick="exportExcel()"><span>📊</span> Excel</div>
+      <div class="export-sep"></div>
+      <div class="export-label">مفصّل (مع الآيات السابقة واللاحقة)</div>
+      <div class="export-item" onclick="exportDetailedPDF()"><span>📄</span> PDF مفصّل</div>
+      <div class="export-item" onclick="exportDetailedExcel()"><span>📊</span> Excel مفصّل</div>
+    </div>
+  </div>
+</div>
+
+<div class="main-with-sidebar">
+<div class="main-content-col">
+<div class="results-area" id="resultsArea"></div>
+</div>
+<div class="sidebar-col" id="sidebarCol" style="display:none;">
+  <div class="sidebar-panel">
+    <div class="sidebar-panel-header"><h3>🌍 الأكثر بحثاً — كل الزوار</h3></div>
+    <ul class="sidebar-list" id="topSearchList"><li class="sidebar-empty">جاري التحميل...</li></ul>
+  </div>
+  <div class="sidebar-panel">
+    <div class="sidebar-panel-header"><h3>🕐 آخر البحوث — كل الزوار</h3></div>
+    <ul class="sidebar-list" id="globalRecentList"><li class="sidebar-empty">جاري التحميل...</li></ul>
+  </div>
+  <div class="sidebar-panel">
+    <div class="sidebar-panel-header"><h3>👤 آخر بحوثك أنت</h3></div>
+    <ul class="sidebar-list" id="recentSearchList"></ul>
+    <div class="sidebar-clear" id="recentClear" style="display:none;"><span onclick="clearRecentSearches()">✕ مسح السجل</span></div>
+  </div>
+</div>
+</div>
+<div id="printArea" style="display:none"></div>
+
+<!-- Word Popup -->
+<div class="wp-overlay" id="wpOverlay" onclick="if(event.target===this)wpClose()">
+  <div class="wp-box">
+    <div class="wp-head">
+      <span class="wp-word" id="wpWord"></span>
+      <button class="wp-close" onclick="wpClose()">✕</button>
+    </div>
+    <div class="wp-body">
+      <div class="wp-row"><span class="wp-lbl">الجذر:</span><span class="wp-val" id="wpRoot">—</span></div>
+      <div class="wp-row"><span class="wp-lbl">السورة:</span><span class="wp-val" id="wpSura">—</span></div>
+      <div class="wp-row"><span class="wp-lbl">الآية:</span><span class="wp-val" id="wpAyahNum">—</span></div>
+      <div class="wp-row wp-stat-row"><span class="wp-lbl">تكرار الكلمة:</span><span class="wp-val wp-badge" id="wpWordCount">—</span></div>
+      <div class="wp-row wp-stat-row" id="wpRootRow"><span class="wp-lbl">تكرار الجذر:</span><span class="wp-val wp-badge wp-badge-root" id="wpRootCount">—</span></div>
+      <div class="wp-ayah" id="wpAyahText"></div>
+      <div id="wpFieldSection" class="wp-field-section" style="display:none;"></div>
+      <div class="wp-actions">
+        <button class="wp-btn wp-btn-word" onclick="wpSearchWord()">📝 بحث بالكلمة</button>
+        <button class="wp-btn wp-btn-root" id="wpBtnRoot" onclick="wpSearchRoot()">🌱 بحث بالجذر</button>
+        <button class="wp-btn wp-btn-copy" id="wpCopyBtn" onclick="wpCopy(this)">📋 نسخ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay" style="display:none">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">جاري التحميل...</div>
+  <div class="loading-sub" id="loadingSub"></div>
+</div>
+
+<script>
+var FILE_URL = './data.xlsx';
+var allData=[], rootsMap={}, wordsMap={}, ayahsArr=[];
+var currentTab='word', ctxId=0;
+var lastWordMatched=[], lastWordQuery='';
+var activeRootFilter=null, activeWordFormFilter=null;
+var lastPhraseResults=[], lastPhraseQuery='';
+var currentSort='order';
+var lastRootKey=null, lastRootEntries=[];
+var exportData=[], exportTitle='';
+var currentFontSize=1.35;
+var chartVisible=true;
+
+// ===== Dark Mode =====
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  var isDark=document.body.classList.contains('dark');
+  document.getElementById('darkBtn').textContent=isDark?'☀️':'🌙';
+  localStorage.setItem('qeDark',isDark?'1':'0');
+}
+if(localStorage.getItem('qeDark')==='1'){document.body.classList.add('dark');document.getElementById('darkBtn').textContent='☀️';}
+
+// ===== Font Size =====
+function changeFontSize(v){
+  currentFontSize=parseFloat(v);
+  var labels=['صغير','متوسط','كبير','كبير جداً'];
+  var idx=Math.round((v-1)/(1.2)*3);
+  document.getElementById('fontVal').textContent=labels[Math.min(idx,3)];
+  document.querySelectorAll('.ayah-text,.context-body').forEach(function(el){el.style.fontSize=v+'rem';});
+  localStorage.setItem('qeFont',v);
+}
+var savedFont=localStorage.getItem('qeFont');
+if(savedFont){currentFontSize=parseFloat(savedFont);document.getElementById('fontSlider').value=savedFont;}
+
+// ===== IndexedDB =====
+function openDB(){return new Promise(function(res,rej){var r=indexedDB.open('QuranExplorer',2);r.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('data'))db.createObjectStore('data');};r.onsuccess=function(e){res(e.target.result);};r.onerror=function(e){rej(e.target.error);};});}
+function dbGet(k){return openDB().then(function(db){return new Promise(function(res,rej){var r=db.transaction('data','readonly').objectStore('data').get(k);r.onsuccess=function(){res(r.result);};r.onerror=function(e){rej(e.target.error);};});});}
+function dbSet(k,v){return openDB().then(function(db){return new Promise(function(res,rej){var tx=db.transaction('data','readwrite');tx.objectStore('data').put(v,k);tx.oncomplete=function(){res();};tx.onerror=function(e){rej(e.target.error);};});});}
+function dbDel(k){return openDB().then(function(db){return new Promise(function(res,rej){var tx=db.transaction('data','readwrite');tx.objectStore('data').delete(k);tx.oncomplete=function(){res();};tx.onerror=function(e){rej(e.target.error);};});});}
+
+// ===== تحميل أولي =====
+window.addEventListener('load',function(){
+  var params=new URLSearchParams(location.search);
+  var pTab=params.get('tab'), pQ=params.get('q');
+
+  dbGet('allData').then(function(saved){
+    if(saved&&saved.length){
+      allData=saved; buildMaps(); showSearchUI();
+      document.getElementById('initScreen').style.display='none';
+      if(pTab&&pQ){switchTab(pTab);document.getElementById('searchInput').value=pQ;handleSearch();}
+    } else {
+      // تحميل تلقائي بدون تدخل المستخدم
+      document.getElementById('initScreen').style.display='none';
+      document.getElementById('loadingOverlay').style.display='flex';
+      document.getElementById('loadingText').textContent='جاري تحميل البيانات...';
+      document.getElementById('loadingSub').textContent='قد يستغرق ذلك لحظات عند أول زيارة';
+      autoLoad(pTab,pQ);
+    }
+  }).catch(function(){
+    document.getElementById('initScreen').style.display='none';
+    document.getElementById('loadingOverlay').style.display='flex';
+    document.getElementById('loadingText').textContent='جاري تحميل البيانات...';
+    autoLoad(pTab,pQ);
+  });
+});
+
+function autoLoad(pTab,pQ){
+  fetch(FILE_URL)
+    .then(function(res){if(!res.ok)throw new Error('تعذّر تحميل الملف ('+res.status+')');document.getElementById('loadingSub').textContent='جاري معالجة البيانات...';return res.arrayBuffer();})
+    .then(function(buf){document.getElementById('loadingSub').textContent='جاري الحفظ للزيارات القادمة...';var wb=XLSX.read(buf,{type:'array'});var ws=wb.Sheets[wb.SheetNames[0]];var rows=XLSX.utils.sheet_to_json(ws,{defval:''});processRows(rows);return dbSet('allData',allData);})
+    .then(function(){document.getElementById('loadingOverlay').style.display='none';showSearchUI();if(pTab&&pQ){switchTab(pTab);document.getElementById('searchInput').value=pQ;handleSearch();}})
+    .catch(function(err){document.getElementById('loadingText').textContent='⚠️ خطأ في التحميل';document.getElementById('loadingSub').innerHTML=err.message+'<br><button onclick="location.reload()" style="margin-top:12px;padding:8px 20px;background:#c9a84c;border:none;border-radius:8px;color:#fff;font-family:inherit;cursor:pointer;font-size:1rem;">🔄 إعادة المحاولة</button>';});
+}
+
+function setProgress(p){document.getElementById('progressFill').style.width=p+'%';}
+
+function initLoadLocal(input){
+  if(!input.files||!input.files[0])return;
+  var file=input.files[0];
+  var btn=document.getElementById('initBtn');
+  btn.disabled=true;
+  document.getElementById('progressBar').style.display='block';
+  document.getElementById('progressText').style.display='block';
+  document.getElementById('progressText').textContent='جاري قراءة الملف...';
+  setProgress(30);
+  var reader=new FileReader();
+  reader.onload=function(e){
+    setProgress(60);
+    document.getElementById('progressText').textContent='جاري معالجة البيانات...';
+    try{
+      var wb=XLSX.read(e.target.result,{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      processRows(rows);
+      setProgress(85);
+      document.getElementById('progressText').textContent='جاري الحفظ...';
+      dbSet('allData',allData).then(function(){
+        setProgress(100);
+        document.getElementById('progressText').textContent='✅ تم! ('+allData.length+' سجل)';
+        setTimeout(function(){document.getElementById('initScreen').style.display='none';showSearchUI();},700);
+      });
+    }catch(err){
+      btn.disabled=false;
+      document.getElementById('progressText').textContent='خطأ في قراءة الملف: '+err.message;
+      setProgress(0);
+    }
+  };
+  reader.onerror=function(){
+    btn.disabled=false;
+    document.getElementById('progressText').textContent='تعذّر قراءة الملف';
+    setProgress(0);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function processRows(rows){
+  if(!rows.length)return;
+  var keys=Object.keys(rows[0]);
+  function find(){for(var i=0;i<arguments.length;i++){var c=arguments[i].toLowerCase().replace(/[\s_]/g,'');var k=keys.find(function(k){return k.toLowerCase().replace(/[\s_]/g,'').indexOf(c)>=0;});if(k)return k;}return null;}
+  var kRoot=find('root'),kWord=find('word_uthmani_tashkeel','word_uthmani','word'),kWordUth=find('word_uthmani','worduthmani'),kWordNorm=find('word_normal','wordnormal'),kAyah=find('ayah_text_tashkeel','ayah_text_ta','ayah_text','text'),kAyahNoTash=find('ayah_text_no','ayahtextno'),kAyahNormal=find('ayah_text_normal','ayahtextnormal'),kSuraName=find('sura_name','surah_name'),kSuraNum=find('sura_num','sura','surah'),kPos=find('ayah_pos_su','ayah_pos','pos'),kBefore=find('5before','before'),kAfter=find('5after','after');
+  allData=[];
+  for(var i=0;i<rows.length;i++){var r=rows[i];var root=String(r[kRoot]||'').trim();if(!root)continue;allData.push({root:root,word:String(r[kWord]||'').trim(),word_uth:String(r[kWordUth]||'').trim(),word_norm:String(r[kWordNorm]||'').trim(),ayah_text:String(r[kAyah]||'').trim(),ayah_text_no_tash:String(r[kAyahNoTash]||'').trim(),ayah_text_normal:String(r[kAyahNormal]||'').trim(),sura_name:String(r[kSuraName]||'').trim(),sura_num:String(r[kSuraNum]||'').trim(),pos:String(r[kPos]||'').trim(),before:String(r[kBefore]||'').trim(),after:String(r[kAfter]||'').trim()});}
+  buildMaps();
+}
+
+function buildMaps(){
+  rootsMap={}; wordsMap={}; var ayahSeen={}; ayahsArr=[];
+  for(var i=0;i<allData.length;i++){
+    var r=allData[i];
+    if(!rootsMap[r.root])rootsMap[r.root]=[];rootsMap[r.root].push(r);
+    if(r.word){if(!wordsMap[r.word])wordsMap[r.word]=[];var dup=false;for(var j=0;j<wordsMap[r.word].length;j++){if(wordsMap[r.word][j].pos===r.pos&&wordsMap[r.word][j].sura_num===r.sura_num){dup=true;break;}}if(!dup)wordsMap[r.word].push(r);}
+    var ak=r.sura_num+'_'+r.pos;if(!ayahSeen[ak]){ayahSeen[ak]=true;ayahsArr.push({sura_num:r.sura_num,sura_name:r.sura_name,pos:r.pos,ayah_text:r.ayah_text,ayah_text_no_tash:r.ayah_text_no_tash,ayah_text_normal:r.ayah_text_normal,before:r.before,after:r.after});}
+  }
+  ayahsArr.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
+}
+
+function showSearchUI(){
+  var rc=Object.keys(rootsMap).length,wc=Object.keys(wordsMap).length;
+  document.getElementById('searchContainer').style.display='block';
+  document.getElementById('statsBar').style.display='block';
+  document.getElementById('fontBar').style.display='flex';
+  document.getElementById('statsBar').innerHTML='السجلات: '+allData.length+' | الجذور: '+rc+' | الكلمات: '+wc+' | الآيات: '+ayahsArr.length+' &nbsp;<span style="color:#b04020;cursor:pointer;font-size:0.8rem;" onclick="clearSaved()">✕ مسح البيانات</span> &nbsp;<label for="localFileInputMain" style="color:#8a6a4a;cursor:pointer;font-size:0.78rem;text-decoration:underline dotted;">📂 تحميل ملف محلي</label><input type="file" id="localFileInputMain" accept=".xlsx,.xls" style="display:none;" onchange="initLoadLocal(this)">';
+  renderSidebar();
+}
+
+function clearSaved(){
+  if(!confirm('هل تريد مسح البيانات المحفوظة؟'))return;
+  dbDel('allData').then(function(){
+    allData=[];rootsMap={};wordsMap={};ayahsArr=[];
+    ['searchContainer','statsBar','rootFilterBar','sortBar','toolbar','fontBar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});
+    document.getElementById('chipsArea').innerHTML='';
+    document.getElementById('resultsArea').innerHTML='';
+    document.getElementById('loadingOverlay').style.display='flex';
+    document.getElementById('loadingText').textContent='جاري إعادة تحميل البيانات...';
+    document.getElementById('loadingSub').textContent='';
+    autoLoad(null,null);
+  });
+}
+
+// ===== تبويبات =====
+function switchTab(tab){
+  currentTab=tab;currentSort='order';
+  var inp=document.getElementById('searchInput'),bar=document.getElementById('searchBar');
+  ['tabRoot','tabWord','tabPhrase'].forEach(function(id){document.getElementById(id).classList.remove('active');});
+  document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+  ['rootFilterBar','sortBar','toolbar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});
+  activeRootFilter=null;activeWordFormFilter=null;lastWordMatched=[];lastWordQuery='';lastPhraseResults=[];lastPhraseQuery='';lastRootKey=null;
+  document.getElementById('chipsArea').innerHTML='';document.getElementById('resultsArea').innerHTML='';
+  bar.classList.remove('phrase-mode');bar.classList.remove('root-mode');setSortBtnsActive('order');
+  if(tab==='root'){inp.placeholder='جذر... (مثال: كتب، علم، رحم)';bar.classList.add('root-mode');}
+  else if(tab==='word')inp.placeholder='كلمة... (مثال: لعلكم، قرآن، عظيم)';
+  else{inp.placeholder='عبارة قرآنية... (مثال: الذين هم، أولئك هم)';bar.classList.add('phrase-mode');}
+  inp.value='';
+  document.getElementById('clearBtn').style.display='none';
+  hideRootAC();
+  if(_searchDebounceTimer){clearTimeout(_searchDebounceTimer);_searchDebounceTimer=null;}
+  inp.focus();
+}
+
+function setSort(mode){currentSort=mode;setSortBtnsActive(mode);if(currentTab==='phrase')renderPhraseResults(lastPhraseQuery,lastPhraseResults);else if(currentTab==='root'&&lastRootKey)renderRootCards(lastRootKey,lastRootEntries);else if(currentTab==='word'&&lastWordMatched.length)applyWordFilters();}
+function setSortBtnsActive(mode){document.getElementById('sortByOrder').classList.toggle('active',mode==='order');document.getElementById('sortBySura').classList.toggle('active',mode==='sura');}
+function showSortBar(){document.getElementById('sortBar').style.display='flex';}
+function showToolbar(){document.getElementById('toolbar').style.display='flex';}
+
+// ===== إحصائيات السور =====
+function buildChart(entries){
+  var sc={};
+  for(var i=0;i<entries.length;i++){var k=entries[i].sura_num+'|'+entries[i].sura_name;sc[k]=(sc[k]||0)+1;}
+  var arr=Object.keys(sc).map(function(k){var p=k.split('|');return{num:+p[0],name:p[1],count:sc[k]};});
+  arr.sort(function(a,b){return b.count-a.count;});
+  var max=arr[0]?arr[0].count:1;
+  var top=arr.slice(0,15);
+  var html='';
+  for(var i=0;i<top.length;i++){
+    var pct=Math.round(top[i].count/max*100);
+    html+='<div class="bar-row"><div class="bar-label" title="سورة '+top[i].name+'">'+top[i].name+'</div>'+
+    '<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="bar-count">'+top[i].count+'</div></div>';
+  }
+  document.getElementById('chartBars').innerHTML=html;
+  document.getElementById('statsChart').style.display='block';
+  chartVisible=true;
+  document.getElementById('chartToggle').textContent='▲ إخفاء';
+}
+function toggleChart(){
+  chartVisible=!chartVisible;
+  document.getElementById('chartBars').style.display=chartVisible?'block':'none';
+  document.getElementById('chartToggle').textContent=chartVisible?'▲ إخفاء':'▼ عرض';
+}
+
+// ===== رابط المشاركة =====
+function updateShareLink(tab,q){
+  var base=location.origin+location.pathname;
+  var url=base+'?tab='+encodeURIComponent(tab)+'&q='+encodeURIComponent(q);
+  document.getElementById('shareInput').value=url;
+  document.getElementById('shareBar').style.display='flex';
+}
+function copyShareLink(event){
+  var inp=document.getElementById('shareInput');
+  inp.select(); inp.setSelectionRange(0,9999);
+  try{document.execCommand('copy');}catch(e){navigator.clipboard&&navigator.clipboard.writeText(inp.value);}
+  var btn=event.target; btn.textContent='✅ تم النسخ'; setTimeout(function(){btn.textContent='نسخ';},2000);
+}
+
+// ===== ✕ زر المسح + اكمال تلقائي + Debounce =====
+var _searchDebounceTimer = null;
+
+function clearSearch(){
+  var inp=document.getElementById('searchInput');
+  inp.value='';
+  document.getElementById('clearBtn').style.display='none';
+  hideRootAC();
+  if(_searchDebounceTimer){clearTimeout(_searchDebounceTimer);_searchDebounceTimer=null;}
+  document.getElementById('chipsArea').innerHTML='';
+  document.getElementById('resultsArea').innerHTML='';
+  ['rootFilterBar','sortBar','toolbar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});
+  inp.focus();
+}
+
+function onSearchInput(){
+  var inp=document.getElementById('searchInput');
+  var val=inp.value;
+  document.getElementById('clearBtn').style.display=val?'inline-block':'none';
+  if(currentTab==='root'){
+    showRootAC(val);
+  } else if(currentTab==='word'||currentTab==='phrase'){
+    if(_searchDebounceTimer)clearTimeout(_searchDebounceTimer);
+    if(val.trim().length>=2){
+      _searchDebounceTimer=setTimeout(function(){handleSearch();},400);
+    } else if(!val.trim()){
+      // مسح فوري لو الحقل فارغ
+      document.getElementById('chipsArea').innerHTML='';
+      document.getElementById('resultsArea').innerHTML='';
+      ['rootFilterBar','sortBar','toolbar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});
+    }
+  }
+}
+
+function showRootAC(val){
+  var ac=document.getElementById('rootAutocomplete');
+  if(!val||!rootsMap||currentTab!=='root'){hideRootAC();return;}
+  var norm=normalizeForSearch(val);
+  var matches=Object.keys(rootsMap).filter(function(k){return normalizeForSearch(k).indexOf(norm)>=0;}).sort().slice(0,8);
+  if(!matches.length){hideRootAC();return;}
+  ac.innerHTML=matches.map(function(r){
+    var cnt=(rootsMap[r]&&rootsMap[r].length)||0;
+    var div=document.createElement('div');
+    div.className='root-ac-item';
+    div.innerHTML=r+' <small style="opacity:0.55;font-size:0.82rem;">('+cnt+')</small>';
+    div.setAttribute('data-root',r);
+    div.addEventListener('click',function(){pickRoot(this.getAttribute('data-root'));});
+    return div.outerHTML;
+  }).join('');
+  // re-attach events since outerHTML loses them
+  var items=ac.querySelectorAll('.root-ac-item');
+  items.forEach(function(item){
+    item.addEventListener('click',function(){pickRoot(this.getAttribute('data-root'));});
+  });
+  ac.style.display='block';
+}
+
+function hideRootAC(){
+  var ac=document.getElementById('rootAutocomplete');
+  if(ac)ac.style.display='none';
+}
+
+function pickRoot(r){
+  document.getElementById('searchInput').value=r;
+  document.getElementById('clearBtn').style.display='inline-block';
+  hideRootAC();
+  handleSearch();
+}
+
+// Close autocomplete on outside click
+document.addEventListener('click',function(e){
+  var bar=document.getElementById('searchBar');
+  if(bar&&!bar.contains(e.target))hideRootAC();
+});
+
+// '/' shortcut — focus search from anywhere on page
+document.addEventListener('keydown',function(e){
+  if(e.key==='/'&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'&&!e.ctrlKey&&!e.metaKey){
+    e.preventDefault();
+    var inp=document.getElementById('searchInput');
+    if(inp){inp.focus();inp.select();}
+  }
+});
+
+// ===== البحث =====
+function handleSearch(){
+  var q=document.getElementById('searchInput').value.trim();
+  if(currentTab==='phrase'){searchPhrase(q);return;}
+  var qNorm=normalizeForSearch(q);
+  if(currentTab==='root'){
+    document.getElementById('rootFilterBar').style.display='none';activeRootFilter=null;
+    if(!q){document.getElementById('resultsArea').innerHTML='';document.getElementById('sortBar').style.display='none';document.getElementById('toolbar').style.display='none';document.getElementById('statsChart').style.display='none';document.getElementById('shareBar').style.display='none';return;}
+    if(typeof gtag!=='undefined')gtag('event','search',{search_term:q,search_type:'root'});
+    recordSearch(q,'root');
+    var list=Object.keys(rootsMap).filter(function(k){return normalizeForSearch(k).indexOf(qNorm)>=0;}).sort();
+    if(list.length===1)renderRootResults(list[0]);
+    else if(list.length>1){var exact=list.find(function(k){return normalizeForSearch(k)===qNorm;});if(exact){renderRootResults(exact);}else{var suggestions=list.map(function(k){return'<span class="chip" style="cursor:pointer;" onclick="document.getElementById(\'searchInput\').value=\''+esc(k)+'\';handleSearch()">'+k+'</span>';}).join('');document.getElementById('resultsArea').innerHTML='<div class="no-results"><div style="margin-bottom:12px;">تعددت الجذور المطابقة لـ \u00ab'+q+'\u00bb \u2014 اختر جذراً:</div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">'+suggestions+'</div></div>';}}
+    else document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يُعثر على جذر: '+q+'</div>';
+  } else {
+    activeRootFilter=null;activeWordFormFilter=null;
+    if(!q){document.getElementById('chipsArea').innerHTML='';document.getElementById('resultsArea').innerHTML='';['rootFilterBar','sortBar','toolbar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});return;}
+    if(typeof gtag!=='undefined')gtag('event','search',{search_term:q,search_type:'word'});
+    recordSearch(q,'word');
+    var seen={},matched=[];
+    for(var i=0;i<allData.length;i++){var r=allData[i];var inUth=r.word_uth&&normalizeHamza(normalizeAlef(r.word_uth)).indexOf(normalizeHamza(normalizeAlef(q)))>=0;var inNorm=r.word_norm&&normalizeHamza(normalizeAlef(r.word_norm)).indexOf(normalizeHamza(normalizeAlef(q)))>=0;var inMain=r.word&&normalizeHamza(normalizeAlef(r.word)).indexOf(normalizeHamza(normalizeAlef(q)))>=0;if(!inUth&&!inNorm&&!inMain)continue;var key=r.sura_num+'_'+r.pos+'_'+r.root+'_'+(r.word||'');if(seen[key])continue;seen[key]=true;matched.push(r);}
+    matched.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
+    lastWordMatched=matched;lastWordQuery=q;
+    buildRootFilter(matched);
+    if(matched.length>0){showSortBar();showToolbar();buildChart(matched);updateShareLink('word',q);}
+    displayWordResults(q,matched);
+  }
+}
+
+// ===== بحث العبارة =====
+function normalizeForSearch(s){var r='';for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c===0x0621||c===0x0623||c===0x0625||c===0x0624||c===0x0626||c===0x0622||c===0x0671)r+='\u0627';else r+=s[i];}return r;}
+function normalizeForPhrase(s){if(!s)return'';var r=normalizeArabic(stripDiacritics(s));r=r.replace(/\s+/g,' ').trim();return r;}
+
+function searchPhrase(q){
+  document.getElementById('sortBar').style.display='none';document.getElementById('toolbar').style.display='none';document.getElementById('statsChart').style.display='none';document.getElementById('shareBar').style.display='none';
+  if(!q||q.length<2){document.getElementById('resultsArea').innerHTML='';return;}
+  if(typeof gtag!=='undefined')gtag('event','search',{search_term:q,search_type:'phrase'});
+  recordSearch(q,'phrase');
+  var qNorm=normalizeForPhrase(q);if(!qNorm)return;
+  var results=[];
+  for(var i=0;i<ayahsArr.length;i++){var ay=ayahsArr[i];var hs=ay.ayah_text_normal?normalizeForPhrase(ay.ayah_text_normal):ay.ayah_text_no_tash?normalizeForPhrase(ay.ayah_text_no_tash):normalizeForPhrase(ay.ayah_text);if(hs.indexOf(qNorm)>=0)results.push(ay);}
+  lastPhraseResults=results;lastPhraseQuery=q;
+  exportTitle='بحث العبارة: '+q;
+  exportData=results.map(function(ay){return{word:'',root:'',sura_name:ay.sura_name,sura_num:ay.sura_num,pos:ay.pos,ayah_text:ay.ayah_text};});
+  if(results.length>0){showSortBar();showToolbar();buildChart(results);updateShareLink('phrase',q);}
+  renderPhraseResults(q,results);
+}
+
+function renderPhraseResults(q,results){
+  var area=document.getElementById('resultsArea');
+  if(!results.length){area.innerHTML='<div class="no-results">لم يتم العثور على نتائج للعبارة: «'+q+'»</div>';return;}
+  var sorted=results.slice();if(currentSort==='sura')sorted.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
+  var html='<div class="root-header phrase-header"><div class="root-title phrase-title">«'+q+'»</div><div style="color:#2b4c8c;font-size:1.1rem">'+results.length+' آية</div></div>';
+  html+=renderGrouped(sorted,function(ay,num){
+    return'<div class="entry-card"><div class="entry-header"><span style="color:#aaa;font-size:.9rem">'+num+'</span><span class="badge blue">'+ay.sura_name+'</span><span class="badge blue">آية '+ay.pos+'</span>'+
+    '<button class="fav-btn'+(isBookmarked('ayah::'+ay.sura_num+'::'+ay.pos)?' faved':'')+'" title="حفظ في المفضلة" onclick="toggleAyahFav(this,\'ayah::'+esc(ay.sura_num)+'::'+esc(ay.pos)+'\',\''+esc(ay.sura_name)+'\',\''+esc(ay.pos)+'\',\'\',\''+esc(ay.ayah_text)+'\')">'+(isBookmarked('ayah::'+ay.sura_num+'::'+ay.pos)?'⭐':'☆')+'</button>'+
+    '<button title="وضع القراءة المركّزة" class="fr-open-btn" style="background:transparent;border:1px solid #7a9ae855;border-radius:8px;padding:3px 10px;font-size:0.82rem;cursor:pointer;color:#2b4c8c;transition:all .18s;flex-shrink:0;" onclick="openFocusReaderFromCard(this)">🔍</button>'+
+    '<button class="share-ayah-btn" onclick="openShareModal(\''+esc(ay.ayah_text)+'\',\''+esc(ay.sura_name)+'\',\''+esc(ay.pos)+'\',\'\',\'\')">📤</button>'+
+    '</div>'+
+    '<div class="ayah-section"><div class="ayah-text" style="font-size:'+currentFontSize+'rem">'+_wpBuildAyahPhrase(ay.ayah_text,q,ay.sura_name,ay.pos,ay.ayah_text_normal||ay.ayah_text_no_tash)+
+    '<button class="copy-btn" onclick="copyAyah(this,\''+esc(ay.ayah_text)+'\')">نسخ</button></div>'+
+    contextBlock('خمس آيات قبلها',ay.before)+contextBlock('خمس آيات بعدها',ay.after)+'</div></div>';
+  },currentSort==='sura');
+  area.innerHTML=html;
+}
+
+function renderGrouped(sorted,cardFn,groupBySura){
+  if(!groupBySura){var h='';for(var i=0;i<sorted.length;i++)h+=cardFn(sorted[i],i+1);return h;}
+  var groups={},groupOrder=[];
+  for(var i=0;i<sorted.length;i++){var k=sorted[i].sura_num+'_'+sorted[i].sura_name;if(!groups[k]){groups[k]=[];groupOrder.push(k);}groups[k].push(sorted[i]);}
+  var h='',num=0;
+  for(var gi=0;gi<groupOrder.length;gi++){var gItems=groups[groupOrder[gi]];h+='<div class="sura-group-header">✨ سورة '+gItems[0].sura_name+' ('+gItems.length+')</div>';for(var j=0;j<gItems.length;j++)h+=cardFn(gItems[j],++num);}
+  return h;
+}
+
+// ===== بحث الجذر =====
+function renderRootResults(root){
+  var entries=rootsMap[root];if(!entries)return;
+  lastRootKey=root;lastRootEntries=entries.slice();
+  showSortBar();showToolbar();
+  exportTitle='الجذر: '+root;
+  var sorted=entries.slice().sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
+  exportData=sorted.map(function(e){return{word:e.word,root:e.root,sura_name:e.sura_name,sura_num:e.sura_num,pos:e.pos,ayah_text:e.ayah_text};});
+  var wc={};for(var i=0;i<sorted.length;i++)if(sorted[i].word)wc[sorted[i].word]=(wc[sorted[i].word]||0)+1;
+  var we=Object.keys(wc).map(function(w){return{word:w,count:wc[w]};}).sort(function(a,b){return b.count-a.count;});
+  var fh='';
+  if(we.length>1){fh='<div style="background:#fff8f0;border:1px solid #c9a84c88;border-radius:10px;padding:12px 16px;margin-bottom:16px;"><div style="font-size:.9rem;color:#7a5c3a;margin-bottom:8px;">📖 تصفية حسب الكلمة:</div><div style="display:flex;flex-wrap:wrap;gap:6px;"><span class="root-filter-chip-all active" onclick="filterRootByWord(\''+esc(root)+'\',null)">الكل ('+sorted.length+')</span>';for(var i=0;i<we.length;i++)fh+='<span class="root-filter-chip" onclick="filterRootByWord(\''+esc(root)+'\',\''+esc(we[i].word)+'\')">'+we[i].word+' ('+we[i].count+')</span>';fh+='</div></div>';}
+  document.getElementById('resultsArea').innerHTML='<div class="root-header"><div class="root-title">'+root+'</div><div><div style="color:#8b4513;font-size:1.1rem" id="rootCountLabel">'+sorted.length+' مواضع</div></div></div>'+fh+'<div id="rootResultCards"></div>';
+  buildChart(sorted);
+  updateShareLink('root',root);
+  renderRootCards(root,sorted);
+}
+
+function renderRootCards(root,entries){
+  var sorted=entries.slice();if(currentSort==='sura')sorted.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
+  var el=document.getElementById('rootResultCards');if(el)el.innerHTML=renderGrouped(sorted,function(e,num){return entryCard(e,num);},currentSort==='sura');
+}
+
+function filterRootByWord(root,word){
+  var entries=rootsMap[root];if(!entries)return;
+  var sorted=entries.slice().sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
+  var filtered=word?sorted.filter(function(r){return r.word===word;}):sorted;
+  lastRootEntries=filtered;
+  exportData=filtered.map(function(e){return{word:e.word,root:e.root,sura_name:e.sura_name,sura_num:e.sura_num,pos:e.pos,ayah_text:e.ayah_text};});
+  var chips=document.querySelectorAll('#resultsArea .root-filter-chip, #resultsArea .root-filter-chip-all');
+  for(var i=0;i<chips.length;i++){var chip=chips[i];if(word===null)chip.classList.toggle('active',chip.classList.contains('root-filter-chip-all'));else{if(chip.classList.contains('root-filter-chip-all'))chip.classList.remove('active');else{var ct=chip.textContent.trim().replace(/\s*\(.*\)\s*$/,'').trim();chip.classList.toggle('active',ct===word);}}}
+  var lbl=document.getElementById('rootCountLabel');if(lbl)lbl.textContent=filtered.length+' مواضع'+(word?' — '+word:'');
+  buildChart(filtered);
+  renderRootCards(root,filtered);
+}
+
+// ===== بحث الكلمة =====
+function buildRootFilter(matched){
+  var rc={};for(var i=0;i<matched.length;i++){var r=matched[i].root;if(r)rc[r]=(rc[r]||0)+1;}
+  var re=Object.keys(rc).map(function(r){return{root:r,count:rc[r]};}).sort(function(a,b){return b.count-a.count;});
+  var fb=document.getElementById('rootFilterBar'),ce=document.getElementById('rootFilterChips');
+  if(re.length<=1){fb.style.display='none';return;}
+  var h='<span class="root-filter-chip-all active" onclick="filterByRoot(null)">الكل ('+matched.length+')</span>';
+  for(var i=0;i<re.length;i++)h+='<span class="root-filter-chip" onclick="filterByRoot(\''+esc(re[i].root)+'\')">'+re[i].root+' ('+re[i].count+')</span>';
+  ce.innerHTML=h;fb.style.display='block';
+}
+
+function filterByRoot(root){
+  activeRootFilter=root;
+  var chips=document.getElementById('rootFilterChips').children;
+  for(var i=0;i<chips.length;i++){var chip=chips[i];if(root===null)chip.classList.toggle('active',i===0);else{if(i===0)chip.classList.remove('active');else{var cr=chip.textContent.replace(/\s*\(\d+\)\s*$/,'').trim();chip.classList.toggle('active',cr===root);}}}
+  applyWordFilters();
+}
+
+function filterByWordForm(word){
+  activeWordFormFilter=(activeWordFormFilter===word)?null:word;
+  var chips=document.getElementById('chipsArea').children;
+  for(var i=0;i<chips.length;i++){var ct=chips[i].textContent.trim().replace(/\s*\(.*\)\s*$/,'').trim();chips[i].classList.toggle('active',activeWordFormFilter!==null&&ct===activeWordFormFilter);}
+  applyWordFilters();
+}
+
+function applyWordFilters(){
+  var filtered=lastWordMatched;
+  if(activeRootFilter)filtered=filtered.filter(function(r){return r.root===activeRootFilter;});
+  if(activeWordFormFilter)filtered=filtered.filter(function(r){return r.word===activeWordFormFilter;});
+  buildChart(filtered);
+  displayWordResults(lastWordQuery,filtered);
+}
+
+function displayWordResults(q,entries){
+  var fc={};for(var i=0;i<entries.length;i++)if(entries[i].word)fc[entries[i].word]=(fc[entries[i].word]||0)+1;
+  var fe=Object.keys(fc).map(function(w){return[w,fc[w]];}).sort(function(a,b){return b[1]-a[1];});
+  document.getElementById('chipsArea').innerHTML=fe.map(function(e){return'<span class="chip word-chip" onclick="filterByWordForm(\''+esc(e[0])+'\')">'+e[0]+' <small>('+e[1]+')</small></span>';}).join('');
+  renderWordSearchResults(q,entries);
+}
+
+function renderWordSearchResults(q,entries){
+  if(!entries.length){document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يتم العثور على نتائج: '+q+'</div>';return;}
+  exportTitle='بحث الكلمة: '+q;
+  exportData=entries.map(function(e){return{word:e.word,root:e.root,sura_name:e.sura_name,sura_num:e.sura_num,pos:e.pos,ayah_text:e.ayah_text};});
+  var rs={};for(var i=0;i<entries.length;i++)if(entries[i].root)rs[entries[i].root]=1;
+  var roots=Object.keys(rs).join(' | ');
+  var sorted=entries.slice();if(currentSort==='sura')sorted.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
+  var html='<div class="root-header" style="border-color:#2a7a55"><div class="root-title" style="color:#2a7a55">'+q+'</div><div><div style="color:#2a7a55;font-size:1.1rem">'+entries.length+' مواضع</div><div class="root-meta">الجذور: '+roots+'</div></div></div>';
+  html+=renderGrouped(sorted,function(e,num){return entryCard(e,num);},currentSort==='sura');
+  document.getElementById('resultsArea').innerHTML=html;
+}
+
+// ===== نسخ الآية =====
+function copyAyah(btn,text){
+  navigator.clipboard?navigator.clipboard.writeText(text).then(function(){showCopied(btn);}):fallbackCopy(text,btn);
+}
+function fallbackCopy(text,btn){var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showCopied(btn);}catch(e){}document.body.removeChild(ta);}
+function showCopied(btn){btn.textContent='✅ تم';btn.classList.add('copied');setTimeout(function(){btn.textContent='نسخ';btn.classList.remove('copied');},2000);}
+
+// ===== طباعة وتصدير =====
+function getSearchQuery(){var q=currentTab==='phrase'?lastPhraseQuery:currentTab==='word'?lastWordQuery:(lastRootKey||'');return(q||'نتائج').replace(/[\\/:*?"<>|]/g,'_');}
+
+function buildPrintHTML(title,rows,q){
+  var date=new Date().toLocaleDateString('ar-SA');
+  var h='<div class="print-header"><h2>مستكشف القرآن العظيم</h2><p>'+title+' | '+rows.length+' نتيجة | '+date+'</p></div>';
+  for(var i=0;i<rows.length;i++){var r=rows[i],ayah=q?highlightPhrase(r.ayah_text,q,''):(r.word?highlight(r.ayah_text,r.word):r.ayah_text);h+='<div class="print-card"><div class="print-card-meta"><b>'+(i+1)+'.</b> '+(r.word?'<b>'+r.word+'</b> ':'')+( r.root?'('+r.root+') ':'')+'سورة '+r.sura_name+' — آية '+r.pos+'</div><div class="print-card-ayah">'+ayah+'</div></div>';}
+  return h;
+}
+
+function printResults(){
+  if(!exportData.length){alert('لا توجد نتائج');return;}
+  var pa=document.getElementById('printArea');
+  var q=(currentTab==='phrase')?lastPhraseQuery:(currentTab==='word'?lastWordQuery:'');
+  pa.innerHTML=buildPrintHTML(exportTitle,exportData,q);pa.style.display='block';
+  setTimeout(function(){window.print();pa.style.display='none';},100);
+}
+
+function toggleExportMenu(){document.getElementById('exportDropdown').classList.toggle('open');}
+document.addEventListener('click',function(e){var m=document.getElementById('exportMenu');if(m&&!m.contains(e.target))document.getElementById('exportDropdown').classList.remove('open');});
+
+function exportExcel(){
+  document.getElementById('exportDropdown').classList.remove('open');
+  if(!exportData.length){alert('لا توجد نتائج');return;}
+  var ws=XLSX.utils.aoa_to_sheet([['#','الكلمة','الجذر','السورة','رقم السورة','رقم الآية','نص الآية']].concat(exportData.map(function(r,i){return[i+1,r.word||'',r.root||'',r.sura_name,r.sura_num,r.pos,r.ayah_text];})));
+  ws['!cols']=[{wch:5},{wch:18},{wch:12},{wch:14},{wch:10},{wch:10},{wch:60}];
+  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'النتائج');
+  XLSX.writeFile(wb,'نتائج_'+getSearchQuery()+'.xlsx');
+}
+
+function exportPDF(){
+  document.getElementById('exportDropdown').classList.remove('open');
+  if(!exportData.length){alert('لا توجد نتائج');return;}
+  var q=(currentTab==='phrase')?lastPhraseQuery:(currentTab==='word'?lastWordQuery:'');
+  var content=buildPrintHTML(exportTitle,exportData,q);
+  var win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet"><style>@font-face{font-family:"KFGQPC HAFS Uthmanic Script Regular";src:url("https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.woff2") format("woff2"),url("https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.ttf") format("truetype");font-display:swap;}body{font-family:Amiri,serif;direction:rtl;padding:24px;}.print-header{text-align:center;margin-bottom:20px;border-bottom:2px solid #c9a84c;padding-bottom:12px;}.print-header h2{color:#6b3a1f;font-size:1.4rem;}.print-header p{font-size:.9rem;color:#7a5c3a;margin-top:4px;}.print-card{border:1px solid #ccc;border-radius:6px;margin-bottom:14px;padding:12px;page-break-inside:avoid;}.print-card-meta{font-size:.85rem;color:#7a5c3a;margin-bottom:8px;}.print-card-ayah{font-family:"KFGQPC HAFS Uthmanic Script Regular",Amiri,serif;font-size:1.2rem;line-height:2.2;border-right:3px solid #c9a84c;padding-right:12px;}span[style*="cc0000"]{color:#cc0000;}@media print{@page{margin:1.5cm;}}</style></head><body>'+content+'<script>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
+}
+
+function getDetailedData(){
+  return exportData.map(function(e){
+    var orig=null;
+    if(e.word){for(var i=0;i<allData.length;i++){if(allData[i].sura_num===e.sura_num&&allData[i].pos===e.pos&&allData[i].root===e.root){orig=allData[i];break;}}}
+    if(!orig){for(var i=0;i<ayahsArr.length;i++){if(ayahsArr[i].sura_num===e.sura_num&&ayahsArr[i].pos===e.pos){orig=ayahsArr[i];break;}}}
+    return{word:e.word,root:e.root,sura_name:e.sura_name,sura_num:e.sura_num,pos:e.pos,ayah_text:e.ayah_text,before:orig?(orig.before||''):'',after:orig?(orig.after||''):''};
+  });
+}
+
+function buildDetailedPrintHTML(title,rows,q){
+  var date=new Date().toLocaleDateString('ar-SA');
+  var h='<div class="print-header"><h2>مستكشف القرآن العظيم — نسخة مفصّلة</h2><p>'+title+' | '+rows.length+' نتيجة | '+date+'</p></div>';
+  for(var i=0;i<rows.length;i++){var r=rows[i];var ayah=q?highlightPhrase(r.ayah_text,q,''):(r.word?highlight(r.ayah_text,r.word):r.ayah_text);h+='<div class="print-card"><div class="print-card-meta"><b>'+(i+1)+'.</b> '+(r.word?'<b>'+r.word+'</b> ':'')+( r.root?'('+r.root+') ':'')+'سورة '+r.sura_name+' — آية '+r.pos+'</div>'+(r.before?'<div class="print-context"><div class="ctx-label">▸ خمس آيات قبلها:</div><div class="ctx-text">'+r.before+'</div></div>':'')+'<div class="print-card-ayah">'+ayah+'</div>'+(r.after?'<div class="print-context" style="border-right-color:#a0c8a0"><div class="ctx-label">▸ خمس آيات بعدها:</div><div class="ctx-text">'+r.after+'</div></div>':'')+'</div>';}
+  return h;
+}
+
+function exportDetailedPDF(){
+  document.getElementById('exportDropdown').classList.remove('open');
+  if(!exportData.length){alert('لا توجد نتائج');return;}
+  var rows=getDetailedData(),q=(currentTab==='phrase')?lastPhraseQuery:(currentTab==='word'?lastWordQuery:'');
+  var content=buildDetailedPrintHTML(exportTitle,rows,q);
+  var win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet"><style>@font-face{font-family:"KFGQPC HAFS Uthmanic Script Regular";src:url("https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.woff2") format("woff2"),url("https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.ttf") format("truetype");font-display:swap;}body{font-family:Amiri,serif;direction:rtl;padding:24px;color:#1a1a1a;}.print-header{text-align:center;margin-bottom:24px;border-bottom:2px solid #c9a84c;padding-bottom:12px;}.print-header h2{color:#6b3a1f;font-size:1.4rem;}.print-header p{font-size:.9rem;color:#7a5c3a;margin-top:4px;}.print-card{border:1px solid #d4b896;border-radius:8px;margin-bottom:20px;padding:14px 18px;page-break-inside:avoid;background:#fffdf8;}.print-card-meta{font-size:.85rem;color:#7a5c3a;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e8d8b8;}.print-context{background:#f8f3ea;border-right:3px solid #d4b896;padding:10px 14px;margin:8px 0;border-radius:6px;}.ctx-label{font-size:.8rem;color:#9a7a5a;margin-bottom:6px;font-weight:bold;}.ctx-text{font-family:"KFGQPC HAFS Uthmanic Script Regular",Amiri,serif;font-size:1rem;line-height:2;color:#4a3a2a;}.print-card-ayah{font-family:"KFGQPC HAFS Uthmanic Script Regular",Amiri,serif;font-size:1.25rem;line-height:2.3;border-right:4px solid #c9a84c;padding:10px 14px;margin:8px 0;background:#fff;border-radius:4px;}span[style*="cc0000"]{color:#cc0000;}@media print{@page{margin:1.5cm;}}</style></head><body>'+content+'<script>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
+}
+
+function exportDetailedExcel(){
+  document.getElementById('exportDropdown').classList.remove('open');
+  if(!exportData.length){alert('لا توجد نتائج');return;}
+  var rows=getDetailedData();
+  var wsData=[['#','الكلمة','الجذر','السورة','رقم السورة','رقم الآية','خمس آيات قبلها','الآية الكريمة','خمس آيات بعدها']];
+  for(var i=0;i<rows.length;i++){var r=rows[i];wsData.push([i+1,r.word||'',r.root||'',r.sura_name,r.sura_num,r.pos,r.before||'',r.ayah_text,r.after||'']);}
+  var ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:5},{wch:18},{wch:12},{wch:14},{wch:10},{wch:10},{wch:60},{wch:60},{wch:60}];
+  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'النتائج المفصّلة');
+  XLSX.writeFile(wb,'نتائج_مفصّلة_'+getSearchQuery()+'.xlsx');
+}
+
+// ===== مساعدات =====
+function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function contextBlock(label,text){if(!text)return'';var id='ctx'+(++ctxId);return'<div class="context-toggle" onclick="toggleCtx(\''+id+'\')"><span id="arr'+id+'">&#9664;</span> '+label+'</div><div class="context-body" id="'+id+'" style="font-size:'+(currentFontSize*0.8)+'rem">'+text+'</div>';}
+function toggleCtx(id){var el=document.getElementById(id),arr=document.getElementById('arr'+id);var open=el.style.display==='block';el.style.display=open?'none':'block';if(arr)arr.style.transform=open?'':'rotate(-90deg)';}
+function entryCard(e,num){
+  var favKey='ayah::'+e.sura_num+'::'+e.pos;
+  var isFav=isBookmarked(favKey);
+  return'<div class="entry-card"><div class="entry-header"><span style="color:#aaa;font-size:.9rem">'+num+'</span><span class="entry-word">'+e.word+'</span>'+(e.root?'<span class="badge green" style="cursor:pointer;transition:all .15s;" title="ابحث عن جذر: '+e.root+'" onclick="switchTab(\'root\');document.getElementById(\'searchInput\').value=\''+e.root+'\';handleSearch();" onmouseover="this.style.background=\'#2a7a55\';this.style.color=\'#fff\';this.style.borderColor=\'#2a7a55\';" onmouseout="this.style.background=\'\';this.style.color=\'\';this.style.borderColor=\'\';">🌱 '+e.root+'</span>':'')+' <span class="badge">'+e.sura_name+'</span><span class="badge">آية '+e.pos+'</span>'+
+  '<button class="fav-btn'+(isFav?' faved':'')+'" title="'+(isFav?'إزالة من المفضلة':'حفظ في المفضلة')+'" onclick="toggleAyahFav(this,\''+favKey+'\',\''+esc(e.sura_name)+'\',\''+esc(e.pos)+'\',\''+esc(e.root||'')+'\',\''+esc(e.ayah_text)+'\')">'+(isFav?'⭐':'☆')+'</button>'+
+  '<button class="fr-open-btn" title="وضع القراءة المركّزة" style="background:transparent;border:1px solid #c9a84c55;border-radius:8px;padding:3px 10px;font-size:0.82rem;cursor:pointer;color:#8b4513;transition:all .18s;flex-shrink:0;" onclick="openFocusReaderFromCard(this)">🔍</button>'+
+  '<button class="share-ayah-btn" onclick="openShareModal(\''+esc(e.ayah_text)+'\',\''+esc(e.sura_name)+'\',\''+esc(e.pos)+'\',\''+esc(e.root||'')+'\',\''+esc(e.word||'')+'\')">📤</button>'+
+  '</div>'+
+  '<div class="ayah-section"><div class="ayah-text" style="font-size:'+currentFontSize+'rem">'+_wpBuildAyah(e.ayah_text,e.word,e.sura_name,e.pos,e)+
+  '<button class="copy-btn" onclick="copyAyah(this,\''+esc(e.ayah_text)+'\')">نسخ</button></div>'+
+  contextBlock('خمس آيات قبلها',e.before)+contextBlock('خمس آيات بعدها',e.after)+'</div></div>';
+}
+function highlightPhrase(t,q,nt){if(!t||!q)return t||'';var qW=normalizeForPhrase(q).split(' ').filter(Boolean);if(!qW.length)return t;var parts=t.split(' '),tokens=[];for(var i=0;i<parts.length;i++){tokens.push({text:parts[i],isWord:true});if(i<parts.length-1)tokens.push({text:' ',isWord:false});}var ns=nt||t,np=ns.split(' ').filter(Boolean);var wt=tokens.filter(function(x){return x.isWord;});for(var i=0;i<wt.length;i++)wt[i].norm=normalizeForPhrase(np[i]!==undefined?np[i]:wt[i].text);var matches=[];outer:for(var i=0;i<=wt.length-qW.length;i++){for(var j=0;j<qW.length;j++){var wN=wt[i+j].norm,qN=qW[j];if(wN!==qN&&wN.indexOf(qN)<0)continue outer;}matches.push({start:i,end:i+qW.length-1});}if(!matches.length)return t;for(var m=0;m<matches.length;m++)for(var i=matches[m].start;i<=matches[m].end;i++)wt[i].highlight=true;var r='';for(var i=0;i<tokens.length;i++)r+=tokens[i].highlight?'<span style="color:#cc0000;">'+tokens[i].text+'</span>':tokens[i].text;return r;}
+function stripDiacritics(s){var r='';for(var i=0;i<s.length;i++){var c=s.charCodeAt(i),skip=false;if((c>=0x0610&&c<=0x061A)||(c>=0x064B&&c<=0x065F)||c===0x0670||(c>=0x06D6&&c<=0x06DC)||(c>=0x06DF&&c<=0x06E4)||c===0x06E7||c===0x06E8||(c>=0x06EA&&c<=0x06ED)||c===0x0640||(c>=0xFE70&&c<=0xFEFF)||c===0x200C||c===0x200D||c===0x200F||c===0x0615||c===0x0616)skip=true;else if(c===0x0671||c===0x0672||c===0x0673||c===0x0675){r+='\u0627';skip=true;}else if(c===0x06CC){r+='\u064A';skip=true;}else if(c===0x06A9){r+='\u0643';skip=true;}else if(c===0x06C1){r+='\u0647';skip=true;}if(!skip)r+=s[i];}return r;}
+function normalizeHamza(s){var r='';for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c===0x0623||c===0x0625||c===0x0624||c===0x0626||c===0x0622||c===0x0671||c===0x0672||c===0x0673||c===0x0675)r+='\u0621';else r+=s[i];}return r;}
+function normalizeAlef(s){var r='';for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if(c===0x0671||c===0x0672||c===0x0673||c===0x0675||c===0x0623||c===0x0625||c===0x0622)r+='\u0627';else r+=s[i];}return r;}
+// تطبيع شامل للبحث: يحول كل أشكال الألف والهمزة لألف عادية
+function normalizeArabic(s){
+  if(!s)return'';
+  var r='';
+  for(var i=0;i<s.length;i++){
+    var c=s.charCodeAt(i);
+    // كل أشكال الألف → ا
+    if(c===0x0622||c===0x0623||c===0x0625||c===0x0671||c===0x0672||c===0x0673||c===0x0675||c===0x0627)r+='\u0627';
+    // الألف الخنجرية (تكتب فوق الحرف) → تُحذف من النص الطبيعي لكن تُحسب كألف في الكلمة
+    else if(c===0x0670)r+='\u0627';
+    // واو الهمزة وياء الهمزة → حرفهم الأصلي بدون همزة
+    else if(c===0x0624)r+='\u0648';
+    else if(c===0x0626)r+='\u064A';
+    // همزة مفردة → تُحذف
+    else if(c===0x0621)r+='';
+    // تاء مربوطة = هاء
+    else if(c===0x0629)r+='\u0647';
+    // تخطي التشكيل
+    else if((c>=0x064B&&c<=0x065F)||c===0x0640||(c>=0x06D6&&c<=0x06ED)){}
+    else r+=s[i];
+  }
+  return r;
+}
+function highlight(text,word){if(!word||!text)return text||'';var idx=text.indexOf(word);if(idx>=0)return text.substring(0,idx)+'<span style="color:#cc0000;">'+word+'</span>'+text.substring(idx+word.length);var cw=stripDiacritics(normalizeAlef(word)),parts=text.split(' '),found=false;for(var i=0;i<parts.length;i++){if(!found&&stripDiacritics(normalizeAlef(parts[i])).indexOf(cw)>=0){parts[i]='<span style="color:#cc0000;">'+parts[i]+'</span>';found=true;}}return parts.join(' ');}
+
+// ===== سجل البحث (سايدبار) =====
+var SEARCH_HISTORY_KEY='qeSearchHistory';
+var SEARCH_COUNTS_KEY='qeSearchCounts';
+var MAX_RECENT=10;
+var MAX_TOP=10;
+
+function getSearchHistory(){try{return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY))||[];}catch(e){return[];}}
+function setSearchHistory(arr){localStorage.setItem(SEARCH_HISTORY_KEY,JSON.stringify(arr));}
+function getSearchCounts(){try{return JSON.parse(localStorage.getItem(SEARCH_COUNTS_KEY))||{};}catch(e){return{};}}
+function setSearchCounts(obj){localStorage.setItem(SEARCH_COUNTS_KEY,JSON.stringify(obj));}
+
+function getTabLabel(tab){if(tab==='root')return'جذر';if(tab==='word')return'كلمة';if(tab==='phrase')return'عبارة';return tab;}
+
+function recordSearch(query,tab){
+  if(!query||query.length<1)return;
+  logSearchToSupabase(query, tab);
+  var entry={q:query,tab:tab,time:Date.now()};
+  var hist=getSearchHistory();
+  // remove duplicate
+  hist=hist.filter(function(h){return!(h.q===query&&h.tab===tab);});
+  hist.unshift(entry);
+  if(hist.length>MAX_RECENT)hist=hist.slice(0,MAX_RECENT);
+  setSearchHistory(hist);
+  // counts
+  var key=tab+'::'+query;
+  var counts=getSearchCounts();
+  counts[key]=(counts[key]||0)+1;
+  setSearchCounts(counts);
+  renderSidebar();
+}
+
+function renderSidebar(){
+  var hist=getSearchHistory();
+  var recentEl=document.getElementById('recentSearchList');
+  var topEl=document.getElementById('topSearchList');
+  var globalRecentEl=document.getElementById('globalRecentList');
+  var sidebarCol=document.getElementById('sidebarCol');
+  var clearEl=document.getElementById('recentClear');
+  if(!recentEl||!topEl)return;
+  if(!allData.length){sidebarCol.style.display='none';return;}
+  sidebarCol.style.display='';
+
+  // البوكس ٣ — آخر بحوث المستخدم (localStorage)
+  if(!hist.length){
+    recentEl.innerHTML='<li class="sidebar-empty">لا توجد عمليات بحث بعد</li>';
+    clearEl.style.display='none';
+  } else {
+    var rh='';
+    for(var i=0;i<hist.length;i++){
+      var h=hist[i];
+      rh+='<li onclick="sidebarSearch(\''+esc(h.q)+'\',\''+h.tab+'\')"><span class="sh-num">'+(i+1)+'</span><span class="sh-query">'+h.q+'</span><span class="sh-badge">'+getTabLabel(h.tab)+'</span></li>';
+    }
+    recentEl.innerHTML=rh;
+    clearEl.style.display='';
+  }
+
+  // البوكس ١ — الأكثر بحثاً من Supabase
+  supa.rpc('top_searches').then(function(res){
+    if(res.error || !res.data){
+      // fallback: يجيب من الجدول مباشرة
+      supa.from('search_logs').select('query,tab').limit(500).then(function(r){
+        if(r.error||!r.data){topEl.innerHTML='<li class="sidebar-empty">تعذر التحميل</li>';return;}
+        var counts={};
+        r.data.forEach(function(row){
+          var k=row.tab+'::'+row.query;
+          counts[k]=(counts[k]||0)+1;
+        });
+        var arr=[];
+        for(var k in counts){
+          var parts=k.split('::');
+          arr.push({tab:parts[0],q:parts.slice(1).join('::'),count:counts[k]});
+        }
+        arr.sort(function(a,b){return b.count-a.count;});
+        var top=arr.slice(0,10);
+        if(!top.length){topEl.innerHTML='<li class="sidebar-empty">لا توجد بيانات بعد</li>';return;}
+        var th='';
+        for(var i=0;i<top.length;i++){
+          var t=top[i];
+          th+='<li onclick="sidebarSearch(\''+esc(t.q)+'\',\''+t.tab+'\')"><span class="sh-num">'+(i+1)+'</span><span class="sh-query">'+t.q+'</span><span class="sh-count">'+t.count+'</span><span class="sh-badge">'+getTabLabel(t.tab)+'</span></li>';
+        }
+        topEl.innerHTML=th;
+      });
+    }
+  });
+
+  // البوكس ٢ — آخر ١٠ بحوث من كل الزوار
+  supa.from('search_logs').select('query,tab,created_at').order('created_at',{ascending:false}).limit(10).then(function(r){
+    if(r.error||!r.data||!r.data.length){globalRecentEl.innerHTML='<li class="sidebar-empty">لا توجد بيانات بعد</li>';return;}
+    var gh='';
+    for(var i=0;i<r.data.length;i++){
+      var row=r.data[i];
+      gh+='<li onclick="sidebarSearch(\''+esc(row.query)+'\',\''+row.tab+'\')"><span class="sh-num">'+(i+1)+'</span><span class="sh-query">'+row.query+'</span><span class="sh-badge">'+getTabLabel(row.tab)+'</span></li>';
+    }
+    globalRecentEl.innerHTML=gh;
+  });
+}
+
+function sidebarSearch(query,tab){
+  switchTab(tab);
+  document.getElementById('searchInput').value=query;
+  handleSearch();
+}
+
+
+// ===== بيانات الحقول الدلالية =====
+var _semData={"f":{"1":{"n":"أدوات الشرط والتوكيد والاستفهام","r":["إن","ءن","ءذا","إلا","قد","لم","ءم","لو","لما","لكن","لعل","هل","كيف","ألا","سوف","عسى","ءين","ليت","متى","كي","هيت","هلم","ءيو","ربما"]},"2":{"n":"أدوات النفي والاستثناء","r":["لا","ءن","إلا","لم","لن","ليس","كلا","لمَ","بلى","زول","حاش","هيه"]},"3":{"n":"أسماء الزمان والمكان والجهة","r":["قبل","بعد","عند","خلف","تحت","فوق","وري","حيث","لدي","هنا","الان"]},"4":{"n":"أسماء موصولة ومبهمة","r":["ما","ذو","شيء","كلل","مثل","بعض","كم"]},"5":{"n":"أقوام وأماكن","r":["قري","ثمود","عاد","بلد","صفو","مدن","مدين","مصر","ءيك","بدر","رسس","خدد","ببل","سين","روم","يثرب","مكك","ءرم","قرش","بكك","وطن","سوح","سنو","حقف","بقع","مرو"]},"6":{"n":"الأنبياء والرسل والأعلام","r":["موسى","فرعون","إبراهيم","نوح","إسرائيل","مريم","يوسف","لوط","ءدم","عيسى","هود","هارون","إسحاق","سليمان","يعقوب","داود","إسماعيل","شعيب","زكريا","هامان","حبر","ءيوب","يونس","عزر","سمر","قارون","جبريل","جالوت","ءزر","إلياس","يسع","إدريس","لقمان","طالوت","سبء","لات","هاروت","ماروت","مناة","يغوث","يعوق","زبن","قسس"]},"7":{"n":"الآية والمعجزة والبرهان","r":["علم","ءيه","حجج","برهن","شرط"]},"9":{"n":"الأبناء والذرية","r":["ذكر","ءم","بنو","ءهل","ءبو","ولد","ءخو","زوج","رجل","نسو","ذرر","مرء","ءنث","سلف","خول","بعل","عمم","نسل","شيخ","رهط","نسب","كهل","صهر","حفد","عول"]},"13":{"n":"الأخذ والقبض","r":["ءخذ","صوب","كسب","مسك","نزع","نيل","سجن","قبض","سرق","ءسر","خطف","حصر","جرح","سحت","سلسل","حبس","عرو","لقط","طمث","عثر","سلب","غصب","قلع","سطو"]},"16":{"n":"الفصل والحجاب والمنع","r":["بعد","ضرب","ذهب","فصل","جنب","كفي","هجر","صرف","حوط","حدد","حصن","منع","سور","عصم","فدي","عزل","حجب","عقر","خمر","كهف","قصو","درء","سرب","برزخ","ستر","نءي","حجز","غطي","سحق","زحزح","نكب","حفف","جفو","عمق","فجو","عوق","سرد","هشش","ذود"]},"18":{"n":"الأعداد والكميات","r":["كثر","جمع","ءحد","قلل","وحد","زيد","عدد","مرر","ثلث","ثني","سبع","عشر","ربع","ءلف","كم","ثمن","مءه","طول","كفل","خمس","ستت","نصف","تسع","سدس","فرد","شطر","وسط","نقر","قنطر","فتل","جزء","ثلل","وتر","رغد","خردل","حطط","نسء","قطمر","جمم","شرذم","قوس","ضيز","زهد"]},"19":{"n":"الأمم والشعوب والجماعات","r":["قوم","ءمم","قرن","عرب","غبر","سبط","عصب","فوج","ءيك","عجم","ثلل","صبء","لفف","شعب","زمر","لبد","مجس","شرذم","عزي"]},"20":{"n":"الألواح والكتابة","r":["كتب","سور","سطر","لوح","قلم","سجل","نسخ","رقم","محو","قرطس","خطط","رقق"]},"21":{"n":"الألوان","r":["بيض","سود","لون","خضر","حمر","صفر","شيب","صرم","وشي","زرق","فقع","دهم"]},"25":{"n":"الأمر والطاعة والعصيان","r":["كتب","ذكر","ءمر","دعو","حكم","نذر","طوع","سءل","خلف","خوف","بشر","دين","حرم","قضي","نهي","فسق","جوب","فصل","عصي","وصي","وعظ","فجر","فتي","فرض","عصو","وقر","كلف","نكث","زجر","دخر","لزم","شرع","طوق","طلب","شءن","حضض","ءفف","حفي","حرض","حطط","ذعن"]},"27":{"n":"الأمل والرجاء","r":["عسى","رجو","مني","ليت","طمع","حرص","حسد","ءمل"]},"28":{"n":"مشاهد يوم القيامة والأهوال","r":["نحس","هطع","شءم","ردف","مور","جثو","بسر","بسس","دخن","قحم","كلح","هدد","كشط","قمطر","دهي","حسم","شوظ"]},"35":{"n":"الإخبار والتبليغ والنبأ","r":["رسل","نبء","بشر","وجه","بلغ","بعث","خبر","قصص","سوق","بثث","كهن","حري"]},"37":{"n":"الإرادة والمشيئة","r":["شيء","رود","قدر","قضي","عزم","همم"]},"38":{"n":"الإرسال والإلقاء","r":["ءخذ","لقي","طلق","حرر","رمي","قذف","صبب","عصر","سفح","لفي","فكك","عتق","سفك","طرح"]},"45":{"n":"الإظهار والاخفاء","r":["بين","ظهر","بدي","صبح","فتح","خفي","بطن","كشف","جهر","علن","سوم","فرج","لطف","مرج","وسط","جلو","عفف","عور","وسم","طفق","خفت","شطء","نشط","وسق","فضح","حصحص","سحل","لوذ","وهي"]},"46":{"n":"الإغلاق والحجب","r":["كفر","غشو","طبع","ختم","حجب","غبر","سدد","طمس","غضض","ستر","طفء","غلف","غلق","قفل","شمز","رين","صكك"]},"47":{"n":"الإفاضة والتدفق","r":["خرج","فسق","بدي","نشء","نبت","فجر","برز","فيض","ءجج","نشز","فسح","نزف","سفك","غيض","همر","بجس"]},"48":{"n":"الإكراه والمشقة","r":["يسر","بلو","شقق","خفف","حرج","ضيق","عسر","رهق","كلف","حصر","عنت","طوق","ءود","ءصر","محن","برم","عضل","ضنك","كبد","حنك","ءتل"]},"51":{"n":"الإنفاق والعطاء","r":["صدق","نعم","نفق","زيد","زكو","نفع","كرم","منن","وهب","سرف","ءثر","ربو","عطو","فدي","نفل","رحب","ءود","بذر","جود"]},"52":{"n":"الإيمان والتصديق","r":["ءمن","صدق","سلم","وفي","قرر","وثق","خبت","صبغ","محن","عرو","محص","رسخ","قشعر","فصم"]},"54":{"n":"الاتباع والسبق","r":["تبع","سبق","رصد","لحق","قفو","نفذ","لفي","قدو","قسس"]},"57":{"n":"الدوران والانقلاب والتحول","r":["قلب","ضرب","عود","طوف","صرف","ثني","حول","عكف","كرر","دءب","طوي","لفف","نكس","كور","بحث","صكك"]},"59":{"n":"الاستهزاء والسخرية","r":["سخر","هزء","لمز","همز","شمت","زري","سمد","غمز","نغض"]},"60":{"n":"البسط والتسوية","r":["سوي","مدد","بسط","مهد","حصد","صرم","قوع","جرز","عجف","صفصف","صلد","رهو","جثث","دحو","طحي","سطح","بسق","رتع"]},"62":{"n":"الاعتداد والإعداد","r":["حمل","عدد","رفع","بوء","عتد","جهز","هيء","طوق","ءصر","وجب"]},"68":{"n":"الامتلاء والإنفاد","r":["ملء","طغو","برء","فرغ","نفد","خوي","غمر","شحن","رغد","نزف","غيض","سكب","همر","نضخ"]},"69":{"n":"الانتشار والتفرق","r":["فرق","نشر","فوج","شتت","وزع","نثر","ثور","نكب","نفش","كثب"]},"71":{"n":"الانحراف والميل","r":["قوم","بعد","قرب","فسق","جنح","عدل","شقق","حنف","فرر","زيغ","عوج","نقض","ميل","لحد","فوت","حيص","ركن","ميد","نضد","جنف","نكص","جفو","ءمت","نوء","ءبق","نوص","لوذ","هرب","حيد","حوز","قضض"]},"72":{"n":"البخل والشح والمنع","r":["منع","بخل","قتر","شحح","كدي","ضنن"]},"73":{"n":"البر والإحسان","r":["ءمن","قوم","خير","حسن","صدق","سلم","وفي","برر","قسط","نصح","حنف"]},"74":{"n":"البرد والحرارة","r":["حرر","برد","زمهر","رمض","دفء"]},"78":{"n":"البعث والإحياء بعد الموت","r":["قوم","رسل","حيي","بعث","حشر","نشر","عيش","بعثر","رفت","رمم","سهر","نخر"]},"79":{"n":"البغض والكره والمقت","r":["كره","نفر","مقت","بغض","حسد","ذمم","شنء","قلو","ضغن","شمت","شمز"]},"81":{"n":"البيع والشراء والتجارة","r":["كسب","خسر","شري","ربو","بيع","فدي","تجر","بخس","بضع","زجو","ربح","كسد","غبن","مير"]},"84":{"n":"التحويل والتغيير","r":["غير","بدل","صرف","صير","حول","نفخ","صور","خفف","جدد","حرف","زهق","نقر","محو","محص","محق","مسخ","نفث","بتك","نفح"]},"85":{"n":"التراب والأرض والمادة","r":["ءرض","جبل","ترب","حجر","طين","غبر","كهف","صلصل","حمء","صخر","خدد","ثري","سهل","جرف","حدب","ريع","لزب","رمد"]},"86":{"n":"الترك والإهمال والتخلي","r":["وذر","ترك","خلص","خلو","حرر","نبذ","عبر","سرح","طرد","جوز","عور","دحر","خذل","ذرو","عطل","فتء","شرد","ذءم","خلع","ذود"]},"89":{"n":"التعليم والبيان والتفسير","r":["علم","بين","ءول","حوط","وقر","درس","شرح","رتل","فسر"]},"90":{"n":"التفاضل والمقارنة","r":["ءخذ","خير","حسن","فضل","سوي","قلل","هوي","برك","صفو","جبي","ندد","ميز","رذل","عمق","ضدد","دهي","فجو"]},"95":{"n":"التمادي والاستمرار","r":["لبث","كود","ملي","دءب","كرر","طفق"]},"97":{"n":"التواضع والانكسار","r":["هون","ذلل","نوب","ءوب","رفق","لين","خبت","خضع","ذعن","لحف","صبو"]},"101":{"n":"التوكل والاستعانة","r":["وكل","حفظ","عون","وزع","فوض"]},"102":{"n":"الثواب والأجر والجزاء","r":["خير","جزي","ءجر","فوز","ثوب","فدي","سعد","رفد","ربح"]},"103":{"n":"الجبال والأماكن المرتفعة","r":["رسو","طور","عدن","عمد","ميد","خدد","شمخ","طود","حرد","حدب","ريع","ضمر","جرف"]},"104":{"n":"الجدل والحجاج والخصام","r":["خلف","حجج","جدل","نزع","خصم","حور","دحض","طعن","لدد","ضدد","مرو","بهل","شكس","نكد","نوش"]},"105":{"n":"الجسد والأعضاء","r":["نفس","قلب","عظم","يدي","ءذن","وجه","رجل","عين","ظهر","روح","قدم","صدر","دبر","شعر","هوي","جنح","بطن","لسن","رقب","رءس","فءد","فوه","جلد","لحم","طرف","دمم","ءيد","عنق","ذرع","رفق","جسد","نصو","سمن","عري","ءنف","ذقن","جيب","جذع","حلق","جسم","خصف","بنن","حنجر","صبع","عضض","حوي","جبه","بدن","عضد","نكب","خدد","طمث","دمع","طري","غوط","قمح","عطف","جوف","حلقم","شفه","نغض","لحي","ضمر","معي","خرطم","وتن","نخر","كبد","مخض","صوف","شحم","وبر","فرع"]},"110":{"n":"الجهل والغفلة والسفه","r":["غفل","جهل","سفه","عمه","خبل","سهو","فند","حير"]},"111":{"n":"الجوع والعطش","r":["صوم","جوع","ظمء","خمص","هيم","سغب"]},"112":{"n":"الحب والمودة والألفة","r":["قلب","حبب","هوي","ودد","ءلف","فءد","شهو","حنن","شغف"]},"118":{"n":"الحروف المقطعة","r":["حم","الم","الر","الل","طسم","المص","المر","كهيعص","طه","طس","يس","ياسين","ص","عسق","ق","ن","زمل","دثر"]},"120":{"n":"الحزن والفرح والوجدان","r":["بشر","سرر","حزن","فرح","بلس","يءس","شقي","حسر","غمم","ضحك","بكي","ءسي","ندم","قنط","ءسف","كرب","شكو","دمع","بخع","ضنك","بسم"]},"121":{"n":"الحساب والوزن","r":["ءخذ","قدر","جمع","حسب","وفي","عدد","قسم","نصب","ثقل","رقب","وزن","تمم","كيل","حصي","قبض","حظظ","كمل","ميز","خردل","وسق","حصل","سلب","قوب","قوس","سهم","صوع","طفف","درهم","قطط"]},"122":{"n":"الحسن والجمال والطيب","r":["حسن","صلح","طيب","جمل","هنء","نضر","بهج","نضد","جني","زهر","خضد","فنن"]},"123":{"n":"الحفظ والصون","r":["جمع","حفظ","خزن","رعي","كنز","نشز","وزع","دخر","ودع","فسح","لفف","ضمم","كفت","حرس","كلء","زبن"]},"126":{"n":"الحكمة والبصيرة","r":["ذكر","حكم","سبح","عقل","دبر","رشد","فكر","لبب","عبر","نهو"]},"127":{"n":"الحلال والحرام","r":["حرم","حلل","خمر","سكر","سحت","سوغ","حظر","زلم","خنق","وقذ","ذكو","سيب"]},"128":{"n":"الحلف والتحالف","r":["قوم","صحب","فرق","ملء","قرن","جند","حزب","خزن","خلل","حور","شيع","ضيف","حبر","ندد","رفق","رهط","خدن","حرس","قسس","عزي"]},"131":{"n":"الحواس والإدراك والتفكر","r":["سمع","وحي","ذوق","مسس","بلو","عمي","صلي","صمم","حسس","بكم","لمس","غضض","لفت","وجس","لقف","عضض","نصت","صغو","طمث","لهم","يقظ"]},"135":{"n":"الوحوش والاسماك","r":["سبع","دبب","حمر","كلب","حوت","قرد","ذءب","حوي","ضفدع","نون","قسر","سمك","فيل","فرث","صفن","وحش","ذود"]},"140":{"n":"الخلط والاجتماع","r":["وصل","ءجج","خلط","لحق","مرج","فور","مزج","هيج","دمغ","خبط"]},"142":{"n":"الخلق والإيجاد والتكوين","r":["ءله","كون","ربب","عمل","جعل","خلق","نوس","ملك","بنو","قدر","بشر","فعل","ءنس","روح","برء","نشء","صنع","فطر","نفخ","صور","ذرء","بدع","طبق","ءسس","بري","ءنم","سدي"]},"143":{"n":"الخلود والأبدية","r":["حيي","خلد","ءبد","بقي","دوم","عيش","وصب","صمد"]},"144":{"n":"الخوف والفزع والهلع","r":["وقي","خوف","خشي","حذر","بغت","رهب","شفق","ضرع","فزع","رعب","وجل","وجس","هطع","جزع","وجف","روع","هلع","ذهل","قشعر","سلق"]},"145":{"n":"الخيانة والغدر","r":["خون","نكث","غدر","ختر"]},"146":{"n":"الدخول والولوج","r":["دخل","ولج","خوض","غوص","قحم","وقب"]},"147":{"n":"الدعاء والنداء والاستغاثة","r":["دعو","نجو","ندو","صرخ","جءر","دعع","حرض","ءوه","بهل","هاؤم"]},"149":{"n":"الدليل والسبيل والطريق","r":["سبل","نفق","دين","صرط","سنن","ملل","طرق","دلل","سدد","دءب","شرع","فجج","صبغ","وسل","نكب","نهج","نجد","لهم"]},"153":{"n":"الدَّين والرهن والكفالة","r":["دين","وكل","كسب","زعم","قرض","كفل","دفع","غرم","ءدي","رهن"]},"157":{"n":"الذل والهوان","r":["عذب","هون","خزي","ذلل","صغر","رجز","خسء","رذل","زري","لحف","تعس","رغم"]},"158":{"n":"الذم واللعن والسب","r":["لعن","لوم","عتب","لمز","همز","عيب","فضح","قبح","نبز","ذءم","ثرب"]},"159":{"n":"الذنب والخطأ والإثم","r":["كفر","سوء","كبر","جرم","فسق","ءثم","ذنب","نكر","وزر","فحش","فجر","خطء","بوء","زني","وبل","نشز","زلل","سفح","حنث","لمم","جنف","حوب"]},"160":{"n":"الذهاب والمضي والانطلاق","r":["كون","ولي","ذهب","فضض","مضي","رحل","برح","تيه"]},"162":{"n":"الرؤية والنظر والإبصار","r":["رءي","شهد","بصر","نظر","عين","رقب","طرف","حسس","رصد","نضر","شخص","لمح","غمض"]},"163":{"n":"الربط والعقد","r":["غلل","عقد","حبل","كلب","ربط","لفف","عرو","برم","ثخن","دسر","رتق"]},"165":{"n":"الرجوع والعودة","r":["رجع","سكن","ردد","عود","ثبت","نوب","ءوب","ثوي","طمن","ءصل","كرر","ءدي","حرك","همد"]},"166":{"n":"الرزق والكسب","r":["خير","رزق","كسب","فلح","ورث","سعي","فيء","رعي","غنم","قرف","نفل"]},"169":{"n":"الرغبة والإقبال والإدبار","r":["عرض","دبر","صدد","جوب","رغب","زهد","صبو","عطف","صكك"]},"172":{"n":"الرياح والمطر والأحوال الجوية","r":["صوب","غمم","برق","سحب","عصف","ثور","ركم","ذرو","رعد","ودق","لقح","رخو","ثجج","نفح","نوء","عرم","نقع","جوو"]},"177":{"n":"الزمان: الليل والنهار والأوقات","r":["ءذا","يوم","نهر","ليل","ءجل","صبح","ءنى","قرن","حين","ءبد","حول","فجر","سنن","شهر","سنه","غدو","عشو","وقت","بكر","ءصل","سبت","عوم","مهل","مسي","عصر","ءمد","نحس","سلخ","خيط","دهر","وسق","لمح","حقب","سرمد","دلك","عسعس","شتو","صيف","فتر"]},"178":{"n":"الزواج والنكاح","r":["زوج","مرء","نكح","طلق","حرث","خطب","سرح","وطء","نشز","حيض","عضل","رفث","وطر","فضو","ءيم","ثيب"]},"187":{"n":"السقوط والانكسار","r":["هوي","وقع","خرر","سقط","دكك","زلل","هور","زلق","كبكب","قعر","قضض"]},"188":{"n":"السماء والفضاء والأفلاك","r":["سمو","شمس","قمر","فلك","نجم","برج","كوكب","شهب","طبق","ءفل","ءفق","ركم","دخن","ثقب","خنس","جوو","حبك","كنس","عرجن"]},"191":{"n":"السير والمشي والجري","r":["سبح","جري","عجل","مرر","هجر","سعي","سير","مشي","سرع","درج","ركب","سلك","سفر","فيض","عبر","خطو","هلل","وزع","رحل","سيح","ركض","نشط","غوص","نفش","ثير","هرع","زحف","ظعن","رتع","زفف","وفض","حثث"]},"192":{"n":"الشر والسوء والخبث","r":["سوء","ءلم","ضرر","بءس","شرر","خبث","رجس","رجز","ضير"]},"193":{"n":"الشرق والغرب والجهات","r":["بعد","دنو","قرب","يمن","علو","بطن","غرب","شرق","خلل","شمل","حنف","سفل","شطر","وسط","قصو","شءم","حدب"]},"194":{"n":"الشرك والعبادة غير الله","r":["كفر","شرك","طغو","صنم","وثن","صبء","زلم","لات","مجس","جبت","ضهي","مناة"]},"200":{"n":"الشيطان والوسوسة","r":["جنن","شطن","فتن","بلس","نزغ","وسوس","سول","دحر","فزز","حوذ","ءزز","قيض","خنس","غرو","عفرت","نفث","ثبط","حنك","خبط"]},"202":{"n":"الصبر والتحمل والثبات","r":["صبر","حلم","ثبت","جلد","كظم","ربط","ختر","صمد"]},"205":{"n":"الصعود والعلو","r":["رفع","طلع","صعد","عرج","رقي","نشز","فسح","بزغ","نتق","فقع"]},"206":{"n":"الصلاة وأركانها","r":["قوم","قبل","صلو","سجد","ركع","قنت","عكف","هجد","قمح"]},"208":{"n":"الصمت والإمساك عن الكلام","r":["صوم","بكم","ودع","عفف","خفت","صمت","سكت","رمز"]},"211":{"n":"الصوت والنداء","r":["صيح","صوت","صرصر","لهث","خور","رمز","مكو","صدو","ركز","همس","نعق","ذيع","هشش"]},"214":{"n":"الضعف والعجز","r":["ضعف","عجز","يتم","بلس","يءس","وهن","ضرع","قنط","خيب","فشل","سءم","شيب","نكس","لهث","كسل","لغب","عيي","وني","وهي","بطء"]},"215":{"n":"الضلال والغواية والزيغ","r":["ضلل","غوي","زيغ","بور","صدف","ركن","نكس","ركس","هيم","نكص","تيه","حير","ذبذب"]},"216":{"n":"الضمائر وأسماء الإشارة","r":["مَن","ذا","ءلى","هو","هم","ءلي","ءيي","ءنت","نحن","لنا","لك","ءنا","هي","لي","تلك","هن","فلن","ال"]},"217":{"n":"الضوء والنور والظلام","r":["ظلم","نور","ظلل","ضحو","ضوء","كسف","درر","غسق","سرج","ءفل","فلق","سرب","قبس","صرم","ثقب","بزغ","زجج","هيج","سني","غطش","كدر","وقب","جذو","دهم"]},"221":{"n":"الطعام والشراب","r":["عذب","رزق","ءكل","ذوق","طعم","شرب","رضع","رعي","خمر","سكر","صيد","هنء","رغد","سوغ","سلي","مزج","حوج","فرت","لقف","لذذ","سندس","بهم","قوت","رفد","قنع","طري","لبن","عرر","ملح","عضض","هضم","شوي","مءد","دهق","رحق","دفء","فرث","شحم","مير","جرع","غول","عسل","غصص","كلء","غدق","لقم","بلع","سلسبيل","زنجبيل","عبقر","حنذ","خبز","جفن","نضج","بقل","عدس"]},"225":{"n":"الطهارة والوضوء","r":["جنب","طهر","مسح","يمم","غسل","غوط","نجس","تفث"]},"226":{"n":"الظلم والعدوان والبغي","r":["ظلم","عدو","بغي","بطل","جور","قهر","ميل","بغض","كبت","شطط","دعع","شنء","هضم","حيف","سطو","ءلت","ضيز","طفف","وءد"]},"227":{"n":"الظن والشك والريبة","r":["قدر","حسب","ظنن","ريب","مري","شكك","مرو"]},"228":{"n":"العبادات والشعائر الدينية","r":["نفق","زكو","حجج","عمر","صلي","صوم","ذبح","ءدي","قلد","وتر","صبغ","بدن","مءد","هجد","نحر","ذكو"]},"229":{"n":"العبادة والتعبد","r":["عبد","خشع","قنت","نسك","سيح","خضع","وسل","بتل","صمع","خلع","ذعن"]},"232":{"n":"العدل والقسط","r":["قوم","حقق","عدل","قسط","نصف"]},"233":{"n":"العذاب بالإغراق والإهلاك","r":["عذب","غرق","خسف","حصب","حمو","سحق","وبق","قصف","عرم","غصص","قصم"]},"239":{"n":"العفو والمغفرة والصفح","r":["رحم","غفر","صلح","توب","عفو","نوب","ءوب","مسح","رءف","عذر","صفح","حطط"]},"240":{"n":"العقوبة والحد والقصاص","r":["عقب","قطع","حدد","صلي","ءذي","بوء","نقم","غلل","رجم","جلد","سبب","صلب","نكل","سفك","نفي","مسد","سوط","مسخ","كوي","بتر"]},"242":{"n":"العهد واليمين والميثاق","r":["وعد","يمن","عهد","قسم","حلف","ذمم","وكد","تلل","حتم"]},"245":{"n":"الغضب والسخط والغيظ","r":["غضب","غيظ","سخط","عبس","حمي","ءفف","بسر","حرد"]},"258":{"n":"الفساد والطغيان والتجبر","r":["فسد","جبر","عتو","عثو","مرد","عتل","خرب","زنم","ءتل","عيب"]},"259":{"n":"الفضة والمعادن","r":["ذهب","حدد","فضض","لؤلؤ","مرج","زجج","ياقوت","عرجن"]},"260":{"n":"الفعل والحركة والتغيير العام","r":["صوب","وقع","مهد","رسو","بغت","طول","جدد","صدف","دلو","لفت","سءم","ردف","مور","نفذ","روغ","ءزز","قنع","زلق","جمح","وني","بطء","جرر","لوذ","نوش","جيس"]},"261":{"n":"الفعل والعمل والصنع","r":["صرر","شءن","نقب","قيض","ركس","ءرب","وطر","كدح","هشم","عبء","حسم"]},"262":{"n":"الفقر والحاجة","r":["سكن","فقر","ءسر","خصص","زجو","حوج","عرر","ملق","عيل","نكد","سغب","لحف"]},"263":{"n":"الفهم والإدراك والوعي","r":["علم","نبء","عرف","خبر","عقل","دري","يقن","حجر","فقه","لبب","درك","وعي","نهو","رسخ","نبط","فهم","تقن","حري","بحث"]},"265":{"n":"القتال والحرب والجهاد","r":["نصر","فتن","ضرب","جهد","فتح","ءوي","غلب","كفف","صفف","حرب","دفع","بطش","ثقف","فشل","سلح","عزر","حرض","هزم","قرح","طعن","ظفر","ثخن","سبغ","جلب","وطن","سوح","صيص","ضبح","نقع","حرس","شرد","تلل","غزز","صرع","رمح","شوك","حوز","جيس","سهم","دمغ","زبن","نطح","سطو"]},"267":{"n":"القرب والدنو","r":["دنو","قرب","ضرب","ءوي","ءلف","لدن","زلف","قصد","غرو","ضمم","ثخن","دنر","رتق","حوز"]},"269":{"n":"القطع والتمزيق","r":["فرق","فصل","هوي","قطع","شقق","فطر","نقض","دكك","صدع","نسف","قدد","خرق","مزق","فلق","نحت","سلخ","جذذ","حفر","سفك","خرب","بتر","بتك","فصم","فتق","هدم","جثث"]},"270":{"n":"القوة والشدة","r":["شدد","قوي","غلظ","عون","ءيد","صلب","قسو","عصب","وزع","متن","ءزر","عضد","بصط","عزب","لدد","محل","ردء","سفع","فظظ","صلد","نكد"]},"271":{"n":"القول والخطاب والبيان","r":["سمى","عرب","زعم","عذر","خطب","زجر","حرف","عجم","شور","شكو","عيي","سلق","رمز","ردء","ذيع","فصح"]},"272":{"n":"القول والكلام والنطق","r":["قول","صدق","وحي","كلم","حدث","ءذي","نصح","حور","نطق","سبب","شور","قيل","لفظ","نمم","رمز"]},"273":{"n":"الكأس والإناء","r":["قرر","وعي","كءس","كوب","تنر","زجج","جفن"]},"274":{"n":"العزة والكبر والغرور","r":["كبر","عظم","عزز","علو","كرم","وسع","عجب","خيل","فخر","رحب","سمن","مرح","نكف","حمي","بطر","ءشر","جلل","مطو","صعر","فره","صمد"]},"275":{"n":"الكتب المقدسة والتلاوة","r":["كتب","قرء","تلو","تور","ملل","سور","نجل","زبر","صحف","سجل","رقم","همن","عضي","خطط"]},"276":{"n":"الكتمان والإخفاء","r":["جنن","غيب","سرر","خفي","وري","كتم","كنن","سري","خمر","حبر","دهن","سرب","غمر","ستر","غطي","دسس","عزب","غمض","همس","خبء","ذيع","جسس","عمق"]},"277":{"n":"الكذب والافتراء والزور","r":["كذب","نفق","فري","بطل","ءفك","لغو","بهت","حرف","لوي","زور","دهن","خرص","دحض","سول","زخرف","شطط","ضغث","ءدد","ضهي","لحن","عضي","نمم","فند"]},"279":{"n":"الكفر والجحود والإنكار","r":["كفر","نكر","فجر","ءبي","جحد","سخط","طفء","غلف","شمز","كند","نفي"]},"284":{"n":"اللهو واللعب والترف","r":["لعب","فكه","لهو","ترف","عبث","شغل","سمد","هزل","سدي","فره"]},"286":{"n":"الماء والأنهار والبحار","r":["نهر","عين","جري","موه","بحر","سقي","فلك","مطر","ودي","يمم","غيث","وبل","موج","سفن","يبس","غور","سيل","لجج","شحن","زبد","فرت","غوص","مخر","نبع","ملح","شطء","جبب","تنر","هشم","طود","سنم","مزن","دسر","سحل","بءر","جمد","ءسن","سكب","دفق","رهو","طلل"]},"287":{"n":"المال والثروة","r":["خير","كثر","نعم","مول","غني","زيد","فيء","كنز","بضع","قنطر","نفل","ورق","كسد","وفر","درهم","قنى","دنر"]},"288":{"n":"المتاع والأثاث","r":["متع","سرر","بوب","عصو","وكء","فرش","ءرك","هلل","نقر","ضجع","ءثث","تبت","نمرق","زرب","وضن","رفرف","خيم"]},"289":{"n":"المجيء والإتيان والوصول","r":["ءتي","جيا","لقي","وجد","بلغ","قدم","حضر","ورد","لفي","عثر","وفد"]},"290":{"n":"المدح والثناء والتسبيح","r":["سبح","شكر","حمد","ثني","قدس","وقر","مجد"]},"291":{"n":"المرض والسقم","r":["ضعف","برء","مرض","شفي","خنزر","عقم","قرح","كمه","برص","سقم","فند"]},"295":{"n":"المكر والخداع والكيد","r":["سحر","مكر","كيد","غرر","حبط","خدع","روغ","دسس","كهن","ثبط","عوق","جسس","نسر"]},"297":{"n":"الملبس والزينة","r":["زين","لبس","حرر","جلد","حلي","قمص","كسو","قلد","زخرف","عري","سربل","خيط","سندس","جلب","سبغ","لبد","عهن","كمم","صوف","غزل","ريش","نعل","جفن","وبر"]},"298":{"n":"الملك والسلطة والتمكين","r":["ولي","ملك","خلف","سلط","عرش","مكن","حوذ","بصط","كرس","دول"]},"299":{"n":"الموت والهلاك والفناء","r":["عذب","حيي","قتل","موت","هلك","ءجل","عمر","غرق","مسح","دمر","ذبح","عقر","عيش","قبر","ردي","تبر","صيد","خوي","بور","جثم","زهق","غمر","جدث","غثث","هبء","رفت","وبق","خمد","رمم","حفر","جبب","محق","عجف","نحب","وتن","فني","بيد","قصم","همد","تعس","وءد","وكز","خنق","وقذ","نطح","نحر","ذكو","ردم","هدم","جثث"]},"302":{"n":"النار والعذاب والجحيم","r":["نار","جهنم","ويل","جحم","حمم","سعر","غلل","وقد","رجس","حيق","حرق","مهل","ءجج","حطم","حصب","قطر","ثبر","غسق","غلو","تبب","سقر","سمم","سلسل","سجر","زفر","زقم","قبس","لهب","حمو","صفد","لظي","بسل","شهق","كبب","صهر","حطب","خمد","سفع","كبكب","جرع","زبن","سردق","قمع","لفح","خمط","شوب","قمح","قدح","وهج","شعل","رمد","نضج","كوي","جذو","شوظ","مسد"]},"305":{"n":"النجاة والخلاص","r":["حسب","نجو","خلص","شفع","عوذ","عصم","لحد","نقذ","لجء","زحزح","وءل","رغم"]},"307":{"n":"النزول والهبوط","r":["نزل","وضع","ودي","سفل","هبط","خفض","ميد","نقب","قوع","حفر","جبب","سهل","قعر"]},"313":{"n":"النقص والضياع","r":["ضرر","خسر","نسي","ضيع","نقص","فرط","فقد","ءلت","بتر","وشي"]},"314":{"n":"النوم والهجوع","r":["نوم","سبت","ضجع","ضغث","قيل","نعس","رقد","هجع","سجي","وسن","يقظ","سهر"]},"316":{"n":"الهداية والاستقامة والرشد","r":["قوم","هدي","صلح","سبل","رضي","صرط","فلح","رشد","دلو","وفق","خذل","قدو"]},"318":{"n":"الهز والتحريك","r":["فتن","رجف","ءجج","زلزل","هزز","ثور","رجج","ذبذب","حرك","خبط","خضد"]},"323":{"n":"الوصف والتشبيه","r":["سمو","مثل","وصف","شبه","ندد","هيء","وسم","شكل","لقب"]},"325":{"n":"الوقوف والقعود والإقامة","r":["قوم","سجد","سكن","حمل","قرر","لبث","قعد","رفع","ربص","ركب","طمن","ركع","وكء","عكف","مكث","رصد","وطء","جثم","ربط","وقف","وصد","جثو","ركد","جلس","كلح","سند","رصص","وجب"]},"326":{"n":"الولادة والنسل والذرية","r":["كلل","ولد","ذرر","يتم","فتي","مهد","غلم","نطف","علق","ذرء","نسل","طفل","مضغ","سلل","صبي","مشج","مخض","دفق","حفد"]},"329":{"n":"حروف الجر والعطف","r":["مِن","في","على","ل","ءلى","ب","عن","ثم","ءلي","ءو","مع","دون","حتى","بل","بيل","بول"]},"333":{"n":"يوم القيامة وأسمائها","r":["يوم","ءخر","سوع","صعق","قرع","ءزف","قمطر","طمم","صخخ","شرط"]},"334":{"n":"الأنعام والحيوانات الأليفة","r":["نعم","جمل","رعي","بقر","غنم","خيل","نوق","حمر","كلب","خنزر","نعج","ءبل","قرد","عير","بهم","بعر","ضمر","معز","بغل","فيل","سيب","ضءن"]},"335":{"n":"الطير والزواحف والحشرات","r":["طير","نمل","سلي","نحل","عنكب","ثعب","جرد","ذبب","هدهد","قمل","نسر"]},"336":{"n":"أفعال الزراعة والحصاد","r":["نبت","زرع","حرث","حصد","صرم","حدق","قطف","قصف"]},"337":{"n":"أنواع النباتات والأشجار والفواكه","r":["جنن","خير","شجر","نبت","ثمر","نخل","فكه","حرث","زرع","عنب","خضر","زيت","سنبل","سدر","ورق","رمن","سلي","حدق","رطب","فردس","روض","قطف","صنو","تين","بصل","زهر","قثء","فوم","ينع","ءثل","قطن","طلح","ءبب","بقل","عدس","نوي","قنو","فنن","قضب"]},"338":{"n":"البيت والمسكن والمكان","r":["جنن","بنو","نفق","بيت","سكن","دور","ءوي","عرش","عمر","بوب","بني","حصن","سور","خزن","قصر","غرف","عمد","فرش","لحد","صرح","جدر","سقف","كعب","نحت","ءسس","وتد","جذع","حدق","شيد","تبت","روض","حظر","غوط","خيم","ردم","صمع","صيص","سوح","حقف"]},"339":{"n":"مواد البناء والصنع","r":["ترب","حجر","لبن","خشب","سرد","حبك","دسر"]}},"r":{"ءبب":["337"],"ءبد":["143","177"],"ءبق":["71"],"ءبل":["334"],"ءبو":["9"],"ءبي":["279"],"ءتل":["258","48"],"ءتي":["289"],"ءثث":["288"],"ءثر":["51"],"ءثل":["337"],"ءثم":["159"],"ءجج":["140","318","47","302"],"ءجر":["102"],"ءجل":["299","177"],"ءحد":["18"],"ءخذ":["13","121","90","38"],"ءخر":["333"],"ءخو":["9"],"ءدد":["277"],"ءدم":["6"],"ءدي":["228","153","165"],"ءذا":["1","177"],"ءذن":["105"],"ءذي":["240","272"],"ءرب":["261"],"ءرض":["85"],"ءرك":["288"],"ءرم":["5"],"ءزر":["6","270"],"ءزز":["200","260"],"ءزف":["333"],"ءسر":["262","13"],"ءسس":["142","338"],"ءسف":["120"],"ءسن":["286"],"ءسي":["120"],"ءشر":["274"],"ءصر":["48","62"],"ءصل":["177","165"],"ءفف":["25","245"],"ءفق":["188"],"ءفك":["277"],"ءفل":["188","217"],"ءكل":["221"],"ءلت":["226","313"],"ءلف":["18","112","267"],"ءلم":["192"],"ءله":["142"],"ءلى":["216","329"],"ءلي":["216","329"],"ءم":["1","9"],"ءمت":["71"],"ءمد":["177"],"ءمر":["25"],"ءمل":["27"],"ءمم":["19"],"ءمن":["52","73"],"ءن":["1","2"],"ءنا":["216"],"ءنت":["216"],"ءنث":["9"],"ءنس":["142"],"ءنف":["105"],"ءنم":["142"],"ءنى":["177"],"ءهل":["9"],"ءو":["329"],"ءوب":["165","239","97"],"ءود":["48","51"],"ءول":["89"],"ءوه":["147"],"ءوي":["265","338","267"],"ءيد":["105","270"],"ءيك":["5","19"],"ءيم":["178"],"ءين":["1"],"ءيه":["7"],"ءيو":["1"],"ءيوب":["6"],"ءيي":["216"],"ألا":["1"],"إبراهيم":["6"],"إدريس":["6"],"إسحاق":["6"],"إسرائيل":["6"],"إسماعيل":["6"],"إلا":["1","2"],"إلياس":["6"],"إن":["1"],"ال":["216"],"الان":["3"],"الر":["118"],"الل":["118"],"الم":["118"],"المر":["118"],"المص":["118"],"ب":["329"],"بءر":["286"],"بءس":["192"],"ببل":["5"],"بتر":["313","240","269"],"بتك":["269","84"],"بتل":["229"],"بثث":["35"],"بجس":["47"],"بحث":["57","263"],"بحر":["286"],"بخس":["81"],"بخع":["120"],"بخل":["72"],"بدر":["5"],"بدع":["142"],"بدل":["84"],"بدن":["105","228"],"بدي":["45","47"],"بذر":["51"],"برء":["142","291","68"],"برج":["188"],"برح":["160"],"برد":["74"],"برر":["73"],"برز":["47"],"برزخ":["16"],"برص":["291"],"برق":["172"],"برك":["90"],"برم":["48","163"],"برهن":["7"],"بري":["142"],"بزغ":["217","205"],"بسر":["28","245"],"بسس":["28"],"بسط":["60"],"بسق":["60"],"بسل":["302"],"بسم":["120"],"بشر":["25","142","35","120"],"بصر":["162"],"بصط":["270","298"],"بصل":["337"],"بضع":["81","287"],"بطء":["214","260"],"بطر":["274"],"بطش":["265"],"بطل":["277","226"],"بطن":["105","45","193"],"بعث":["78","35"],"بعثر":["78"],"بعد":["3","16","193","71"],"بعر":["334"],"بعض":["4"],"بعل":["9"],"بغت":["144","260"],"بغض":["79","226"],"بغل":["334"],"بغي":["226"],"بقر":["334"],"بقع":["5"],"بقل":["337","221"],"بقي":["143"],"بكر":["177"],"بكك":["5"],"بكم":["208","131"],"بكي":["120"],"بل":["329"],"بلد":["5"],"بلس":["200","214","120"],"بلع":["221"],"بلغ":["35","289"],"بلو":["48","131"],"بلى":["2"],"بنن":["105"],"بنو":["9","142","338"],"بني":["338"],"بهت":["277"],"بهج":["122"],"بهل":["104","147"],"بهم":["334","221"],"بوء":["159","240","62"],"بوب":["288","338"],"بور":["215","299"],"بول":["329"],"بيت":["338"],"بيد":["299"],"بيض":["21"],"بيع":["81"],"بيل":["329"],"بين":["45","89"],"تبب":["302"],"تبت":["338","288"],"تبر":["299"],"تبع":["54"],"تجر":["81"],"تحت":["3"],"ترب":["85","339"],"ترف":["284"],"ترك":["86"],"تسع":["18"],"تعس":["299","157"],"تفث":["225"],"تقن":["263"],"تلك":["216"],"تلل":["265","242"],"تلو":["275"],"تمم":["121"],"تنر":["273","286"],"توب":["239"],"تور":["275"],"تين":["337"],"تيه":["160","215"],"ثبت":["202","165"],"ثبر":["302"],"ثبط":["200","295"],"ثجج":["172"],"ثخن":["265","163","267"],"ثرب":["158"],"ثري":["85"],"ثعب":["335"],"ثقب":["188","217"],"ثقف":["265"],"ثقل":["121"],"ثلث":["18"],"ثلل":["18","19"],"ثم":["329"],"ثمر":["337"],"ثمن":["18"],"ثمود":["5"],"ثني":["18","290","57"],"ثوب":["102"],"ثور":["172","69","318"],"ثوي":["165"],"ثيب":["178"],"ثير":["191"],"جءر":["147"],"جالوت":["6"],"جبب":["286","299","307"],"جبت":["194"],"جبر":["258"],"جبريل":["6"],"جبل":["85"],"جبه":["105"],"جبي":["90"],"جثث":["269","299","60"],"جثم":["299","325"],"جثو":["28","325"],"جحد":["279"],"جحم":["302"],"جدث":["299"],"جدد":["84","260"],"جدر":["338"],"جدل":["104"],"جذذ":["269"],"جذع":["338","105"],"جذو":["217","302"],"جرح":["13"],"جرد":["335"],"جرر":["260"],"جرز":["60"],"جرع":["221","302"],"جرف":["85","103"],"جرم":["159"],"جري":["191","286"],"جزء":["18"],"جزع":["144"],"جزي":["102"],"جسد":["105"],"جسس":["276","295"],"جسم":["105"],"جعل":["142"],"جفن":["273","297","221"],"جفو":["16","71"],"جلب":["297","265"],"جلد":["105","202","240","297"],"جلس":["325"],"جلل":["274"],"جلو":["45"],"جمح":["260"],"جمد":["286"],"جمع":["123","18","121"],"جمل":["122","334"],"جمم":["18"],"جنب":["16","225"],"جنح":["105","71"],"جند":["128"],"جنف":["159","71"],"جنن":["200","276","337","338"],"جني":["122"],"جهد":["265"],"جهر":["45"],"جهز":["62"],"جهل":["110"],"جهنم":["302"],"جوب":["25","169"],"جود":["51"],"جور":["226"],"جوز":["86"],"جوع":["111"],"جوف":["105"],"جوو":["172","188"],"جيا":["289"],"جيب":["105"],"جيس":["260","265"],"حاش":["2"],"حبب":["112"],"حبر":["128","276","6"],"حبس":["13"],"حبط":["295"],"حبك":["188","339"],"حبل":["163"],"حتم":["242"],"حتى":["329"],"حثث":["191"],"حجب":["46","16"],"حجج":["104","7","228"],"حجر":["263","85","339"],"حجز":["16"],"حدب":["85","103","193"],"حدث":["272"],"حدد":["240","16","259"],"حدق":["336","338","337"],"حذر":["144"],"حرب":["265"],"حرث":["178","337","336"],"حرج":["48"],"حرد":["245","103"],"حرر":["74","86","38","297"],"حرس":["265","128","123"],"حرص":["27"],"حرض":["265","25","147"],"حرف":["277","271","84"],"حرق":["302"],"حرك":["165","318"],"حرم":["127","25"],"حري":["263","35"],"حزب":["128"],"حزن":["120"],"حسب":["121","227","305"],"حسد":["27","79"],"حسر":["120"],"حسس":["131","162"],"حسم":["28","261"],"حسن":["73","122","90"],"حشر":["78"],"حصب":["233","302"],"حصحص":["45"],"حصد":["336","60"],"حصر":["48","13"],"حصل":["121"],"حصن":["338","16"],"حصي":["121"],"حضر":["289"],"حضض":["25"],"حطب":["302"],"حطط":["25","18","239"],"حطم":["302"],"حظر":["127","338"],"حظظ":["121"],"حفد":["9","326"],"حفر":["269","307","299"],"حفظ":["123","101"],"حفف":["16"],"حفي":["25"],"حقب":["177"],"حقف":["5","338"],"حقق":["232"],"حكم":["126","25"],"حلف":["242"],"حلق":["105"],"حلقم":["105"],"حلل":["127"],"حلم":["202"],"حلي":["297"],"حم":["118"],"حمء":["85"],"حمد":["290"],"حمر":["21","135","334"],"حمل":["62","325"],"حمم":["302"],"حمو":["233","302"],"حمي":["274","245"],"حنث":["159"],"حنجر":["105"],"حنذ":["221"],"حنف":["73","71","193"],"حنك":["48","200"],"حنن":["112"],"حوب":["159"],"حوت":["135"],"حوج":["221","262"],"حوذ":["200","298"],"حور":["128","272","104"],"حوز":["265","71","267"],"حوط":["89","16"],"حول":["84","57","177"],"حوي":["105","135"],"حيث":["3"],"حيد":["71"],"حير":["110","215"],"حيص":["71"],"حيض":["178"],"حيف":["226"],"حيق":["302"],"حين":["177"],"حيي":["78","143","299"],"خبء":["276"],"خبت":["52","97"],"خبث":["192"],"خبر":["35","263"],"خبز":["221"],"خبط":["200","318","140"],"خبل":["110"],"ختر":["145","202"],"ختم":["46"],"خدد":["105","85","103","5"],"خدع":["295"],"خدن":["128"],"خذل":["316","86"],"خرب":["258","269"],"خرج":["47"],"خردل":["18","121"],"خرر":["187"],"خرص":["277"],"خرطم":["105"],"خرق":["269"],"خزن":["128","123","338"],"خزي":["157"],"خسء":["157"],"خسر":["81","313"],"خسف":["233"],"خشب":["339"],"خشع":["229"],"خشي":["144"],"خصص":["262"],"خصف":["105"],"خصم":["104"],"خضد":["318","122"],"خضر":["21","337"],"خضع":["97","229"],"خطء":["159"],"خطب":["178","271"],"خطط":["20","275"],"خطف":["13"],"خطو":["191"],"خفت":["208","45"],"خفض":["307"],"خفف":["48","84"],"خفي":["276","45"],"خلد":["143"],"خلص":["305","86"],"خلط":["140"],"خلع":["229","86"],"خلف":["298","3","104","25"],"خلق":["142"],"خلل":["128","193"],"خلو":["86"],"خمد":["299","302"],"خمر":["127","221","276","16"],"خمس":["18"],"خمص":["111"],"خمط":["302"],"خنزر":["291","334"],"خنس":["188","200"],"خنق":["127","299"],"خور":["211"],"خوض":["146"],"خوف":["144","25"],"خول":["9"],"خون":["145"],"خوي":["299","68"],"خيب":["214"],"خير":["73","102","90","166","287","337"],"خيط":["177","297"],"خيل":["274","334"],"خيم":["288","338"],"دءب":["95","57","149"],"داود":["6"],"دبب":["135"],"دبر":["126","169","105"],"دثر":["118"],"دحر":["200","86"],"دحض":["104","277"],"دحو":["60"],"دخر":["25","123"],"دخل":["146"],"دخن":["28","188"],"درء":["16"],"درج":["191"],"درر":["217"],"درس":["89"],"درك":["263"],"درهم":["287","121"],"دري":["263"],"دسر":["286","163","339"],"دسس":["276","295"],"دعع":["226","147"],"دعو":["147","25"],"دفء":["221","74"],"دفع":["265","153"],"دفق":["286","326"],"دكك":["187","269"],"دلك":["177"],"دلل":["149"],"دلو":["260","316"],"دمر":["299"],"دمع":["105","120"],"دمغ":["265","140"],"دمم":["105"],"دنر":["267","287"],"دنو":["267","193"],"دهر":["177"],"دهق":["221"],"دهم":["217","21"],"دهن":["276","277"],"دهي":["28","90"],"دور":["338"],"دول":["298"],"دوم":["143"],"دون":["329"],"دين":["153","149","25"],"ذءب":["135"],"ذءم":["158","86"],"ذا":["216"],"ذبب":["335"],"ذبح":["228","299"],"ذبذب":["215","318"],"ذرء":["142","326"],"ذرر":["9","326"],"ذرع":["105"],"ذرو":["172","86"],"ذعن":["25","97","229"],"ذقن":["105"],"ذكر":["9","25","126"],"ذكو":["127","228","299"],"ذلل":["97","157"],"ذمم":["242","79"],"ذنب":["159"],"ذهب":["160","16","259"],"ذهل":["144"],"ذو":["4"],"ذود":["135","16","86"],"ذوق":["221","131"],"ذيع":["271","276","211"],"رءس":["105"],"رءف":["239"],"رءي":["162"],"ربب":["142"],"ربح":["81","102"],"ربص":["325"],"ربط":["163","202","325"],"ربع":["18"],"ربما":["1"],"ربو":["81","51"],"رتع":["191","60"],"رتق":["267","163"],"رتل":["89"],"رجج":["318"],"رجز":["192","157"],"رجس":["302","192"],"رجع":["165"],"رجف":["318"],"رجل":["105","9"],"رجم":["240"],"رجو":["27"],"رحب":["51","274"],"رحق":["221"],"رحل":["191","160"],"رحم":["239"],"رخو":["172"],"ردء":["270","271"],"ردد":["165"],"ردف":["28","260"],"ردم":["338","299"],"ردي":["299"],"رذل":["90","157"],"رزق":["166","221"],"رسخ":["52","263"],"رسس":["5"],"رسل":["78","35"],"رسو":["103","260"],"رشد":["126","316"],"رصد":["325","162","54"],"رصص":["325"],"رضع":["221"],"رضي":["316"],"رطب":["337"],"رعب":["144"],"رعد":["172"],"رعي":["221","166","123","334"],"رغب":["169"],"رغد":["221","18","68"],"رغم":["305","157"],"رفت":["78","299"],"رفث":["178"],"رفد":["102","221"],"رفرف":["288"],"رفع":["205","62","325"],"رفق":["105","97","128"],"رقب":["105","121","162"],"رقد":["314"],"رقق":["20"],"رقم":["20","275"],"رقي":["205"],"ركب":["191","325"],"ركد":["325"],"ركز":["211"],"ركس":["215","261"],"ركض":["191"],"ركع":["206","325"],"ركم":["172","188"],"ركن":["71","215"],"رمح":["265"],"رمد":["302","85"],"رمز":["211","271","208","272"],"رمض":["74"],"رمم":["78","299"],"رمن":["337"],"رمي":["38"],"رهب":["144"],"رهط":["9","128"],"رهق":["48"],"رهن":["153"],"رهو":["286","60"],"روح":["142","105"],"رود":["37"],"روض":["338","337"],"روع":["144"],"روغ":["260","295"],"روم":["5"],"ريب":["227"],"ريش":["297"],"ريع":["85","103"],"رين":["46"],"زبد":["286"],"زبر":["275"],"زبن":["302","6","123","265"],"زجج":["217","273","259"],"زجر":["25","271"],"زجو":["81","262"],"زحزح":["305","16"],"زحف":["191"],"زخرف":["277","297"],"زرب":["288"],"زرع":["336","337"],"زرق":["21"],"زري":["59","157"],"زعم":["271","153"],"زفر":["302"],"زفف":["191"],"زقم":["302"],"زكريا":["6"],"زكو":["51","228"],"زلزل":["318"],"زلف":["267"],"زلق":["187","260"],"زلل":["159","187"],"زلم":["127","194"],"زمر":["19"],"زمل":["118"],"زمهر":["74"],"زنجبيل":["221"],"زنم":["258"],"زني":["159"],"زهد":["169","18"],"زهر":["122","337"],"زهق":["84","299"],"زوج":["178","9"],"زور":["277"],"زول":["2"],"زيت":["337"],"زيد":["18","287","51"],"زيغ":["71","215"],"زين":["297"],"سءل":["25"],"سءم":["260","214"],"سبء":["6"],"سبب":["240","272"],"سبت":["314","177"],"سبح":["290","191","126"],"سبط":["19"],"سبع":["18","135"],"سبغ":["297","265"],"سبق":["54"],"سبل":["149","316"],"ستت":["18"],"ستر":["276","16","46"],"سجد":["206","325"],"سجر":["302"],"سجل":["20","275"],"سجن":["13"],"سجي":["314"],"سحب":["172"],"سحت":["127","13"],"سحر":["295"],"سحق":["233","16"],"سحل":["286","45"],"سخر":["59"],"سخط":["245","279"],"سدد":["46","149"],"سدر":["337"],"سدس":["18"],"سدي":["142","284"],"سرب":["217","276","16"],"سربل":["297"],"سرج":["217"],"سرح":["178","86"],"سرد":["16","339"],"سردق":["302"],"سرر":["276","288","120"],"سرع":["191"],"سرف":["51"],"سرق":["13"],"سرمد":["177"],"سري":["276"],"سطح":["60"],"سطر":["20"],"سطو":["226","265","13"],"سعد":["102"],"سعر":["302"],"سعي":["166","191"],"سغب":["111","262"],"سفح":["38","159"],"سفر":["191"],"سفع":["302","270"],"سفك":["240","269","47","38"],"سفل":["307","193"],"سفن":["286"],"سفه":["110"],"سقر":["302"],"سقط":["187"],"سقف":["338"],"سقم":["291"],"سقي":["286"],"سكب":["286","68"],"سكت":["208"],"سكر":["127","221"],"سكن":["262","165","325","338"],"سلب":["13","121"],"سلح":["265"],"سلخ":["177","269"],"سلسبيل":["221"],"سلسل":["302","13"],"سلط":["298"],"سلف":["9"],"سلق":["271","144"],"سلك":["191"],"سلل":["326"],"سلم":["52","73"],"سلي":["221","337","335"],"سليمان":["6"],"سمد":["59","284"],"سمر":["6"],"سمع":["131"],"سمك":["135"],"سمم":["302"],"سمن":["105","274"],"سمو":["188","323"],"سمى":["271"],"سنبل":["337"],"سند":["325"],"سندس":["221","297"],"سنم":["286"],"سنن":["177","149"],"سنه":["177"],"سنو":["5"],"سني":["217"],"سهر":["78","314"],"سهل":["85","307"],"سهم":["265","121"],"سهو":["110"],"سوء":["192","159"],"سوح":["5","265","338"],"سود":["21"],"سور":["20","275","16","338"],"سوط":["240"],"سوع":["333"],"سوغ":["127","221"],"سوف":["1"],"سوق":["35"],"سول":["200","277"],"سوم":["45"],"سوي":["60","90"],"سيب":["127","334"],"سيح":["229","191"],"سير":["191"],"سيل":["286"],"سين":["5"],"شءم":["28","193"],"شءن":["261","25"],"شبه":["323"],"شتت":["69"],"شتو":["177"],"شجر":["337"],"شحح":["72"],"شحم":["221","105"],"شحن":["286","68"],"شخص":["162"],"شدد":["270"],"شرب":["221"],"شرح":["89"],"شرد":["265","86"],"شرذم":["18","19"],"شرر":["192"],"شرط":["333","7"],"شرع":["149","25"],"شرق":["193"],"شرك":["194"],"شري":["81"],"شطء":["286","45"],"شطر":["18","193"],"شطط":["226","277"],"شطن":["200"],"شعب":["19"],"شعر":["105"],"شعل":["302"],"شعيب":["6"],"شغف":["112"],"شغل":["284"],"شفع":["305"],"شفق":["144"],"شفه":["105"],"شفي":["291"],"شقق":["71","269","48"],"شقي":["120"],"شكر":["290"],"شكس":["104"],"شكك":["227"],"شكل":["323"],"شكو":["120","271"],"شمت":["59","79"],"شمخ":["103"],"شمز":["279","46","79"],"شمس":["188"],"شمل":["193"],"شنء":["79","226"],"شهب":["188"],"شهد":["162"],"شهر":["177"],"شهق":["302"],"شهو":["112"],"شوب":["302"],"شور":["271","272"],"شوظ":["28","302"],"شوك":["265"],"شوي":["221"],"شيء":["4","37"],"شيب":["21","214"],"شيخ":["9"],"شيد":["338"],"شيع":["128"],"ص":["118"],"صبء":["19","194"],"صبب":["38"],"صبح":["177","45"],"صبر":["202"],"صبع":["105"],"صبغ":["52","228","149"],"صبو":["169","97"],"صبي":["326"],"صحب":["128"],"صحف":["275"],"صخخ":["333"],"صخر":["85"],"صدد":["169"],"صدر":["105"],"صدع":["269"],"صدف":["215","260"],"صدق":["52","73","272","51"],"صدو":["211"],"صرح":["338"],"صرخ":["147"],"صرر":["261"],"صرصر":["211"],"صرط":["149","316"],"صرع":["265"],"صرف":["84","16","57"],"صرم":["336","60","217","21"],"صعد":["205"],"صعر":["274"],"صعق":["333"],"صغر":["157"],"صغو":["131"],"صفح":["239"],"صفد":["302"],"صفر":["21"],"صفصف":["60"],"صفف":["265"],"صفن":["135"],"صفو":["90","5"],"صكك":["46","57","169"],"صلب":["240","270"],"صلح":["122","239","316"],"صلد":["60","270"],"صلصل":["85"],"صلو":["206"],"صلي":["240","228","131"],"صمت":["208"],"صمد":["143","202","274"],"صمع":["229","338"],"صمم":["131"],"صنع":["142"],"صنم":["194"],"صنو":["337"],"صهر":["9","302"],"صوب":["172","260","13"],"صوت":["211"],"صور":["142","84"],"صوع":["121"],"صوف":["297","105"],"صوم":["208","111","228"],"صيح":["211"],"صيد":["221","299"],"صير":["84"],"صيص":["265","338"],"صيف":["177"],"ضءن":["334"],"ضبح":["265"],"ضجع":["314","288"],"ضحك":["120"],"ضحو":["217"],"ضدد":["90","104"],"ضرب":["265","16","267","57"],"ضرر":["192","313"],"ضرع":["214","144"],"ضعف":["214","291"],"ضغث":["277","314"],"ضغن":["79"],"ضفدع":["135"],"ضلل":["215"],"ضمر":["105","103","334"],"ضمم":["123","267"],"ضنك":["48","120"],"ضنن":["72"],"ضهي":["194","277"],"ضوء":["217"],"ضير":["192"],"ضيز":["18","226"],"ضيع":["313"],"ضيف":["128"],"ضيق":["48"],"طالوت":["6"],"طبع":["46"],"طبق":["142","188"],"طحي":["60"],"طرح":["38"],"طرد":["86"],"طرف":["105","162"],"طرق":["149"],"طري":["105","221"],"طس":["118"],"طسم":["118"],"طعم":["221"],"طعن":["104","265"],"طغو":["194","68"],"طفء":["279","46"],"طفف":["226","121"],"طفق":["95","45"],"طفل":["326"],"طلب":["25"],"طلح":["337"],"طلع":["205"],"طلق":["178","38"],"طلل":["286"],"طمث":["105","131","13"],"طمس":["46"],"طمع":["27"],"طمم":["333"],"طمن":["325","165"],"طه":["118"],"طهر":["225"],"طود":["103","286"],"طور":["103"],"طوع":["25"],"طوف":["57"],"طوق":["48","25","62"],"طول":["18","260"],"طوي":["57"],"طيب":["122"],"طير":["335"],"طين":["85"],"ظعن":["191"],"ظفر":["265"],"ظلل":["217"],"ظلم":["217","226"],"ظمء":["111"],"ظنن":["227"],"ظهر":["45","105"],"عاد":["5"],"عبء":["261"],"عبث":["284"],"عبد":["229"],"عبر":["126","191","86"],"عبس":["245"],"عبقر":["221"],"عتب":["158"],"عتد":["62"],"عتق":["38"],"عتل":["258"],"عتو":["258"],"عثر":["289","13"],"عثو":["258"],"عجب":["274"],"عجز":["214"],"عجف":["299","60"],"عجل":["191"],"عجم":["19","271"],"عدد":["62","121","18"],"عدس":["337","221"],"عدل":["232","71"],"عدن":["103"],"عدو":["226"],"عذب":["221","233","299","157"],"عذر":["239","271"],"عرب":["271","19"],"عرج":["205"],"عرجن":["188","259"],"عرر":["221","262"],"عرش":["298","338"],"عرض":["169"],"عرف":["263"],"عرم":["172","233"],"عرو":["52","163","13"],"عري":["105","297"],"عزب":["270","276"],"عزر":["6","265"],"عزز":["274"],"عزل":["16"],"عزم":["37"],"عزي":["19","128"],"عسر":["48"],"عسعس":["177"],"عسق":["118"],"عسل":["221"],"عسى":["1","27"],"عشر":["18"],"عشو":["177"],"عصب":["19","270"],"عصر":["177","38"],"عصف":["172"],"عصم":["16","305"],"عصو":["25","288"],"عصي":["25"],"عضد":["105","270"],"عضض":["105","221","131"],"عضل":["178","48"],"عضي":["275","277"],"عطف":["105","169"],"عطل":["86"],"عطو":["51"],"عظم":["105","274"],"عفرت":["200"],"عفف":["208","45"],"عفو":["239"],"عقب":["240"],"عقد":["163"],"عقر":["16","299"],"عقل":["263","126"],"عقم":["291"],"عكف":["206","57","325"],"علق":["326"],"علم":["89","7","263"],"علن":["45"],"علو":["274","193"],"على":["329"],"عمد":["103","338"],"عمر":["228","299","338"],"عمق":["90","276","16"],"عمل":["142"],"عمم":["9"],"عمه":["110"],"عمي":["131"],"عن":["329"],"عنب":["337"],"عنت":["48"],"عند":["3"],"عنق":["105"],"عنكب":["335"],"عهد":["242"],"عهن":["297"],"عوج":["71"],"عود":["165","57"],"عوذ":["305"],"عور":["86","45"],"عوق":["295","16"],"عول":["9"],"عوم":["177"],"عون":["101","270"],"عيب":["158","258"],"عير":["334"],"عيسى":["6"],"عيش":["143","78","299"],"عيل":["262"],"عين":["105","286","162"],"عيي":["214","271"],"غبر":["19","85","46"],"غبن":["81"],"غثث":["299"],"غدر":["145"],"غدق":["221"],"غدو":["177"],"غرب":["193"],"غرر":["295"],"غرف":["338"],"غرق":["233","299"],"غرم":["153"],"غرو":["200","267"],"غزز":["265"],"غزل":["297"],"غسق":["217","302"],"غسل":["225"],"غشو":["46"],"غصب":["13"],"غصص":["221","233"],"غضب":["245"],"غضض":["131","46"],"غطش":["217"],"غطي":["276","16"],"غفر":["239"],"غفل":["110"],"غلب":["265"],"غلظ":["270"],"غلف":["279","46"],"غلق":["46"],"غلل":["240","302","163"],"غلم":["326"],"غلو":["302"],"غمر":["299","276","68"],"غمز":["59"],"غمض":["162","276"],"غمم":["120","172"],"غنم":["166","334"],"غني":["287"],"غور":["286"],"غوص":["286","146","191"],"غوط":["105","225","338"],"غول":["221"],"غوي":["215"],"غيب":["276"],"غيث":["286"],"غير":["84"],"غيض":["68","47"],"غيظ":["245"],"فءد":["112","105"],"فتء":["86"],"فتح":["265","45"],"فتر":["177"],"فتق":["269"],"فتل":["18"],"فتن":["265","318","200"],"فتي":["25","326"],"فجج":["149"],"فجر":["47","279","177","159","25"],"فجو":["90","16"],"فحش":["159"],"فخر":["274"],"فدي":["102","81","16","51"],"فرت":["286","221"],"فرث":["135","221"],"فرج":["45"],"فرح":["120"],"فرد":["18"],"فردس":["337"],"فرر":["71"],"فرش":["288","338"],"فرض":["25"],"فرط":["313"],"فرع":["105"],"فرعون":["6"],"فرغ":["68"],"فرق":["69","269","128"],"فره":["274","284"],"فري":["277"],"فزز":["200"],"فزع":["144"],"فسح":["123","205","47"],"فسد":["258"],"فسر":["89"],"فسق":["159","71","47","25"],"فشل":["214","265"],"فصح":["271"],"فصل":["269","16","25"],"فصم":["52","269"],"فضح":["45","158"],"فضض":["259","160"],"فضل":["90"],"فضو":["178"],"فطر":["142","269"],"فظظ":["270"],"فعل":["142"],"فقد":["313"],"فقر":["262"],"فقع":["21","205"],"فقه":["263"],"فكر":["126"],"فكك":["38"],"فكه":["337","284"],"فلح":["166","316"],"فلق":["217","269"],"فلك":["188","286"],"فلن":["216"],"فند":["110","277","291"],"فنن":["122","337"],"فني":["299"],"فهم":["263"],"فوت":["71"],"فوج":["19","69"],"فور":["140"],"فوز":["102"],"فوض":["101"],"فوق":["3"],"فوم":["337"],"فوه":["105"],"في":["329"],"فيء":["166","287"],"فيض":["191","47"],"فيل":["135","334"],"ق":["118"],"قارون":["6"],"قبح":["158"],"قبر":["299"],"قبس":["217","302"],"قبض":["13","121"],"قبل":["3","206"],"قتر":["72"],"قتل":["299"],"قثء":["337"],"قحم":["28","146"],"قد":["1"],"قدح":["302"],"قدد":["269"],"قدر":["37","227","121","142"],"قدس":["290"],"قدم":["105","289"],"قدو":["54","316"],"قذف":["38"],"قرء":["275"],"قرب":["267","193","71"],"قرح":["265","291"],"قرد":["135","334"],"قرر":["325","273","52"],"قرش":["5"],"قرض":["153"],"قرطس":["20"],"قرع":["333"],"قرف":["166"],"قرن":["19","128","177"],"قري":["5"],"قسر":["135"],"قسس":["128","54","6"],"قسط":["232","73"],"قسم":["242","121"],"قسو":["270"],"قشعر":["52","144"],"قصد":["267"],"قصر":["338"],"قصص":["35"],"قصف":["233","336"],"قصم":["233","299"],"قصو":["16","193"],"قضب":["337"],"قضض":["187","71"],"قضي":["37","25"],"قطر":["302"],"قطط":["121"],"قطع":["240","269"],"قطف":["337","336"],"قطمر":["18"],"قطن":["337"],"قعد":["325"],"قعر":["187","307"],"قفل":["46"],"قفو":["54"],"قلب":["57","112","105"],"قلد":["228","297"],"قلع":["13"],"قلل":["18","90"],"قلم":["20"],"قلو":["79"],"قمح":["105","206","302"],"قمر":["188"],"قمص":["297"],"قمطر":["28","333"],"قمع":["302"],"قمل":["335"],"قنت":["206","229"],"قنط":["214","120"],"قنطر":["18","287"],"قنع":["221","260"],"قنو":["337"],"قنى":["287"],"قهر":["226"],"قوب":["121"],"قوت":["221"],"قوس":["18","121"],"قوع":["60","307"],"قول":["272"],"قوم":["19","78","206","316","128","71","73","232","325"],"قوي":["270"],"قيض":["200","261"],"قيل":["272","314"],"كءس":["273"],"كبب":["302"],"كبت":["226"],"كبد":["48","105"],"كبر":["274","159"],"كبكب":["187","302"],"كتب":["275","25","20"],"كتم":["276"],"كثب":["69"],"كثر":["18","287"],"كدح":["261"],"كدر":["217"],"كدي":["72"],"كذب":["277"],"كرب":["120"],"كرر":["57","165","95"],"كرس":["298"],"كرم":["51","274"],"كره":["79"],"كسب":["166","13","81","153"],"كسد":["81","287"],"كسف":["217"],"كسل":["214"],"كسو":["297"],"كشط":["28"],"كشف":["45"],"كظم":["202"],"كعب":["338"],"كفت":["123"],"كفر":["279","194","46","159"],"كفف":["265"],"كفل":["153","18"],"كفي":["16"],"كلء":["221","123"],"كلا":["2"],"كلب":["135","334","163"],"كلح":["28","325"],"كلف":["25","48"],"كلل":["4","326"],"كلم":["272"],"كم":["4","18"],"كمل":["121"],"كمم":["297"],"كمه":["291"],"كند":["279"],"كنز":["287","123"],"كنس":["188"],"كنن":["276"],"كهف":["85","16"],"كهل":["9"],"كهن":["295","35"],"كهيعص":["118"],"كوب":["273"],"كود":["95"],"كور":["57"],"كوكب":["188"],"كون":["142","160"],"كوي":["240","302"],"كي":["1"],"كيد":["295"],"كيف":["1"],"كيل":["121"],"ل":["329"],"لؤلؤ":["259"],"لا":["2"],"لات":["194","6"],"لبب":["126","263"],"لبث":["95","325"],"لبد":["19","297"],"لبس":["297"],"لبن":["221","339"],"لجء":["305"],"لجج":["286"],"لحد":["305","71","338"],"لحف":["262","97","157"],"لحق":["140","54"],"لحم":["105"],"لحن":["277"],"لحي":["105"],"لدد":["104","270"],"لدن":["267"],"لدي":["3"],"لذذ":["221"],"لزب":["85"],"لزم":["25"],"لسن":["105"],"لطف":["45"],"لظي":["302"],"لعب":["284"],"لعل":["1"],"لعن":["158"],"لغب":["214"],"لغو":["277"],"لفت":["131","260"],"لفح":["302"],"لفظ":["272"],"لفف":["19","57","123","163"],"لفي":["54","38","289"],"لقب":["323"],"لقح":["172"],"لقط":["13"],"لقف":["221","131"],"لقم":["221"],"لقمان":["6"],"لقي":["289","38"],"لك":["216"],"لكن":["1"],"لم":["1","2"],"لمَ":["2"],"لما":["1"],"لمح":["162","177"],"لمز":["158","59"],"لمس":["131"],"لمم":["159"],"لن":["2"],"لنا":["216"],"لهب":["302"],"لهث":["214","211"],"لهم":["131","149"],"لهو":["284"],"لو":["1"],"لوح":["20"],"لوذ":["260","45","71"],"لوط":["6"],"لوم":["158"],"لون":["21"],"لوي":["277"],"لي":["216"],"ليت":["1","27"],"ليس":["2"],"ليل":["177"],"لين":["97"],"مءد":["228","221"],"مءه":["18"],"ما":["4"],"ماروت":["6"],"متع":["288"],"متن":["270"],"متى":["1"],"مثل":["4","323"],"مجد":["290"],"مجس":["19","194"],"محص":["52","84"],"محق":["84","299"],"محل":["270"],"محن":["48","52"],"محو":["84","20"],"مخر":["286"],"مخض":["105","326"],"مدد":["60"],"مدن":["5"],"مدين":["5"],"مرء":["178","9"],"مرج":["140","259","45"],"مرح":["274"],"مرد":["258"],"مرر":["18","191"],"مرض":["291"],"مرو":["104","227","5"],"مري":["227"],"مريم":["6"],"مزج":["221","140"],"مزق":["269"],"مزن":["286"],"مسح":["225","299","239"],"مسخ":["84","240"],"مسد":["240","302"],"مسس":["131"],"مسك":["13"],"مسي":["177"],"مشج":["326"],"مشي":["191"],"مصر":["5"],"مضغ":["326"],"مضي":["160"],"مطر":["286"],"مطو":["274"],"مع":["329"],"معز":["334"],"معي":["105"],"مقت":["79"],"مكث":["325"],"مكر":["295"],"مكك":["5"],"مكن":["298"],"مكو":["211"],"ملء":["68","128"],"ملح":["221","286"],"ملق":["262"],"ملك":["298","142"],"ملل":["149","275"],"ملي":["95"],"مَن":["216"],"مِن":["329"],"مناة":["194","6"],"منع":["72","16"],"منن":["51"],"مني":["27"],"مهد":["260","60","326"],"مهل":["302","177"],"موت":["299"],"موج":["286"],"مور":["28","260"],"موسى":["6"],"مول":["287"],"موه":["286"],"ميد":["103","307","71"],"مير":["221","81"],"ميز":["90","121"],"ميل":["71","226"],"ن":["118"],"نءي":["16"],"نار":["302"],"نبء":["35","263"],"نبت":["47","336","337"],"نبذ":["86"],"نبز":["158"],"نبط":["263"],"نبع":["286"],"نتق":["205"],"نثر":["69"],"نجد":["149"],"نجس":["225"],"نجل":["275"],"نجم":["188"],"نجو":["147","305"],"نحب":["299"],"نحت":["269","338"],"نحر":["228","299"],"نحس":["28","177"],"نحل":["335"],"نحن":["216"],"نخر":["78","105"],"نخل":["337"],"ندد":["323","128","90"],"ندم":["120"],"ندو":["147"],"نذر":["25"],"نزع":["13","104"],"نزغ":["200"],"نزف":["47","68"],"نزل":["307"],"نسء":["18"],"نسب":["9"],"نسخ":["20"],"نسر":["335","295"],"نسف":["269"],"نسك":["229"],"نسل":["9","326"],"نسو":["9"],"نسي":["313"],"نشء":["142","47"],"نشر":["69","78"],"نشز":["178","205","123","47","159"],"نشط":["191","45"],"نصب":["121"],"نصت":["131"],"نصح":["73","272"],"نصر":["265"],"نصف":["18","232"],"نصو":["105"],"نضج":["302","221"],"نضخ":["68"],"نضد":["122","71"],"نضر":["122","162"],"نطح":["265","299"],"نطف":["326"],"نطق":["272"],"نظر":["162"],"نعج":["334"],"نعس":["314"],"نعق":["211"],"نعل":["297"],"نعم":["51","287","334"],"نغض":["59","105"],"نفث":["200","84"],"نفح":["172","84"],"نفخ":["142","84"],"نفد":["68"],"نفذ":["54","260"],"نفر":["79"],"نفس":["105"],"نفش":["191","69"],"نفع":["51"],"نفق":["51","277","228","149","338"],"نفل":["287","166","51"],"نفي":["240","279"],"نقب":["261","307"],"نقذ":["305"],"نقر":["18","288","84"],"نقص":["313"],"نقض":["269","71"],"نقع":["172","265"],"نقم":["240"],"نكب":["105","149","69","16"],"نكث":["145","25"],"نكح":["178"],"نكد":["262","270","104"],"نكر":["279","159"],"نكس":["215","57","214"],"نكص":["215","71"],"نكف":["274"],"نكل":["240"],"نمرق":["288"],"نمل":["335"],"نمم":["277","272"],"نهج":["149"],"نهر":["177","286"],"نهو":["263","126"],"نهي":["25"],"نوء":["172","71"],"نوب":["165","239","97"],"نوح":["6"],"نور":["217"],"نوس":["142"],"نوش":["260","104"],"نوص":["71"],"نوق":["334"],"نوم":["314"],"نون":["135"],"نوي":["337"],"نيل":["13"],"هاؤم":["147"],"هاروت":["6"],"هارون":["6"],"هامان":["6"],"هبء":["299"],"هبط":["307"],"هجد":["206","228"],"هجر":["16","191"],"هجع":["314"],"هدد":["28"],"هدم":["269","299"],"هدهد":["335"],"هدي":["316"],"هرب":["71"],"هرع":["191"],"هزء":["59"],"هزز":["318"],"هزل":["284"],"هزم":["265"],"هشش":["16","211"],"هشم":["261","286"],"هضم":["226","221"],"هطع":["28","144"],"هل":["1"],"هلع":["144"],"هلك":["299"],"هلل":["191","288"],"هلم":["1"],"هم":["216"],"همد":["299","165"],"همر":["47","68"],"همز":["158","59"],"همس":["211","276"],"همم":["37"],"همن":["275"],"هن":["216"],"هنء":["221","122"],"هنا":["3"],"هو":["216"],"هود":["6"],"هور":["187"],"هون":["157","97"],"هوي":["187","105","269","90","112"],"هي":["216"],"هيء":["62","323"],"هيت":["1"],"هيج":["140","217"],"هيم":["215","111"],"هيه":["2"],"وءد":["226","299"],"وءل":["305"],"وبر":["297","105"],"وبق":["233","299"],"وبل":["159","286"],"وتد":["338"],"وتر":["18","228"],"وتن":["105","299"],"وثق":["52"],"وثن":["194"],"وجب":["325","62"],"وجد":["289"],"وجس":["131","144"],"وجف":["144"],"وجل":["144"],"وجه":["105","35"],"وحد":["18"],"وحش":["135"],"وحي":["272","131"],"ودد":["112"],"ودع":["208","123"],"ودق":["172"],"ودي":["286","307"],"وذر":["86"],"ورث":["166"],"ورد":["289"],"ورق":["337","287"],"وري":["3","276"],"وزر":["159"],"وزع":["101","69","123","191","270"],"وزن":["121"],"وسط":["18","45","193"],"وسع":["274"],"وسق":["177","121","45"],"وسل":["149","229"],"وسم":["45","323"],"وسن":["314"],"وسوس":["200"],"وشي":["21","313"],"وصب":["143"],"وصد":["325"],"وصف":["323"],"وصل":["140"],"وصي":["25"],"وضع":["307"],"وضن":["288"],"وطء":["178","325"],"وطر":["178","261"],"وطن":["5","265"],"وعد":["242"],"وعظ":["25"],"وعي":["263","273"],"وفد":["289"],"وفر":["287"],"وفض":["191"],"وفق":["316"],"وفي":["73","52","121"],"وقب":["217","146"],"وقت":["177"],"وقد":["302"],"وقذ":["127","299"],"وقر":["25","89","290"],"وقع":["187","260"],"وقف":["325"],"وقي":["144"],"وكء":["288","325"],"وكد":["242"],"وكز":["299"],"وكل":["101","153"],"ولج":["146"],"ولد":["9","326"],"ولي":["160","298"],"وني":["214","260"],"وهب":["51"],"وهج":["302"],"وهن":["214"],"وهي":["214","45"],"ويل":["302"],"يءس":["214","120"],"ياسين":["118"],"ياقوت":["259"],"يبس":["286"],"يتم":["214","326"],"يثرب":["5"],"يدي":["105"],"يس":["118"],"يسر":["48"],"يسع":["6"],"يعقوب":["6"],"يعوق":["6"],"يغوث":["6"],"يقظ":["131","314"],"يقن":["263"],"يمم":["286","225"],"يمن":["242","193"],"ينع":["337"],"يوسف":["6"],"يوم":["177","333"],"يونس":["6"]}};
+
+function _wpGetFieldsForRoot(root){
+  var nums=_semData.r[root];
+  if(!nums||!nums.length)return[];
+  var out=[];
+  for(var i=0;i<nums.length;i++){var fd=_semData.f[nums[i]];if(fd)out.push({num:nums[i],name:fd.n,roots:fd.r});}
+  return out;
+}
+
+function _wpToggleField(idx){
+  var exp=document.getElementById('wpFE'+idx);
+  var btn=document.getElementById('wpFT'+idx);
+  if(!exp)return;
+  var open=exp.style.display==='flex';
+  exp.style.display=open?'none':'flex';
+  exp.style.flexDirection='column';
+  btn.classList.toggle('open',!open);
+}
+
+function _wpExportFieldSummary(fieldIdx){
+  var fd=_wpCurrentFields[fieldIdx];
+  if(!fd){alert('لا توجد بيانات');return;}
+  var wsData=[['#','الجذر','الحقل الدلالي']];
+  fd.roots.forEach(function(r,i){wsData.push([i+1,r,fd.name]);});
+  var ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:5},{wch:14},{wch:40}];
+  var wb2=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb2,ws,fd.name.substring(0,31));
+  XLSX.writeFile(wb2,'ملخّص_'+fd.name.replace(/[\/\\:*?"<>|]/g,'_')+'.xlsx');
+}
+
+function _wpExportFieldExcel(fieldIdx){
+  var fd=_wpCurrentFields[fieldIdx];
+  if(!fd){alert('لا توجد بيانات');return;}
+  var fieldName=fd.name,roots=fd.roots;
+  var wsData=[['#','الكلمة','الجذر','السورة','رقم السورة','رقم الآية','خمس آيات قبلها','الآية الكريمة','خمس آيات بعدها']];
+  var rowNum=1;
+  for(var ri=0;ri<roots.length;ri++){
+    var root=roots[ri];
+    var entries=[];
+    for(var i=0;i<allData.length;i++){
+      if(allData[i].root===root)entries.push(allData[i]);
+    }
+    entries.sort(function(a,b){return(a.sura_num-b.sura_num)||((a.pos||0)-(b.pos||0));});
+    for(var j=0;j<entries.length;j++){
+      var e=entries[j];
+      wsData.push([rowNum++,e.word||'',e.root||'',e.sura_name||'',e.sura_num||'',e.pos||'',e.before||'',e.ayah_text||'',e.after||'']);
+    }
+  }
+  if(wsData.length<=1){alert('لا توجد بيانات');return;}
+  var ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:5},{wch:18},{wch:10},{wch:14},{wch:9},{wch:9},{wch:55},{wch:55},{wch:55}];
+  var wb2=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb2,ws,fieldName.substring(0,31));
+  XLSX.writeFile(wb2,'حقل_'+fieldName.replace(/[\/\\:*?"<>|]/g,'_')+'.xlsx');
+}
+
+function _wpRenderFields(root){
+  var section=document.getElementById('wpFieldSection');
+  if(!root){section.style.display='none';return;}
+  var fields=_wpGetFieldsForRoot(root);
+  if(!fields.length){section.style.display='none';return;}
+  _wpCurrentFields=fields;
+  var countAr=String(fields.length).replace(/[0-9]/g,function(d){return'٠١٢٣٤٥٦٧٨٩'[d];});
+  var html='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+    +'<span style="font-size:.85rem;color:#7a5c3a;font-weight:bold;">الحقول الدلالية</span>'
+    +'<span style="background:#2b4c8c22;color:#2b4c8c;border:1px solid #2b4c8c44;border-radius:12px;padding:1px 10px;font-size:.8rem;font-weight:bold;">('+countAr+')</span>'
+    +'<span style="background:#c9a84c18;color:#8b6914;border:1px solid #c9a84c55;border-radius:12px;padding:1px 10px;font-size:.75rem;">تجريبي</span>'
+    +'</div>';
+  for(var i=0;i<fields.length;i++){
+    var fd=fields[i];
+    html+='<div class="wp-field-row" onclick="_wpToggleField('+i+')">';
+    html+='<span class="wp-field-toggle" id="wpFT'+i+'">+</span>';
+    html+='<span class="wp-field-name">'+fd.name+'</span>';
+    html+='</div>';
+    html+='<div class="wp-field-expanded" id="wpFE'+i+'">';
+    html+='<div class="wp-field-roots">';
+    for(var j=0;j<fd.roots.length;j++){
+      var r=fd.roots[j];
+      if(r===root){
+        html+='<span class="wp-field-root-chip wp-cur">'+r+'</span>';
+      }else{
+        html+='<span class="wp-field-root-chip" onclick="event.stopPropagation();_wpChipSearch(this);" data-root="'+r+'">'+r+'</span>';
+      }
+    }
+    html+='</div>';
+    html+='<div class="wp-field-btns">';html+='<button class="wp-field-save-btn wp-field-save-summary" onclick="event.stopPropagation();_wpExportFieldSummary('+i+')">&#x1F4C4; Excel ملخّص</button>';html+='<button class="wp-field-save-btn wp-field-save-detail" onclick="event.stopPropagation();_wpExportFieldExcel('+i+')">&#x1F4CB; Excel مفصّل</button>';html+='</div>';
+    html+='</div>';
+  }
+  section.innerHTML=html;
+  section.style.display='';
+}
+
+function _wpChipSearch(el){
+  var r=el.getAttribute('data-root');
+  if(!r)return;
+  wpClose();
+  switchTab('root');
+  document.getElementById('searchInput').value=r;
+  handleSearch();
+}
+
+// ===== Word Popup =====
+var _wpData={};
+var _wpCurrentFields=[];
+
+function wpShow(word, root, suraName, ayahNum, ayahText){
+  _wpData={word:word,root:root,suraName:suraName,ayahNum:ayahNum,ayahText:ayahText};
+  document.getElementById('wpWord').textContent=word;
+  document.getElementById('wpRoot').textContent=root||'—';
+  document.getElementById('wpSura').textContent=suraName;
+  document.getElementById('wpAyahNum').textContent=ayahNum;
+  // تكرار الكلمة والجذر
+  var ws=_wpStripDia(word),wc=0,rc=0;
+  for(var i=0;i<allData.length;i++){
+    if(_wpStripDia(allData[i].word||'')===ws)wc++;
+    if(root&&allData[i].root===root)rc++;
+  }
+  document.getElementById('wpWordCount').textContent=_wpArabicNum(wc)+' مرة';
+  var rr=document.getElementById('wpRootRow');
+  if(root){document.getElementById('wpRootCount').textContent=_wpArabicNum(rc)+' مرة';rr.style.display='';document.getElementById('wpBtnRoot').style.display='';}
+  else{rr.style.display='none';document.getElementById('wpBtnRoot').style.display='none';}
+  // تمييز الكلمة في الآية
+  var ht=ayahText||'';
+  if(word&&ayahText){var idx=ayahText.indexOf(word);if(idx>=0)ht=ayahText.substring(0,idx)+'<span style="color:#c9a84c;font-weight:bold;">'+word+'</span>'+ayahText.substring(idx+word.length);}
+  document.getElementById('wpAyahText').innerHTML=ht;
+  _wpRenderFields(root);
+  document.getElementById('wpOverlay').classList.add('open');
+}
+function wpClose(){document.getElementById('wpOverlay').classList.remove('open');}
+function wpSearchWord(){if(!_wpData.word)return;wpClose();switchTab('word');document.getElementById('searchInput').value=_wpStripDia(_wpData.word);handleSearch();}
+function wpSearchRoot(){if(!_wpData.root)return;wpClose();switchTab('root');document.getElementById('searchInput').value=_wpData.root;handleSearch();}
+function wpCopy(btn){
+  var t=_wpData.word||'';
+  if(navigator.clipboard)navigator.clipboard.writeText(t);
+  else{var ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);}
+  btn.textContent='✅ تم';setTimeout(function(){btn.textContent='📋 نسخ';},1500);
+}
+function _wpStripDia(s){
+  if(!s)return'';var r='';
+  for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);if((c>=0x064B&&c<=0x065F)||c===0x0670||c===0x0640||(c>=0x06D6&&c<=0x06ED)||(c>=0x0610&&c<=0x061A))continue;r+=s[i];}
+  return r;
+}
+function _wpArabicNum(n){return String(n).replace(/[0-9]/g,function(d){return'٠١٢٣٤٥٦٧٨٩'[d];});}
+
+// بناء آية clickable مع تمييز كلمة
+function _wpBuildAyah(ayahText, highlightWord, suraName, ayahPos, rowData){
+  if(!ayahText)return'';
+  var words=ayahText.split(' ');
+  // ابحث عن بيانات الكلمات من allData لهذه الآية
+  var pool=[];
+  for(var i=0;i<allData.length;i++){
+    if(allData[i].sura_name===suraName&&allData[i].pos===ayahPos)pool.push(allData[i]);
+  }
+  var html='';
+  for(var i=0;i<words.length;i++){
+    var tw=words[i];if(!tw)continue;
+    // أوجد مطابقة في pool
+    var matched=null;
+    for(var j=0;j<pool.length;j++){
+      if(pool[j].word===tw||_wpStripDia(pool[j].word)===_wpStripDia(tw)){matched=pool[j];pool.splice(j,1);break;}
+    }
+    var popWord=matched?matched.word:tw;
+    var popRoot=matched?(matched.root||''):'';
+    var isHL=highlightWord&&(tw===highlightWord||_wpStripDia(tw)===_wpStripDia(highlightWord));
+    var col=isHL?'color:#cc0000;':'';
+    html+='<span class="aw" style="'+col+'" onclick="wpShow(\''+esc(popWord)+'\',\''+esc(popRoot)+'\',\''+esc(suraName)+'\',\''+esc(ayahPos)+'\',\''+esc(ayahText)+'\')">'+tw+'</span> ';
+  }
+  return html;
+}
+
+// بناء آية clickable مع تمييز عبارة
+function _wpBuildAyahPhrase(ayahText, query, suraName, ayahPos, normText){
+  if(!ayahText)return'';
+  var words=ayahText.split(' ');
+  // احسب الكلمات المضلَّلة
+  var nt=normText||ayahText;
+  var np=nt.split(' ').filter(Boolean);
+  var qW=normalizeForPhrase(query).split(' ').filter(Boolean);
+  var hlSet={};
+  if(qW.length){
+    outer:for(var i=0;i<=words.length-qW.length;i++){
+      for(var j=0;j<qW.length;j++){var wn=normalizeForPhrase(np[i+j]||words[i+j]||'');if(wn!==qW[j]&&wn.indexOf(qW[j])<0)continue outer;}
+      for(var j=0;j<qW.length;j++)hlSet[i+j]=true;
+    }
+  }
+  var pool=[];
+  for(var i=0;i<allData.length;i++){
+    if(allData[i].sura_name===suraName&&allData[i].pos===ayahPos)pool.push(allData[i]);
+  }
+  var html='';
+  for(var i=0;i<words.length;i++){
+    var tw=words[i];if(!tw)continue;
+    var matched=null;
+    for(var j=0;j<pool.length;j++){
+      if(pool[j].word===tw||_wpStripDia(pool[j].word)===_wpStripDia(tw)){matched=pool[j];pool.splice(j,1);break;}
+    }
+    var popWord=matched?matched.word:tw;
+    var popRoot=matched?(matched.root||''):'';
+    var col=hlSet[i]?'color:#cc0000;':'';
+    html+='<span class="aw" style="'+col+'" onclick="wpShow(\''+esc(popWord)+'\',\''+esc(popRoot)+'\',\''+esc(suraName)+'\',\''+esc(ayahPos)+'\',\''+esc(ayahText)+'\')">'+tw+'</span> ';
+  }
+  return html;
+}
+
+// ===== المفضلة / الإشارات المرجعية (IndexedDB) =====
+var FAV_DB_NAME='QuranFavorites', FAV_STORE='favs';
+
+function openFavDB(){
+  return new Promise(function(res,rej){
+    var r=indexedDB.open(FAV_DB_NAME,1);
+    r.onupgradeneeded=function(e){
+      var db=e.target.result;
+      if(!db.objectStoreNames.contains(FAV_STORE)){
+        var st=db.createObjectStore(FAV_STORE,{keyPath:'key'});
+        st.createIndex('type','type',{unique:false});
+        st.createIndex('time','time',{unique:false});
+      }
+    };
+    r.onsuccess=function(e){res(e.target.result);};
+    r.onerror=function(e){rej(e.target.error);};
+  });
+}
+
+function favGet(key){
+  return openFavDB().then(function(db){
+    return new Promise(function(res,rej){
+      var r=db.transaction(FAV_STORE,'readonly').objectStore(FAV_STORE).get(key);
+      r.onsuccess=function(){res(r.result||null);};
+      r.onerror=function(e){rej(e.target.error);};
+    });
+  });
+}
+
+function favSet(obj){
+  return openFavDB().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction(FAV_STORE,'readwrite');
+      tx.objectStore(FAV_STORE).put(obj);
+      tx.oncomplete=function(){res();};
+      tx.onerror=function(e){rej(e.target.error);};
+    });
+  });
+}
+
+function favDel(key){
+  return openFavDB().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction(FAV_STORE,'readwrite');
+      tx.objectStore(FAV_STORE).delete(key);
+      tx.oncomplete=function(){res();};
+      tx.onerror=function(e){rej(e.target.error);};
+    });
+  });
+}
+
+function favGetAll(){
+  return openFavDB().then(function(db){
+    return new Promise(function(res,rej){
+      var r=db.transaction(FAV_STORE,'readonly').objectStore(FAV_STORE).getAll();
+      r.onsuccess=function(){res(r.result||[]);};
+      r.onerror=function(e){rej(e.target.error);};
+    });
+  });
+}
+
+// كاش سريع في الذاكرة لتجنب استعلامات IndexedDB في كل render
+var _favsCache={};
+function _loadFavsCache(){
+  return favGetAll().then(function(all){
+    _favsCache={};
+    for(var i=0;i<all.length;i++)_favsCache[all[i].key]=true;
+  });
+}
+function isBookmarked(key){ return !!_favsCache[key]; }
+
+// تحميل الكاش عند بدء التطبيق
+_loadFavsCache();
+
+function toggleAyahFav(btn,key,suraName,ayahPos,root,ayahText){
+  if(_favsCache[key]){
+    // إزالة من المفضلة
+    favDel(key).then(function(){
+      delete _favsCache[key];
+      btn.textContent='☆';
+      btn.classList.remove('faved');
+      btn.title='حفظ في المفضلة';
+      showFavToast('تمت الإزالة من المفضلة');
+    });
+  } else {
+    // إضافة للمفضلة
+    var obj={key:key,type:'ayah',suraName:suraName,ayahPos:ayahPos,root:root||'',ayahText:ayahText,time:Date.now()};
+    favSet(obj).then(function(){
+      _favsCache[key]=true;
+      btn.textContent='⭐';
+      btn.classList.add('faved');
+      btn.title='إزالة من المفضلة';
+      showFavToast('تمت الإضافة للمفضلة ⭐');
+    });
+  }
+}
+
+function showFavToast(msg){
+  var t=document.getElementById('favToast');
+  if(!t){t=document.createElement('div');t.id='favToast';t.style.cssText='position:fixed;bottom:80px;right:50%;transform:translateX(50%);background:#3a2a10;color:#f5e6c8;padding:10px 22px;border-radius:20px;font-family:Amiri,serif;font-size:1rem;z-index:9999;border:1px solid #c9a84c55;box-shadow:0 4px 20px #00000044;transition:opacity .3s;pointer-events:none;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(function(){t.style.opacity='0';},2000);
+}
+
+// ===== صفحة المفضلة =====
+function openFavPage(){
+  document.getElementById('favpageOverlay').classList.add('open');
+  renderFavPage();
+}
+function closeFavPage(){
+  document.getElementById('favpageOverlay').classList.remove('open');
+}
+
+function renderFavPage(){
+  var body=document.getElementById('favpageBody');
+  body.innerHTML='<div class="favpage-empty">جاري التحميل...</div>';
+  favGetAll().then(function(all){
+    if(!all.length){
+      body.innerHTML='<div class="favpage-empty">📭 لا توجد عناصر في المفضلة بعد<br><small style="font-size:.85rem;margin-top:8px;display:block;">اضغط ☆ على أي آية لحفظها هنا</small></div>';
+      return;
+    }
+    // ترتيب تنازلي حسب الوقت
+    all.sort(function(a,b){return b.time-a.time;});
+    var html='<div class="favpage-section"><div class="favpage-section-title">⭐ الآيات المحفوظة <span style="color:#b09070;font-size:.85rem;font-weight:normal;">('+all.length+')</span></div>';
+    for(var i=0;i<all.length;i++){
+      var f=all[i];
+      var dt=new Date(f.time).toLocaleDateString('ar-SA',{year:'numeric',month:'long',day:'numeric'});
+      html+='<div class="fav-card" id="favcard-'+esc(f.key)+'">';
+      html+='<div class="fav-card-body">';
+      html+='<div class="fav-card-ref"><span class="badge">'+f.suraName+'</span><span class="badge">آية '+f.ayahPos+'</span>';
+      if(f.root)html+='<span class="badge" style="color:#1a6b4a;">🌱 '+f.root+'</span>';
+      html+='<span style="color:#c0a870;font-size:.78rem;margin-right:auto;">'+dt+'</span></div>';
+      html+='<div class="fav-card-ayah">'+f.ayahText+'</div>';
+      html+='</div>';
+      html+='<div class="fav-card-actions">';
+      html+='<button class="fav-action-btn" onclick="favOpenReader(\''+esc(f.key)+'\',\''+esc(f.ayahText)+'\',\''+esc(f.suraName)+'\',\''+esc(f.ayahPos)+'\',\''+esc(f.root)+'\')">🔍 قراءة</button>';
+      html+='<button class="fav-action-btn" onclick="favShare(\''+esc(f.ayahText)+'\',\''+esc(f.suraName)+'\',\''+esc(f.ayahPos)+'\',\''+esc(f.root)+'\')">📤 مشاركة</button>';
+      html+='<button class="fav-action-btn del" onclick="favRemoveFromPage(\''+esc(f.key)+'\')">🗑 حذف</button>';
+      html+='</div>';
+      html+='</div>';
+    }
+    html+='</div>';
+    body.innerHTML=html;
+  });
+}
+
+function favRemoveFromPage(key){
+  favDel(key).then(function(){
+    delete _favsCache[key];
+    // تحديث أزرار المفضلة في الصفحة الرئيسية إن كانت مرئية
+    document.querySelectorAll('.fav-btn').forEach(function(btn){
+      if(btn.getAttribute('onclick')&&btn.getAttribute('onclick').indexOf(key)>=0){
+        btn.textContent='☆';btn.classList.remove('faved');btn.title='حفظ في المفضلة';
+      }
+    });
+    renderFavPage();
+    showFavToast('تمت الإزالة من المفضلة');
+  });
+}
+
+function favOpenReader(key,ayahText,suraName,ayahPos,root){
+  closeFavPage();
+  // افتح وضع القراءة بالآية
+  _frItems=[{ayah_text:ayahText,sura_name:suraName,pos:ayahPos,root:root||''}];
+  _frIdx=0;
+  _frKey=key;
+  renderFocusReader();
+  document.getElementById('frOverlay').classList.add('open');
+}
+
+function favShare(ayahText,suraName,ayahPos,root){
+  closeFavPage();
+  openShareModal(ayahText,suraName,ayahPos,root,'');
+}
+
+// ===== وضع القراءة المركّزة =====
+var _frItems=[], _frIdx=0, _frFontSize=1.8, _frKey='';
+
+function openFocusReaderFromCard(btn){
+  // اجمع كل الكروت الحالية المرئية وابنِ قائمة
+  var cards=document.querySelectorAll('.entry-card');
+  var items=[];
+  var clickedIdx=0;
+  for(var i=0;i<cards.length;i++){
+    var header=cards[i].querySelector('.entry-header');
+    if(!header)continue;
+    var ayahEl=cards[i].querySelector('.ayah-text');
+    if(!ayahEl)continue;
+    // استخرج البيانات من أزرار الكرت
+    var shareBtn=cards[i].querySelector('.share-ayah-btn');
+    if(!shareBtn)continue;
+    var oc=shareBtn.getAttribute('onclick')||'';
+    // parse openShareModal args
+    var m=oc.match(/openShareModal\('(.*?)','(.*?)','(.*?)','(.*?)','(.*?)'\)/);
+    if(!m)continue;
+    var favBtnEl=cards[i].querySelector('.fav-btn');
+    var favOC=favBtnEl?favBtnEl.getAttribute('onclick'):'';
+    var km=favOC?favOC.match(/toggleAyahFav\(this,'(.*?)'/):null;
+    var fkey=km?km[1]:'';
+    items.push({ayah_text:m[1],sura_name:m[2],pos:m[3],root:m[4],favKey:fkey});
+    // هل هذا الكرت الذي ضُغط عليه؟
+    if(cards[i].contains(btn))clickedIdx=items.length-1;
+  }
+  if(!items.length)return;
+  _frItems=items;
+  _frIdx=clickedIdx;
+  _frKey=items[clickedIdx].favKey||'';
+  renderFocusReader();
+  document.getElementById('frOverlay').classList.add('open');
+}
+
+function renderFocusReader(){
+  if(!_frItems.length)return;
+  var it=_frItems[_frIdx];
+  document.getElementById('frRef').textContent='سورة '+it.sura_name+' — آية '+it.pos+(it.root?' · 🌱 '+it.root:'');
+  var ayahEl=document.getElementById('frAyahText');
+  ayahEl.textContent=it.ayah_text;
+  ayahEl.style.fontSize=_frFontSize+'rem';
+  // زر المفضلة
+  _frKey=it.favKey||('ayah::'+(it.sura_num||'')+'::'+it.pos);
+  var favBtn=document.getElementById('frFavBtn');
+  if(isBookmarked(_frKey)){favBtn.textContent='⭐ في المفضلة';favBtn.classList.add('faved');}
+  else{favBtn.textContent='☆ حفظ';favBtn.classList.remove('faved');}
+  // عداد
+  document.getElementById('frCounter').textContent=(_frIdx+1)+' / '+_frItems.length;
+  // أزرار التنقل
+  document.getElementById('frPrevBtn').disabled=(_frIdx===0);
+  document.getElementById('frNextBtn').disabled=(_frIdx===_frItems.length-1);
+  // slider
+  document.getElementById('frFontSlider').value=_frFontSize;
+  document.getElementById('frFontVal').textContent=_frFontSize.toFixed(1);
+}
+
+function frNavigate(dir){
+  var ni=_frIdx+dir;
+  if(ni<0||ni>=_frItems.length)return;
+  _frIdx=ni;
+  var ayahEl=document.getElementById('frAyahText');
+  var direction=dir>0?'translateX(-30px)':'translateX(30px)';
+  ayahEl.style.transition='opacity .15s, transform .15s';
+  ayahEl.style.opacity='0';
+  ayahEl.style.transform=direction;
+  setTimeout(function(){
+    renderFocusReader();
+    ayahEl.style.transition='opacity .2s, transform .2s';
+    ayahEl.style.opacity='1';
+    ayahEl.style.transform='translateX(0)';
+  },150);
+}
+
+function frSetFont(v){
+  _frFontSize=parseFloat(v);
+  document.getElementById('frAyahText').style.fontSize=v+'rem';
+  document.getElementById('frFontVal').textContent=parseFloat(v).toFixed(1);
+}
+
+function frToggleFav(){
+  if(!_frItems.length)return;
+  var it=_frItems[_frIdx];
+  var key=_frKey||('ayah::'+it.pos);
+  var favBtn=document.getElementById('frFavBtn');
+  if(isBookmarked(key)){
+    favDel(key).then(function(){
+      delete _favsCache[key];
+      favBtn.textContent='☆ حفظ';favBtn.classList.remove('faved');
+      showFavToast('تمت الإزالة من المفضلة');
+      _syncFavBtns(key,false);
+    });
+  } else {
+    var obj={key:key,type:'ayah',suraName:it.sura_name,ayahPos:it.pos,root:it.root||'',ayahText:it.ayah_text,time:Date.now()};
+    favSet(obj).then(function(){
+      _favsCache[key]=true;
+      favBtn.textContent='⭐ في المفضلة';favBtn.classList.add('faved');
+      showFavToast('تمت الإضافة للمفضلة ⭐');
+      _syncFavBtns(key,true);
+    });
+  }
+}
+
+function _syncFavBtns(key,isFav){
+  document.querySelectorAll('.fav-btn').forEach(function(btn){
+    var oc=btn.getAttribute('onclick')||'';
+    if(oc.indexOf("'"+key+"'")>=0||oc.indexOf('"'+key+'"')>=0){
+      btn.textContent=isFav?'⭐':'☆';
+      btn.classList.toggle('faved',isFav);
+      btn.title=isFav?'إزالة من المفضلة':'حفظ في المفضلة';
+    }
+  });
+}
+
+function frShare(){
+  if(!_frItems.length)return;
+  var it=_frItems[_frIdx];
+  closeFocusReader();
+  openShareModal(it.ayah_text,it.sura_name,it.pos,it.root||'','');
+}
+
+function closeFocusReader(){
+  document.getElementById('frOverlay').classList.remove('open');
+}
+
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('frOverlay').classList.contains('open')){
+    if(e.key==='ArrowLeft'||e.key==='ArrowDown')frNavigate(1);
+    else if(e.key==='ArrowRight'||e.key==='ArrowUp')frNavigate(-1);
+    else if(e.key==='Escape')closeFocusReader();
+    return;
+  }
+  if(e.key==='Escape'){wpClose();closeShareModal();}
+});
+
+function clearRecentSearches(){
+  if(!confirm('مسح سجل آخر عمليات البحث؟'))return;
+  localStorage.removeItem(SEARCH_HISTORY_KEY);
+  renderSidebar();
+}
+
+// ===== مشاركة الآية =====
+var _sd={};
+function openShareModal(ayah,suraName,pos,root,word){
+  var ref='سورة '+suraName+' — آية '+pos;
+  var txt=ayah+'\n\n'+ref+(root?'\n🌱 الجذر: '+root:'')+'\n\n🔗 مستكشف القرآن العظيم\nhttps://quranrootswords.netlify.app';
+  _sd={ayah:ayah,ref:ref,txt:txt};
+  document.getElementById('smPrev').textContent=ayah;
+  document.getElementById('smRef').textContent=ref+(root?' · الجذر: '+root:'');
+  document.getElementById('smNv').style.display=navigator.share?'flex':'none';
+  document.getElementById('sm').classList.add('open');
+}
+function closeShareModal(){document.getElementById('sm').classList.remove('open');}
+function smVia(p){
+  var t=encodeURIComponent(_sd.txt);
+  var u=p==='wa'?'https://wa.me/?text='+t
+       :p==='tg'?'https://t.me/share/url?url=https://quranrootswords.netlify.app&text='+encodeURIComponent(_sd.ayah+'\n\n'+_sd.ref)
+       :p==='tw'?'https://twitter.com/intent/tweet?text='+t:'';
+  if(u)window.open(u,'_blank');
+  closeShareModal();
+}
+function smCopy(){
+  var btn=document.getElementById('smCp');
+  var done=function(){btn.innerHTML='<span class="sm-icon">✅</span> تم';setTimeout(function(){btn.innerHTML='<span class="sm-icon">📋</span> نسخ';},2000);};
+  if(navigator.clipboard){navigator.clipboard.writeText(_sd.txt).then(done).catch(done);}
+  else{var ta=document.createElement('textarea');ta.value=_sd.txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}
+}
+function smNative(){if(navigator.share)navigator.share({title:'مستكشف القرآن العظيم',text:_sd.txt}).then(closeShareModal).catch(function(){});}
+
+// ===== PWA: Service Worker + Auto Update =====
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('/sw.js').then(function(reg){
+      // تحقق من تحديثات فوراً
+      reg.update();
+      // كل ما وُجد سيرفس ووركر جديد جاهز — حدّث الصفحة تلقائياً
+      reg.addEventListener('updatefound', function(){
+        var newWorker = reg.installing;
+        newWorker.addEventListener('statechange', function(){
+          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+            // سيرفس ووركر جديد جاهز — أخبره يتولى السيطرة
+            newWorker.postMessage('skipWaiting');
+          }
+        });
+      });
+    }).catch(function(){});
+
+    // لما يتغير الكنترولر (بعد skipWaiting) — أعد تحميل الصفحة مرة واحدة
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(!refreshing){ refreshing = true; window.location.reload(); }
+    });
+  });
+}
+
+// ===== PWA: Install Banner =====
+(function(){
+  var deferredPrompt = null;
+  var bannerShown = false;
+
+  // اخزّن الحدث قبل ما يختفي (Android Chrome)
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    // أظهر البانر بعد ٣ ثواني من تحميل الصفحة
+    if(!localStorage.getItem('pwaInstallDismissed')){
+      setTimeout(showPWABanner, 3000);
+    }
+  });
+
+  // بعد تثبيت ناجح — أخفِ البانر
+  window.addEventListener('appinstalled', function(){
+    hidePWABanner();
+    localStorage.setItem('pwaInstallDismissed','1');
+  });
+
+  function showPWABanner(){
+    if(bannerShown) return;
+    bannerShown = true;
+    var banner = document.getElementById('pwaBanner');
+    if(banner) banner.style.display = 'flex';
+  }
+
+  function hidePWABanner(){
+    var banner = document.getElementById('pwaBanner');
+    if(banner) banner.style.display = 'none';
+  }
+
+  window._pwaTriggerInstall = function(){
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(result){
+        deferredPrompt = null;
+        hidePWABanner();
+        if(result.outcome === 'accepted') localStorage.setItem('pwaInstallDismissed','1');
+      });
+    } else {
+      // iOS — لا يدعم beforeinstallprompt، نظهر التعليمات
+      document.getElementById('pwaIOSGuide').style.display = 'block';
+    }
+  };
+
+  window._pwaDismiss = function(){
+    hidePWABanner();
+    localStorage.setItem('pwaInstallDismissed','1');
+  };
+
+  // iOS: أظهر البانر تلقائياً إذا ما كان مثبتاً
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isInStandalone = window.navigator.standalone === true;
+  if(isIOS && !isInStandalone && !localStorage.getItem('pwaInstallDismissed')){
+    setTimeout(showPWABanner, 3000);
+  }
+})();
+</script>
+
+<!-- ===== PWA Install Banner ===== -->
+<div id="pwaBanner" style="display:none;position:fixed;bottom:0;right:0;left:0;z-index:9999;
+  background:linear-gradient(135deg,#6b3a1f,#3d1f0a);
+  border-top:2px solid #c9a84c;
+  padding:14px 20px;
+  align-items:center;gap:14px;
+  box-shadow:0 -4px 24px #0004;
+  font-family:'Amiri',serif;direction:rtl;">
+
+  <div style="font-size:2rem;flex-shrink:0;">📲</div>
+
+  <div style="flex:1;min-width:0;">
+    <div style="color:#f5e6c8;font-size:1.05rem;font-weight:bold;margin-bottom:2px;">
+      ثبّت تطبيق مستكشف القرآن
+    </div>
+    <div style="color:#d4b896;font-size:0.82rem;">
+      يعمل بدون إنترنت بعد التثبيت
+    </div>
+    <!-- iOS guide -->
+    <div id="pwaIOSGuide" style="display:none;margin-top:8px;background:#ffffff15;border-radius:8px;padding:10px 12px;">
+      <div style="color:#f5e6c8;font-size:0.85rem;line-height:1.7;">
+        لتثبيته على الآيفون:<br>
+        ١· اضغط زر المشاركة <span style="font-size:1rem;">⎙</span> في سفارة المتصفح<br>
+        ٢· اختر «إضافة إلى الشاشة الرئيسية» <span style="font-size:0.9rem;">➕</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-shrink:0;">
+    <button onclick="_pwaTriggerInstall()" style="
+      background:linear-gradient(135deg,#c9a84c,#a07830);
+      color:#fff;border:none;border-radius:10px;
+      padding:10px 20px;font-family:'Amiri',serif;
+      font-size:0.95rem;cursor:pointer;
+      box-shadow:0 2px 10px #c9a84c44;
+      white-space:nowrap;">
+      تثبيت
+    </button>
+    <button onclick="_pwaDismiss()" style="
+      background:#ffffff15;color:#d4b896;
+      border:1px solid #ffffff22;border-radius:10px;
+      padding:10px 14px;font-family:'Amiri',serif;
+      font-size:0.95rem;cursor:pointer;">
+      ✕
+    </button>
+  </div>
+</div>
+
+<!-- ===== Share Modal ===== -->
+<div id="sm" class="smo" onclick="if(event.target===this)closeShareModal()">
+  <div class="smb">
+    <div class="smh-bar"></div>
+    <div class="smh">
+      <span>📤 مشاركة الآية</span>
+      <button onclick="closeShareModal()">✕</button>
+    </div>
+    <div class="sm-prev" id="smPrev"></div>
+    <div class="sm-ref" id="smRef"></div>
+    <div class="sm-btns">
+      <button class="sm-btn sm-wa" onclick="smVia('wa')"><span class="sm-icon">💬</span> واتساب</button>
+      <button class="sm-btn sm-tg" onclick="smVia('tg')"><span class="sm-icon">✈️</span> تيليغرام</button>
+      <button class="sm-btn sm-tw" onclick="smVia('tw')"><span class="sm-icon">𝕏</span> تويتر</button>
+      <button class="sm-btn sm-cp" id="smCp" onclick="smCopy()"><span class="sm-icon">📋</span> نسخ</button>
+      <button class="sm-btn sm-nv" id="smNv" onclick="smNative()" style="display:none"><span class="sm-icon">📲</span> مشاركة عبر...</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== وضع القراءة المركّزة ===== -->
+<div class="fr-overlay" id="frOverlay">
+  <div class="fr-box">
+    <div class="fr-top">
+      <span class="fr-ref" id="frRef"></span>
+      <div class="fr-top-btns">
+        <button class="fr-icon-btn" id="frFavBtn" onclick="frToggleFav()" title="حفظ في المفضلة">⭐</button>
+        <button class="fr-icon-btn" id="frShareBtn" onclick="frShare()">📤 مشاركة</button>
+        <button class="fr-icon-btn" onclick="closeFocusReader()">✕</button>
+      </div>
+    </div>
+    <div class="fr-ayah" id="frAyahText" style="font-size:1.8rem;"></div>
+    <div class="fr-font-bar">
+      <span class="fr-font-lbl">🔡</span>
+      <input type="range" min="1.2" max="3" step="0.1" value="1.8" id="frFontSlider" oninput="frSetFont(this.value)">
+      <span class="fr-font-lbl" id="frFontVal">١.٨</span>
+    </div>
+    <div class="fr-nav">
+      <button class="fr-nav-btn" id="frPrevBtn" onclick="frNavigate(-1)">&#x2192; السابقة</button>
+      <span class="fr-counter" id="frCounter"></span>
+      <button class="fr-nav-btn" id="frNextBtn" onclick="frNavigate(1)">التالية &#x2190;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== صفحة المفضلة ===== -->
+<div class="favpage-overlay" id="favpageOverlay">
+  <div class="favpage-header">
+    <h2>⭐ المفضلة والإشارات المرجعية</h2>
+    <button class="favpage-close" onclick="closeFavPage()">✕ إغلاق</button>
+  </div>
+  <div class="favpage-body" id="favpageBody">
+    <div class="favpage-empty">جاري التحميل...</div>
+  </div>
+</div>
+
+<script src="nav.js?v=5"></script>
+</body>
+</html>

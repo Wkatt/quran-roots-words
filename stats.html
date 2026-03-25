@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إحصائيات — مستكشف القرآن العظيم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Amiri','Traditional Arabic',serif;background:#f5f0e8;color:#2c1a0e;min-height:100vh;direction:rtl;}
+body.dark{background:#1a1208;color:#e8d8b8;}
+.header{background:linear-gradient(135deg,#6b3a1f,#3d1f0a);border-bottom:3px solid #c9a84c;padding:16px 30px;text-align:center;}
+.header h1{font-size:1.8rem;color:#f5e6c8;}
+.header p{color:#d4b896;font-size:0.9rem;margin-top:4px;}
+.main{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:40px 20px;text-align:center;gap:24px;}
+.card{background:#fff;border:1px solid #e0d0b8;border-radius:16px;padding:30px 40px;text-decoration:none;color:#2c1a0e;transition:all .2s;box-shadow:0 2px 10px #c9a84c11;min-width:280px;}
+body.dark .card{background:#221508;border-color:#4a3520;color:#e8d8b8;}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 24px #c9a84c33;border-color:#c9a84c88;}
+.card-icon{font-size:3rem;margin-bottom:12px;}
+.card-title{font-size:1.3rem;color:#8b4513;font-weight:bold;margin-bottom:6px;}
+body.dark .card-title{color:#c9a84c;}
+.card-desc{font-size:0.95rem;color:#9a7a5a;}
+.cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}
+.back{margin-top:20px;}
+.back a{color:#8b4513;text-decoration:none;font-size:1rem;}
+body.dark .back a{color:#c9a84c;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📊 إحصائيات المستكشف</h1>
+  <p>اختر نوع الإحصائيات</p>
+</div>
+<div class="main">
+  <div class="cards">
+    <a href="stats-roots.html" class="card">
+      <div class="card-icon">🌱</div>
+      <div class="card-title">إحصائيات الجذور</div>
+      <div class="card-desc">الجذور القرآنية مع صيغها وتكراراتها</div>
+    </a>
+    <a href="stats-words.html" class="card">
+      <div class="card-icon">📝</div>
+      <div class="card-title">إحصائيات الكلمات</div>
+      <div class="card-desc">كلمات القرآن الكريم وتكراراتها</div>
+    </a>
+  </div>
+  <div class="back"><a href="index.html">🔍 العودة للبحث</a></div>
+</div>
+<script>
+if(localStorage.getItem('qeDark')==='1'){document.body.classList.add('dark');}
+</script>
+<script src="nav.js?v=3"></script>
+</body>
+</html>

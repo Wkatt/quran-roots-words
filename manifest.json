@@ -1,0 +1,40 @@
+{
+  "name": "مستكشف القرآن العظيم",
+  "short_name": "مستكشف القرآن",
+  "description": "ابحث في القرآن الكريم بالجذر أو الكلمة أو العبارة",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f0e8",
+  "theme_color": "#6b3a1f",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["education", "religion"],
+  "shortcuts": [
+    {
+      "name": "البحث بالجذر",
+      "url": "/?tab=root",
+      "description": "ابحث بالجذر القرآني"
+    },
+    {
+      "name": "المتصفح القرآني",
+      "url": "/browse.html",
+      "description": "تصفح سور القرآن"
+    }
+  ]
+}

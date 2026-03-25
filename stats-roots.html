@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إحصائيات الجذور — مستكشف القرآن العظيم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Amiri','Traditional Arabic',serif;background:#f5f0e8;color:#2c1a0e;min-height:100vh;direction:rtl;}
+body.dark{background:#1a1208;color:#e8d8b8;}
+
+.header{background:linear-gradient(135deg,#6b3a1f,#3d1f0a);border-bottom:3px solid #c9a84c;padding:16px 30px;text-align:center;position:relative;}
+.header h1{font-size:1.8rem;color:#f5e6c8;}
+.header p{color:#d4b896;font-size:0.9rem;margin-top:4px;}
+.header-controls{position:absolute;left:16px;top:50%;transform:translateY(-50%);display:flex;gap:8px;}
+.hc-btn{background:#ffffff22;border:1px solid #ffffff33;border-radius:8px;color:#f5e6c8;padding:6px 10px;cursor:pointer;font-size:1rem;transition:background .2s;text-decoration:none;display:inline-flex;align-items:center;}
+.hc-btn:hover{background:#ffffff33;}
+.back-btn{position:absolute;right:16px;top:50%;transform:translateY(-50%);}
+
+.nav-links{max-width:800px;margin:16px auto 0;padding:0 20px;display:flex;gap:10px;justify-content:center;}
+.nav-link{background:#fff8f0;border:1px solid #c9a84c66;border-radius:20px;padding:8px 24px;font-family:inherit;font-size:1rem;color:#8b4513;text-decoration:none;transition:all .2s;}
+body.dark .nav-link{background:#2a1c0a;color:#c9a84c;border-color:#7a5c3a55;}
+.nav-link:hover{background:#8b4513;color:#fff;border-color:#8b4513;}
+body.dark .nav-link:hover{background:#c9a84c;color:#1a1208;}
+.nav-link.active{background:#8b4513;color:#fff;border-color:#8b4513;}
+body.dark .nav-link.active{background:#c9a84c;color:#1a1208;}
+
+.no-data-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;padding:40px 20px;text-align:center;}
+.no-data-icon{font-size:4rem;margin-bottom:20px;}
+.no-data-title{font-size:1.3rem;color:#6b3a1f;margin-bottom:10px;}
+body.dark .no-data-title{color:#c9a84c;}
+.no-data-sub{color:#9a7a5a;font-size:0.95rem;margin-bottom:24px;line-height:1.8;}
+
+.controls-bar{max-width:800px;margin:16px auto 6px;padding:0 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.ctrl-label{font-size:0.88rem;color:#7a5c3a;white-space:nowrap;flex-shrink:0;}
+body.dark .ctrl-label{color:#9a8060;}
+.seg-group{display:flex;border:1px solid #c9a84c88;border-radius:8px;overflow:hidden;}
+.seg-btn{background:#fff8f0;border:none;padding:6px 14px;font-family:inherit;font-size:0.88rem;color:#8b4513;cursor:pointer;transition:all .2s;}
+body.dark .seg-btn{background:#2a1c0a;color:#c9a84c;}
+.seg-btn.active{background:#8b4513;color:#fff;}
+body.dark .seg-btn.active{background:#c9a84c;color:#1a1208;}
+.seg-btn:not(:last-child){border-left:1px solid #c9a84c55;}
+.search-input{background:#fff8f0;border:1px solid #c9a84c88;border-radius:8px;padding:7px 14px;font-family:inherit;font-size:1rem;color:#2c1a0e;outline:none;flex:1;min-width:160px;}
+body.dark .search-input{background:#2a1c0a;color:#e8d8b8;border-color:#7a5c3a;}
+.search-input::placeholder{color:#b09070;}
+
+.total-bar{max-width:800px;margin:0 auto 8px;padding:0 20px;}
+.total-badge{display:inline-block;background:#fff8f0;border:1px solid #c9a84c55;border-radius:20px;padding:5px 16px;font-size:0.85rem;color:#7a5c3a;}
+body.dark .total-badge{background:#2a1c0a;color:#9a8060;}
+
+.panel{max-width:800px;margin:0 auto 60px;padding:0 20px;}
+.panel-inner{background:#fff;border:1px solid #e0d0b8;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px #c9a84c11;}
+body.dark .panel-inner{background:#221508;border-color:#4a3520;}
+.panel-header{background:linear-gradient(135deg,#fff8f0,#fdf0dc);border-bottom:1px solid #e0d0b8;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+body.dark .panel-header{background:linear-gradient(135deg,#2c1f0e,#3a2a10);border-color:#4a3520;}
+.panel-title{font-size:1.1rem;color:#8b4513;font-weight:bold;}
+body.dark .panel-title{color:#c9a84c;}
+.panel-count{font-size:0.85rem;color:#9a7a5a;background:#ffe;border:1px solid #c9a84c44;border-radius:12px;padding:3px 12px;}
+body.dark .panel-count{background:#2a2010;color:#b09060;}
+.panel-body{max-height:700px;overflow-y:auto;}
+
+.panel-actions{display:flex;gap:4px;align-items:center;margin-right:auto;margin-left:8px;}
+.panel-act-btn{display:inline-flex;align-items:center;gap:4px;background:transparent;border:1px solid #c9a84c55;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:inherit;font-size:0.82rem;color:#8b4513;transition:all .2s;}
+body.dark .panel-act-btn{color:#c9a84c;border-color:#7a5c3a44;}
+.panel-act-btn:hover{background:#f5e6cc;border-color:#c9a84c;}
+body.dark .panel-act-btn:hover{background:#3a2a10;}
+
+.export-menu{position:relative;display:inline-block;}
+.export-dropdown{display:none;position:absolute;top:110%;right:0;background:#fff;border:1px solid #c9a84c88;border-radius:10px;box-shadow:0 4px 20px #0002;z-index:100;min-width:220px;overflow:hidden;}
+body.dark .export-dropdown{background:#2a1c0a;border-color:#7a5c3a;}
+.export-dropdown.open{display:block;}
+.export-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:0.95rem;color:#2c1a0e;transition:background .15s;}
+body.dark .export-item{color:#e8d8b8;}
+.export-item:hover{background:#fdf5e6;}
+body.dark .export-item:hover{background:#3a2a10;}
+.export-sep{border-top:1px solid #e8d8b8;margin:4px 0;}
+body.dark .export-sep{border-color:#4a3520;}
+.export-label{padding:5px 16px;font-size:0.78rem;color:#9a7a5a;}
+
+.root-row{border-bottom:1px solid #f0e8d8;transition:background .15s;cursor:pointer;}
+body.dark .root-row{border-color:#3a2a10;}
+.load-more-btn{display:block;width:100%;padding:14px;background:#fff8f0;border:none;border-top:1px solid #e8d8b8;color:#8b4513;font-family:inherit;font-size:0.95rem;cursor:pointer;transition:background .2s;}
+.load-more-btn:hover{background:#fdf0dc;}
+body.dark .load-more-btn{background:#2a1c0a;color:#c9a84c;border-color:#4a3520;}
+body.dark .load-more-btn:hover{background:#3a2a10;}
+.root-row:last-child{border-bottom:none;}
+.root-row-inner{display:flex;align-items:center;padding:10px 16px;gap:12px;}
+.root-row:hover .root-row-inner{background:#fdf5e6;}
+body.dark .root-row:hover .root-row-inner{background:#2a1c0a;}
+.root-row.expanded .root-row-inner{background:#fff8f0;border-right:3px solid #c9a84c;}
+body.dark .root-row.expanded .root-row-inner{background:#2c1f0e;border-right-color:#a07830;}
+.root-arrow{color:#c9a84c;font-size:0.8rem;transition:transform .2s;flex-shrink:0;}
+.root-row.expanded .root-arrow{transform:rotate(90deg);}
+.root-text{font-size:1.4rem;color:#8b4513;flex:1;}
+body.dark .root-text{color:#c9a84c;}
+.count-pill{background:#8b4513;color:#fff;border-radius:12px;padding:2px 12px;font-size:0.8rem;flex-shrink:0;}
+body.dark .count-pill{background:#c9a84c;color:#1a1208;}
+.rank-bar-wrap{flex:2;background:#e8d8b8;border-radius:4px;height:8px;overflow:hidden;}
+body.dark .rank-bar-wrap{background:#3a2a10;}
+.rank-bar-fill{height:100%;background:linear-gradient(90deg,#c9a84c,#a07830);border-radius:4px;transition:width .4s;}
+
+.words-subtree{display:none;background:#fdf8f0;border-top:1px solid #e8d8b8;padding:8px 16px 12px 16px;}
+body.dark .words-subtree{background:#261a08;border-color:#3a2a10;}
+.root-row.expanded .words-subtree{display:block;}
+.subtree-sort{display:flex;gap:6px;margin-bottom:10px;}
+.sub-seg-btn{background:#fff;border:1px solid #c9a84c66;border-radius:14px;padding:3px 12px;font-family:inherit;font-size:0.82rem;color:#8b4513;cursor:pointer;transition:all .2s;}
+body.dark .sub-seg-btn{background:#2a1c0a;color:#c9a84c;border-color:#7a5c3a44;}
+.sub-seg-btn.active{background:#8b4513;color:#fff;border-color:#8b4513;}
+body.dark .sub-seg-btn.active{background:#c9a84c;color:#1a1208;border-color:#c9a84c;}
+.word-item{display:flex;align-items:center;padding:5px 8px;border-radius:8px;gap:10px;cursor:pointer;transition:background .15s;}
+.word-item:hover{background:#fff8f0;}
+body.dark .word-item:hover{background:#2a1c0a;}
+.word-text{font-size:1.25rem;color:#2c1a0e;flex:1;}
+body.dark .word-text{color:#e8d8b8;}
+.word-count{background:#fff8f0;border:1px solid #c9a84c55;border-radius:10px;padding:2px 10px;font-size:0.78rem;color:#8b4513;flex-shrink:0;}
+body.dark .word-count{background:#2a1c0a;color:#c9a84c;border-color:#7a5c3a44;}
+.word-bar-wrap{flex:2;background:#e8d8b8;border-radius:3px;height:6px;overflow:hidden;}
+body.dark .word-bar-wrap{background:#3a2a10;}
+.word-bar-fill{height:100%;background:linear-gradient(90deg,#2a9a6a,#1a7a55);border-radius:3px;}
+
+.empty-msg{text-align:center;padding:40px;color:#9a7a5a;font-size:1rem;}
+
+.panel-body::-webkit-scrollbar{width:6px;}
+.panel-body::-webkit-scrollbar-track{background:#f5f0e8;}
+.panel-body::-webkit-scrollbar-thumb{background:#c9a84c55;border-radius:3px;}
+body.dark .panel-body::-webkit-scrollbar-track{background:#1a1208;}
+
+@media print{
+  body *{visibility:hidden;}
+  #printArea,#printArea *{visibility:visible;}
+  #printArea{position:fixed;inset:0;background:#fff;padding:20px;direction:rtl;font-family:'Amiri',serif;overflow:auto;}
+  .print-header{text-align:center;margin-bottom:20px;border-bottom:2px solid #c9a84c;padding-bottom:12px;}
+  .print-header h2{font-size:1.4rem;color:#6b3a1f;}
+  .print-header p{font-size:.9rem;color:#7a5c3a;margin-top:4px;}
+  .print-table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+  .print-table th,.print-table td{border:1px solid #ccc;padding:8px 12px;text-align:right;}
+  .print-table th{background:#f5e6cc;color:#6b3a1f;font-weight:bold;}
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="hc-btn back-btn" title="العودة للبحث">🔍 العودة للبحث</a>
+  <h1>📊 إحصائيات الجذور</h1>
+  <p>الجذور القرآنية مرتّبة حسب التكرار أو الترتيب الهجائي</p>
+  <div class="header-controls">
+    <button class="hc-btn" onclick="toggleDark()" id="darkBtn" title="وضع ليلي">🌙</button>
+  </div>
+</div>
+
+<div class="nav-links">
+  <a href="stats-roots.html" class="nav-link active">🌱 إحصائيات الجذور</a>
+  <a href="stats-words.html" class="nav-link">📝 إحصائيات الكلمات</a>
+</div>
+
+<div id="loadingScreen" class="no-data-screen">
+  <div class="no-data-icon" style="animation:pulse 1.5s ease-in-out infinite;">⏳</div>
+  <div class="no-data-title">جاري تحميل الإحصائيات...</div>
+</div>
+
+<div id="mainContent" style="display:none;">
+  <div class="total-bar"><span class="total-badge" id="totalBadge"></span></div>
+  <div class="controls-bar">
+    <span class="ctrl-label">ترتيب:</span>
+    <div class="seg-group">
+      <button class="seg-btn active" id="rootSortCount" onclick="setRootSort('count')">الأكثر تكراراً</button>
+      <button class="seg-btn" id="rootSortAlpha" onclick="setRootSort('alpha')">هجائي</button>
+    </div>
+    <input class="search-input" id="rootFilterInput" placeholder="🔍 بحث في الجذور... (Enter)" onkeydown="if(event.key==='Enter')filterRoots(this.value)">
+  </div>
+
+  <div class="panel">
+    <div class="panel-inner">
+      <div class="panel-header">
+        <span class="panel-title">🌱 الجذور</span>
+        <div class="panel-actions">
+          <button class="panel-act-btn" onclick="printRoots()" title="طباعة">&#x1F5A8;</button>
+          <div class="export-menu" id="rootExportMenu">
+            <button class="panel-act-btn" onclick="toggleMenu('rootExportDD')" title="حفظ">&#x1F4BE; &#9660;</button>
+            <div class="export-dropdown" id="rootExportDD">
+              <div class="export-item" onclick="exportRootsPDF()"><span>📄</span> PDF</div>
+              <div class="export-item" onclick="exportRootsExcel()"><span>📊</span> Excel</div>
+              <div class="export-sep"></div>
+              <div class="export-label">مفصّل (الجذور مع صيغها)</div>
+              <div class="export-item" onclick="exportDetailedRootsPDF()"><span>📄</span> PDF مفصّل</div>
+              <div class="export-item" onclick="exportDetailedRootsExcel()"><span>📊</span> Excel مفصّل</div>
+            </div>
+          </div>
+        </div>
+        <span class="panel-count" id="rootCountBadge">—</span>
+      </div>
+      <div class="panel-body" id="rootsPanel"></div>
+    </div>
+  </div>
+</div>
+
+<div id="printArea" style="display:none"></div>
+
+<script>
+// ===== Dark Mode =====
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  var d=document.body.classList.contains('dark');
+  document.getElementById('darkBtn').textContent=d?'☀️':'🌙';
+  localStorage.setItem('qeDark',d?'1':'0');
+}
+if(localStorage.getItem('qeDark')==='1'){
+  document.body.classList.add('dark');
+  document.getElementById('darkBtn').textContent='☀️';
+}
+
+// ===== State =====
+var rootsData={};
+var rootSort='count';
+var currentFilter='';
+var expandedRoots={};
+var maxRootCount=1;
+var totalRecords=0;
+
+var PAGE_SIZE=150;
+var currentPage=1;
+var currentRootsList=[];
+var debounceTimer=null;
+
+// ===== Load from pre-computed JSON =====
+window.addEventListener('load', function(){
+  fetch('./data/roots-stats.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      rootsData=data;
+      totalRecords=0;
+      var keys=Object.keys(rootsData);
+      for(var i=0;i<keys.length;i++) totalRecords+=rootsData[keys[i]].c;
+      render();
+      document.getElementById('loadingScreen').style.display='none';
+      document.getElementById('mainContent').style.display='block';
+    })
+    .catch(function(err){
+      document.getElementById('loadingScreen').querySelector('.no-data-title').textContent='خطأ في تحميل البيانات: '+err.message;
+    });
+});
+
+// ===== Helpers =====
+function stripD(s){
+  if(!s)return'';
+  var r='';
+  for(var i=0;i<s.length;i++){
+    var c=s.charCodeAt(i);
+    if(c===0x0670){r+='\u0627';continue;}
+    if((c>=0x0610&&c<=0x061A)||(c>=0x064B&&c<=0x065F)||(c>=0x06D6&&c<=0x06DC)||(c>=0x06DF&&c<=0x06E4)||c===0x06E7||c===0x06E8||(c>=0x06EA&&c<=0x06ED)||c===0x0640)continue;
+    if(c===0x0622||c===0x0623||c===0x0625||c===0x0671||c===0x0672||c===0x0673||c===0x0675){r+='\u0627';continue;}
+    if(c===0x0624){r+='\u0648';continue;}
+    if(c===0x0626){r+='\u064A';continue;}
+    if(c===0x0621)continue;
+    if(c===0x0629){r+='\u0647';continue;}
+    r+=s[i];
+  }
+  return r;
+}
+function matchFilter(key,filter){if(!filter)return true;return stripD(key).indexOf(stripD(filter))>=0;}
+function arabicCompare(a,b){return a.localeCompare(b,'ar');}
+function encodeForId(s){return s.replace(/[^a-zA-Z\u0600-\u06FF]/g,'_');}
+function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+function getRootsSorted(){
+  var keys=Object.keys(rootsData);
+  if(currentFilter) keys=keys.filter(function(k){return matchFilter(k,currentFilter);});
+  if(rootSort==='count') keys.sort(function(a,b){return rootsData[b].c-rootsData[a].c||arabicCompare(a,b);});
+  else keys.sort(function(a,b){return arabicCompare(a,b);});
+  return keys;
+}
+
+// ===== Render =====
+function render(){
+  currentPage=1;
+  currentRootsList=getRootsSorted();
+  var maxR=0;
+  for(var i=0;i<currentRootsList.length;i++) if(rootsData[currentRootsList[i]].c>maxR) maxR=rootsData[currentRootsList[i]].c;
+  maxRootCount=maxR||1;
+  document.getElementById('rootCountBadge').textContent=currentRootsList.length+' جذر';
+  document.getElementById('totalBadge').textContent='الإجمالي: '+Object.keys(rootsData).length+' جذر | '+totalRecords+' سجل';
+
+  var panel=document.getElementById('rootsPanel');
+  panel.innerHTML='';
+  if(!currentRootsList.length){ panel.innerHTML='<div class="empty-msg">لا توجد نتائج</div>'; return; }
+  renderPage();
+}
+
+function renderPage(){
+  var panel=document.getElementById('rootsPanel');
+  var old=document.getElementById('loadMoreBtn');
+  if(old) old.remove();
+
+  var start=(currentPage-1)*PAGE_SIZE;
+  var end=Math.min(currentPage*PAGE_SIZE, currentRootsList.length);
+  var html='';
+  for(var i=start;i<end;i++){
+    var root=currentRootsList[i];
+    var cnt=rootsData[root].c;
+    var pct=Math.round(cnt/maxRootCount*100);
+    var isExp=!!expandedRoots[root];
+    html+='<div class="root-row'+(isExp?' expanded':'')+'" id="rr_'+encodeForId(root)+'">';
+    html+='<div class="root-row-inner" onclick="toggleRoot(\''+esc(root)+'\')">';
+    html+='<span class="root-arrow">▶</span>';
+    html+='<span class="root-text">'+root+'</span>';
+    html+='<div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:'+pct+'%"></div></div>';
+    html+='<span class="count-pill">'+cnt+'</span>';
+    html+='</div>';
+    html+='<div class="words-subtree">';
+    if(isExp) html+=buildSubtreeHTML(root,expandedRoots[root]);
+    html+='</div>';
+    html+='</div>';
+  }
+  panel.insertAdjacentHTML('beforeend', html);
+
+  if(end < currentRootsList.length){
+    var remaining=currentRootsList.length-end;
+    var btn=document.createElement('button');
+    btn.id='loadMoreBtn';
+    btn.className='load-more-btn';
+    btn.textContent='تحميل المزيد ('+remaining+' متبقية)';
+    btn.onclick=function(){currentPage++;renderPage();};
+    panel.appendChild(btn);
+  }
+}
+
+function buildSubtreeHTML(root,sort){
+  var wordsArr=rootsData[root].words||[];
+  if(sort==='alpha'){
+    wordsArr=wordsArr.slice().sort(function(a,b){return arabicCompare(a.w,b.w);});
+  }
+  var maxW=0;
+  for(var i=0;i<wordsArr.length;i++) if(wordsArr[i].c>maxW) maxW=wordsArr[i].c;
+  maxW=maxW||1;
+
+  var h='<div class="subtree-sort">';
+  h+='<button class="sub-seg-btn'+(sort==='count'?' active':'')+'" onclick="event.stopPropagation();setSubSort(\''+esc(root)+'\',\'count\')">الأكثر</button>';
+  h+='<button class="sub-seg-btn'+(sort==='alpha'?' active':'')+'" onclick="event.stopPropagation();setSubSort(\''+esc(root)+'\',\'alpha\')">هجائي</button>';
+  h+='<span style="font-size:.8rem;color:#9a7a5a;margin-right:8px;">'+wordsArr.length+' صيغة</span>';
+  h+='</div>';
+  for(var i=0;i<wordsArr.length;i++){
+    var w=wordsArr[i];
+    var pct=Math.round(w.c/maxW*100);
+    h+='<div class="word-item" onclick="event.stopPropagation();goSearch(\'word\',\''+esc(w.w)+'\')">';
+    h+='<span class="word-text">'+w.w+'</span>';
+    h+='<div class="word-bar-wrap"><div class="word-bar-fill" style="width:'+pct+'%"></div></div>';
+    h+='<span class="word-count">'+w.c+'</span>';
+    h+='</div>';
+  }
+  return h;
+}
+
+function toggleRoot(root){
+  if(expandedRoots[root]) delete expandedRoots[root];
+  else expandedRoots[root]='count';
+  var id='rr_'+encodeForId(root);
+  var row=document.getElementById(id);
+  if(!row) return;
+  if(expandedRoots[root]){
+    row.classList.add('expanded');
+    row.querySelector('.words-subtree').innerHTML=buildSubtreeHTML(root,expandedRoots[root]);
+  } else {
+    row.classList.remove('expanded');
+    row.querySelector('.words-subtree').innerHTML='';
+  }
+}
+
+function setSubSort(root,sort){
+  expandedRoots[root]=sort;
+  var id='rr_'+encodeForId(root);
+  var row=document.getElementById(id);
+  if(!row) return;
+  row.querySelector('.words-subtree').innerHTML=buildSubtreeHTML(root,sort);
+}
+
+function setRootSort(sort){
+  rootSort=sort;
+  document.getElementById('rootSortCount').classList.toggle('active',sort==='count');
+  document.getElementById('rootSortAlpha').classList.toggle('active',sort==='alpha');
+  render();
+}
+
+function filterRoots(val){
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(function(){currentFilter=val.trim();render();},300);
+}
+
+function goSearch(tab,q){window.location.href='index.html?tab='+encodeURIComponent(tab)+'&q='+encodeURIComponent(q);}
+
+// ===== Export Menus =====
+function toggleMenu(id){
+  var dds=document.querySelectorAll('.export-dropdown');
+  for(var i=0;i<dds.length;i++){if(dds[i].id!==id)dds[i].classList.remove('open');}
+  document.getElementById(id).classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  var menus=document.querySelectorAll('.export-menu');
+  for(var i=0;i<menus.length;i++){
+    if(!menus[i].contains(e.target)){
+      var dd=menus[i].querySelector('.export-dropdown');
+      if(dd)dd.classList.remove('open');
+    }
+  }
+});
+
+function getDate(){return new Date().toLocaleDateString('ar-SA');}
+
+function openPrintWindow(content){
+  var win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet"><style>body{font-family:Amiri,serif;direction:rtl;padding:24px;color:#1a1a1a;}.print-header{text-align:center;margin-bottom:20px;border-bottom:2px solid #c9a84c;padding-bottom:12px;}.print-header h2{color:#6b3a1f;font-size:1.4rem;}.print-header p{font-size:.9rem;color:#7a5c3a;margin-top:4px;}.print-table{width:100%;border-collapse:collapse;margin-bottom:16px;}.print-table th,.print-table td{border:1px solid #ccc;padding:8px 12px;text-align:right;}.print-table th{background:#f5e6cc;color:#6b3a1f;font-weight:bold;}@media print{@page{margin:1.5cm;}}</style></head><body>'+content+'<script>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
+}
+
+function getRootsData(){return getRootsSorted();}
+
+function buildRootsPrintHTML(){
+  var roots=getRootsData();var date=getDate();
+  var h='<div class="print-header"><h2>إحصائيات الجذور — مستكشف القرآن العظيم</h2><p>'+roots.length+' جذر | '+date+'</p></div>';
+  h+='<table class="print-table"><tr><th>#</th><th>الجذر</th><th>عدد التكرار</th></tr>';
+  for(var i=0;i<roots.length;i++){
+    h+='<tr><td>'+(i+1)+'</td><td style="font-size:1.2rem;">'+roots[i]+'</td><td>'+rootsData[roots[i]].c+'</td></tr>';
+  }
+  h+='</table>';return h;
+}
+
+function buildDetailedRootsPrintHTML(){
+  var roots=getRootsData();var date=getDate();
+  var h='<div class="print-header"><h2>إحصائيات الجذور — نسخة مفصّلة</h2><p>'+roots.length+' جذر | '+date+'</p></div>';
+  for(var i=0;i<roots.length;i++){
+    var root=roots[i];var rd=rootsData[root];
+    h+='<table class="print-table" style="margin-bottom:14px;">';
+    h+='<tr><th colspan="3" style="background:#f0e0c0;font-size:1.15rem;">'+(i+1)+'. '+root+' — '+rd.c+' تكرار | '+rd.words.length+' صيغة</th></tr>';
+    h+='<tr><th>#</th><th>الصيغة</th><th>عدد التكرار</th></tr>';
+    for(var j=0;j<rd.words.length;j++){
+      h+='<tr><td>'+(j+1)+'</td><td style="font-size:1.1rem;">'+rd.words[j].w+'</td><td>'+rd.words[j].c+'</td></tr>';
+    }
+    h+='</table>';
+  }
+  return h;
+}
+
+function printRoots(){
+  var pa=document.getElementById('printArea');
+  pa.innerHTML=buildRootsPrintHTML();
+  pa.style.display='block';
+  setTimeout(function(){window.print();pa.style.display='none';},100);
+}
+
+function exportRootsPDF(){
+  document.getElementById('rootExportDD').classList.remove('open');
+  openPrintWindow(buildRootsPrintHTML());
+}
+
+function exportDetailedRootsPDF(){
+  document.getElementById('rootExportDD').classList.remove('open');
+  openPrintWindow(buildDetailedRootsPrintHTML());
+}
+
+function exportRootsExcel(){
+  document.getElementById('rootExportDD').classList.remove('open');
+  var roots=getRootsData();
+  var wb=XLSX.utils.book_new();
+  var rows=[['#','الجذر','عدد التكرار']];
+  for(var i=0;i<roots.length;i++) rows.push([i+1,roots[i],rootsData[roots[i]].c]);
+  var ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:5},{wch:20},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws,'الجذور');
+  XLSX.writeFile(wb,'إحصائيات_الجذور.xlsx');
+}
+
+function exportDetailedRootsExcel(){
+  document.getElementById('rootExportDD').classList.remove('open');
+  var roots=getRootsData();
+  var wb=XLSX.utils.book_new();
+  var rows=[['#','الجذر','عدد التكرار','الصيغة','عدد تكرار الصيغة']];
+  var num=0;
+  for(var i=0;i<roots.length;i++){
+    var root=roots[i];var rd=rootsData[root];
+    for(var j=0;j<rd.words.length;j++){
+      num++;
+      rows.push([num,root,rd.c,rd.words[j].w,rd.words[j].c]);
+    }
+  }
+  var ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:5},{wch:20},{wch:14},{wch:22},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,ws,'الجذور مع الصيغ');
+  XLSX.writeFile(wb,'إحصائيات_الجذور_مفصّلة.xlsx');
+}
+</script>
+<script src="nav.js?v=3"></script>
+</body>
+</html>

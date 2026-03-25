@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إحصائيات الجذور — مستكشف القرآن العظيم</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DGJW3108XZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DGJW3108XZ');
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@font-face { font-family: 'KFGQPC HAFS Uthmanic Script Regular'; src: url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.woff2') format('woff2'), url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.ttf') format('truetype'); font-display: swap; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Amiri', 'Traditional Arabic', serif; background: #f5f0e8; color: #2c1a0e; min-height: 100vh; direction: rtl; }
+body.dark { background: #1a1208; color: #e8d8b8; }
+
+.header { background: linear-gradient(135deg, #6b3a1f, #3d1f0a); border-bottom: 3px solid #c9a84c; padding: 16px 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.header-title { font-size: 1.5rem; color: #f5e6c8; }
+.header-sub { color: #d4b896; font-size: 0.85rem; margin-top: 2px; }
+.header-controls { display: flex; gap: 8px; align-items: center; }
+.hc-btn { background: #ffffff22; border: 1px solid #ffffff33; border-radius: 8px; color: #f5e6c8; padding: 6px 12px; cursor: pointer; font-size: 0.95rem; text-decoration: none; transition: background .2s; font-family: inherit; }
+.hc-btn:hover { background: #ffffff33; }
+
+.controls { max-width: 960px; margin: 24px auto 16px; padding: 0 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.sort-btn { background: #fff8f0; border: 1px solid #c9a84c66; border-radius: 20px; padding: 7px 20px; cursor: pointer; font-family: inherit; font-size: 1rem; color: #8b4513; transition: all .2s; }
+body.dark .sort-btn { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a55; }
+.sort-btn.active { background: #8b4513; color: #fff; border-color: #8b4513; }
+.search-box { flex: 1; min-width: 180px; background: #fff8f0; border: 1px solid #c9a84c88; border-radius: 20px; padding: 7px 18px; font-family: inherit; font-size: 1rem; color: #2c1a0e; outline: none; direction: rtl; }
+body.dark .search-box { background: #2a1c0a; color: #e8d8b8; border-color: #7a5c3a; }
+.search-box::placeholder { color: #b09070; }
+.count-label { font-size: 0.85rem; color: #9a7a5a; white-space: nowrap; }
+body.dark .count-label { color: #7a6050; }
+
+.no-data { text-align: center; padding: 80px 20px; color: #9a7a5a; }
+.no-data a { color: #c9a84c; }
+
+/* Grid of root cards */
+.roots-grid { max-width: 960px; margin: 0 auto; padding: 0 20px 60px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+
+.root-card { background: #fff; border: 1px solid #e0d0b8; border-radius: 12px; padding: 14px 12px; cursor: pointer; transition: all .2s; text-align: center; position: relative; overflow: hidden; }
+body.dark .root-card { background: #221508; border-color: #4a3520; }
+.root-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #c9a84c22; border-color: #c9a84c88; }
+.root-card.open { border-color: #c9a84c; box-shadow: 0 4px 16px #c9a84c33; background: #fffdf5; }
+body.dark .root-card.open { background: #2a1f0a; }
+
+.root-bar { position: absolute; bottom: 0; right: 0; height: 3px; background: linear-gradient(90deg, #c9a84c, #a07830); border-radius: 0 0 12px 12px; transition: width .4s; }
+.root-word { font-size: 1.5rem; color: #8b4513; font-weight: bold; margin-bottom: 4px; }
+body.dark .root-word { color: #c9a84c; }
+.root-count { font-size: 0.8rem; color: #9a7a5a; }
+.root-rank { position: absolute; top: 6px; left: 8px; font-size: 0.7rem; color: #c9a84c88; }
+
+/* Detail panel */
+.detail-panel { max-width: 960px; margin: 0 auto 16px; padding: 0 20px; }
+.detail-inner { background: #fff; border: 1px solid #c9a84c88; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px #c9a84c22; animation: slideDown .2s ease; }
+body.dark .detail-inner { background: #221508; border-color: #7a5c3a; }
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+.detail-header { background: linear-gradient(135deg, #fff8f0, #fdf0dc); padding: 16px 24px; border-bottom: 1px solid #e8d8b8; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+body.dark .detail-header { background: linear-gradient(135deg, #2c1f0e, #3a2a10); border-color: #4a3520; }
+.detail-root { font-size: 2rem; color: #8b4513; }
+body.dark .detail-root { color: #c9a84c; }
+.detail-meta { color: #7a5c3a; font-size: 0.9rem; }
+body.dark .detail-meta { color: #9a8060; }
+.detail-close { margin-right: auto; background: none; border: 1px solid #c9a84c66; border-radius: 8px; padding: 4px 12px; color: #8b4513; cursor: pointer; font-family: inherit; font-size: 0.9rem; }
+body.dark .detail-close { color: #c9a84c; }
+
+/* word chips inside detail */
+.word-chips { padding: 12px 20px; display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid #f0e0c8; }
+body.dark .word-chips { border-color: #3a2a10; }
+.word-chip { background: #fff8f0; border: 1px solid #c9a84c66; border-radius: 16px; padding: 4px 14px; font-size: 0.95rem; color: #8b4513; cursor: pointer; transition: all .15s; }
+body.dark .word-chip { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a55; }
+.word-chip:hover, .word-chip.active { background: #8b4513; color: #fff; border-color: #8b4513; }
+
+/* ayah list */
+.ayah-list { max-height: 420px; overflow-y: auto; }
+.ayah-row { padding: 12px 24px; border-bottom: 1px solid #f5ede0; display: flex; gap: 12px; align-items: flex-start; }
+body.dark .ayah-row { border-color: #2a1c0a; }
+.ayah-row:last-child { border-bottom: none; }
+.ayah-num { font-size: 0.78rem; color: #b09070; min-width: 28px; padding-top: 4px; }
+.ayah-ref { font-size: 0.78rem; color: #9a7a5a; min-width: 90px; padding-top: 4px; white-space: nowrap; }
+.ayah-txt { font-family: 'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif; font-size: 1.1rem; line-height: 2; color: #2c1a0e; flex: 1; }
+body.dark .ayah-txt { color: #e8d8b8; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">📊 إحصائيات الجذور</div>
+    <div class="header-sub">مستكشف القرآن العظيم</div>
+  </div>
+  <div class="header-controls">
+    <a href="index.html" class="hc-btn">🔍 العودة للبحث</a>
+    <button class="hc-btn" onclick="toggleDark()" id="darkBtn" title="وضع ليلي">🌙</button>
+  </div>
+</div>
+
+<div class="controls" id="controls" style="display:none">
+  <button class="sort-btn active" id="btnFreq" onclick="setSort('freq')">الأكثر ورودًا</button>
+  <button class="sort-btn" id="btnAlpha" onclick="setSort('alpha')">أبجدي</button>
+  <input class="search-box" id="filterInput" placeholder="ابحث في الجذور..." oninput="applyFilter()">
+  <span class="count-label" id="countLabel"></span>
+</div>
+
+<div id="detailPanel" class="detail-panel" style="display:none"></div>
+
+<div class="roots-grid" id="rootsGrid"></div>
+
+<div class="no-data" id="noData" style="display:none">
+  <p style="font-size:1.2rem;margin-bottom:16px;">⚠️ لا توجد بيانات محفوظة</p>
+  <p style="font-size:0.95rem;margin-bottom:20px;">إذا كنت على نفس الموقع يرجى <a href="index.html">تحميل البيانات أولاً</a> من الصفحة الرئيسية</p>
+  <div style="border-top:1px solid #e0d0b8;padding-top:20px;margin-top:4px;">
+    <p style="font-size:0.9rem;color:#8b4513;margin-bottom:10px;">أو ارفع ملف data.xlsx مباشرة:</p>
+    <label for="localFileInputRoots" style="display:inline-block;background:linear-gradient(135deg,#c9a84c,#a07830);color:#fff;border-radius:10px;padding:10px 28px;cursor:pointer;font-size:1rem;">📂 اختر الملف</label>
+    <input type="file" id="localFileInputRoots" accept=".xlsx,.xls" style="display:none;" onchange="loadLocalFile(this)">
+    <div id="loadProgress" style="margin-top:14px;font-size:0.9rem;color:#8b6a4a;display:none;"></div>
+  </div>
+</div>
+
+<script>
+var rootsMap={}, currentSort='freq', filterText='', openRoot=null, openWordFilter=null;
+var maxCount=1;
+
+// Dark mode
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  var isDark=document.body.classList.contains('dark');
+  document.getElementById('darkBtn').textContent=isDark?'☀️':'🌙';
+  localStorage.setItem('qeDark',isDark?'1':'0');
+}
+if(localStorage.getItem('qeDark')==='1'){document.body.classList.add('dark');document.getElementById('darkBtn').textContent='☀️';}
+
+// Load from pre-computed JSON
+window.addEventListener('load',function(){
+  fetch('./data/roots-detail.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      // Convert compact format to full format
+      rootsMap={};
+      var roots=Object.keys(data);
+      for(var i=0;i<roots.length;i++){
+        var root=roots[i];
+        var entries=data[root];
+        rootsMap[root]=[];
+        for(var j=0;j<entries.length;j++){
+          var e=entries[j];
+          rootsMap[root].push({root:root,word:e.w,ayah_text:e.t,sura_name:e.sn,sura_num:e.s,pos:e.p});
+        }
+      }
+      maxCount=0;
+      for(var i=0;i<roots.length;i++)if(rootsMap[roots[i]].length>maxCount)maxCount=rootsMap[roots[i]].length;
+      render();
+      document.getElementById('controls').style.display='flex';
+    })
+    .catch(function(err){
+      // Fallback: try IndexedDB
+      tryIndexedDB();
+    });
+});
+
+function tryIndexedDB(){
+  function openDB(){return new Promise(function(res,rej){var r=indexedDB.open('QuranExplorer',2);r.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('data'))db.createObjectStore('data');};r.onsuccess=function(e){res(e.target.result);};r.onerror=function(e){rej(e.target.error);};});}
+  function dbGet(k){return openDB().then(function(db){return new Promise(function(res,rej){var r=db.transaction('data','readonly').objectStore('data').get(k);r.onsuccess=function(){res(r.result);};r.onerror=function(e){rej(e.target.error);};});});}
+  dbGet('allData').then(function(saved){
+    if(saved&&saved.length){
+      rootsMap={};
+      for(var i=0;i<saved.length;i++){
+        var r=saved[i];
+        if(!r.root)continue;
+        if(!rootsMap[r.root])rootsMap[r.root]=[];
+        rootsMap[r.root].push(r);
+      }
+      var roots=Object.keys(rootsMap);
+      maxCount=0;
+      for(var i=0;i<roots.length;i++)if(rootsMap[roots[i]].length>maxCount)maxCount=rootsMap[roots[i]].length;
+      render();
+      document.getElementById('controls').style.display='flex';
+    } else {
+      document.getElementById('noData').style.display='block';
+    }
+  }).catch(function(){
+    document.getElementById('noData').style.display='block';
+  });
+}
+
+function getSortedRoots(){
+  var roots=Object.keys(rootsMap);
+  // apply filter
+  if(filterText){
+    roots=roots.filter(function(r){return r.indexOf(filterText)>=0;});
+  }
+  if(currentSort==='freq'){
+    roots.sort(function(a,b){return rootsMap[b].length-rootsMap[a].length;});
+  } else {
+    roots.sort(function(a,b){return a.localeCompare(b,'ar');});
+  }
+  return roots;
+}
+
+function setSort(s){
+  currentSort=s;
+  document.getElementById('btnFreq').classList.toggle('active',s==='freq');
+  document.getElementById('btnAlpha').classList.toggle('active',s==='alpha');
+  closeDetail();
+  render();
+}
+
+function applyFilter(){
+  filterText=document.getElementById('filterInput').value.trim();
+  closeDetail();
+  render();
+}
+
+function render(){
+  var roots=getSortedRoots();
+  document.getElementById('countLabel').textContent=roots.length+' جذر';
+  var html='';
+  for(var i=0;i<roots.length;i++){
+    var root=roots[i];
+    var count=rootsMap[root].length;
+    var pct=Math.round(count/maxCount*100);
+    var rank=currentSort==='freq'?'#'+(i+1):'';
+    html+='<div class="root-card'+(openRoot===root?' open':'')+'" onclick="toggleDetail(\''+esc(root)+'\')" id="card_'+esc(root)+'">'
+      +'<div class="root-rank">'+rank+'</div>'
+      +'<div class="root-word">'+root+'</div>'
+      +'<div class="root-count">'+count+' موضع</div>'
+      +'<div class="root-bar" style="width:'+pct+'%"></div>'
+      +'</div>';
+  }
+  document.getElementById('rootsGrid').innerHTML=html;
+}
+
+function toggleDetail(root){
+  if(openRoot===root){closeDetail();return;}
+  openRoot=root;
+  openWordFilter=null;
+  render();
+  showDetail(root);
+  // scroll detail into view
+  setTimeout(function(){document.getElementById('detailPanel').scrollIntoView({behavior:'smooth',block:'nearest'});},100);
+}
+
+function closeDetail(){
+  openRoot=null;openWordFilter=null;
+  document.getElementById('detailPanel').style.display='none';
+  document.getElementById('detailPanel').innerHTML='';
+}
+
+function showDetail(root){
+  var entries=rootsMap[root];if(!entries)return;
+  var sorted=entries.slice().sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
+
+  // word frequency chips
+  var wc={};for(var i=0;i<sorted.length;i++)if(sorted[i].word)wc[sorted[i].word]=(wc[sorted[i].word]||0)+1;
+  var we=Object.keys(wc).sort(function(a,b){return wc[b]-wc[a];});
+
+  // get sura names for meta
+  var suras={};for(var i=0;i<sorted.length;i++)suras[sorted[i].sura_num]=sorted[i].sura_name;
+  var suraCount=Object.keys(suras).length;
+
+  var chipsHtml='';
+  for(var i=0;i<we.length;i++){
+    chipsHtml+='<span class="word-chip'+(openWordFilter===we[i]?' active':'')+'" onclick="filterWord(\''+esc(root)+'\',\''+esc(we[i])+'\')">'
+      +we[i]+' <small style="opacity:.7">('+wc[we[i]]+')</small></span>';
+  }
+
+  var display=openWordFilter?sorted.filter(function(r){return r.word===openWordFilter;}):sorted;
+  var ayahsHtml='';
+  for(var i=0;i<display.length;i++){
+    var e=display[i];
+    var txt=highlight(e.ayah_text,e.word);
+    ayahsHtml+='<div class="ayah-row">'
+      +'<span class="ayah-num">'+(i+1)+'</span>'
+      +'<span class="ayah-ref">'+e.sura_name+' '+e.pos+'</span>'
+      +'<span class="ayah-txt">'+txt+'</span>'
+      +'</div>';
+  }
+
+  var html='<div class="detail-inner">'
+    +'<div class="detail-header">'
+    +'<div class="detail-root">'+root+'</div>'
+    +'<div class="detail-meta">'+sorted.length+' موضع &nbsp;|&nbsp; '+suraCount+' سورة</div>'
+    +'<button class="detail-close" onclick="closeDetail()">✕ إغلاق</button>'
+    +'</div>'
+    +(we.length>1?'<div class="word-chips">'+chipsHtml+'</div>':'')
+    +'<div class="ayah-list">'+ayahsHtml+'</div>'
+    +'</div>';
+
+  var panel=document.getElementById('detailPanel');
+  panel.style.display='block';
+  panel.innerHTML=html;
+}
+
+function filterWord(root,word){
+  openWordFilter=(openWordFilter===word)?null:word;
+  showDetail(root);
+}
+
+function highlight(text,word){
+  if(!word||!text)return text||'';
+  var idx=text.indexOf(word);
+  if(idx>=0)return text.substring(0,idx)+'<span style="color:#cc0000;">'+word+'</span>'+text.substring(idx+word.length);
+  return text;
+}
+
+function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+function loadLocalFile(input){
+  if(!input.files||!input.files[0])return;
+  var prog=document.getElementById('loadProgress');
+  prog.style.display='block';prog.textContent='جاري قراءة الملف...';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    prog.textContent='جاري معالجة البيانات...';
+    try{
+      var wb=XLSX.read(e.target.result,{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      processAndShow(rows);
+      prog.textContent='';
+    }catch(err){prog.textContent='خطأ: '+err.message;}
+  };
+  reader.onerror=function(){prog.textContent='تعذّر قراءة الملف';};
+  reader.readAsArrayBuffer(input.files[0]);
+}
+
+function processAndShow(rows){
+  if(!rows.length)return;
+  var keys=Object.keys(rows[0]);
+  function find(){for(var i=0;i<arguments.length;i++){var c=arguments[i].toLowerCase().replace(/[\s_]/g,'');var k=keys.find(function(k){return k.toLowerCase().replace(/[\s_]/g,'').indexOf(c)>=0;});if(k)return k;}return null;}
+  var kRoot=find('root'),kWord=find('word_uthmani_tashkeel','word_uthmani','word'),kAyah=find('ayah_text_tashkeel','ayah_text_ta','ayah_text','text'),kSuraName=find('sura_name','surah_name'),kSuraNum=find('sura_num','sura','surah'),kPos=find('ayah_pos_su','ayah_pos','pos');
+  allData=[];
+  for(var i=0;i<rows.length;i++){var r=rows[i];var root=String(r[kRoot]||'').trim();if(!root)continue;allData.push({root:root,word:String(r[kWord]||'').trim(),ayah_text:String(r[kAyah]||'').trim(),sura_name:String(r[kSuraName]||'').trim(),sura_num:String(r[kSuraNum]||'').trim(),pos:String(r[kPos]||'').trim()});}
+  buildMaps();
+  document.getElementById('noData').style.display='none';
+  document.getElementById('controls').style.display='flex';
+  render();
+}
+</script>
+<script src="nav.js?v=3"></script>
+</body>
+</html>
