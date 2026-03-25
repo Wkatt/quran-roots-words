@@ -174,8 +174,10 @@ body.dark .ayah-txt { color: #e8d8b8; }
 
 <!-- Controls -->
 <div class="controls" id="controls" style="display:none">
-  <button class="sort-btn active" id="btnFreq" onclick="setSort('freq')">الأكثر ورودًا</button>
-  <button class="sort-btn" id="btnAlpha" onclick="setSort('alpha')">أبجدي</button>
+  <button class="sort-btn" id="btnFreqDesc" onclick="setSort('freqDesc')">الأكثر وروداً ↓</button>
+  <button class="sort-btn active" id="btnFreqAsc" onclick="setSort('freqAsc')">الأقل وروداً ↑</button>
+  <button class="sort-btn" id="btnAlphaAsc" onclick="setSort('alphaAsc')">أبجدي أ←ي</button>
+  <button class="sort-btn" id="btnAlphaDesc" onclick="setSort('alphaDesc')">أبجدي ي←أ</button>
   <input class="search-box" id="filterInput" placeholder="ابحث في الجذور..." oninput="applyFilter()">
   <span class="count-label" id="countLabel"></span>
 </div>
@@ -215,7 +217,7 @@ body.dark .ayah-txt { color: #e8d8b8; }
 <div class="toast" id="toast"></div>
 
 <script>
-var rootsMap = {}, currentSort = 'freq', filterText = '', filterLetter = '', openRoot = null, openWordFilter = null;
+var rootsMap = {}, currentSort = 'freqAsc', filterText = '', filterLetter = '', openRoot = null, openWordFilter = null;
 var maxCount = 1;
 var ARABIC_LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
 
@@ -322,15 +324,20 @@ function getSortedRoots() {
   var roots = Object.keys(rootsMap);
   if (filterLetter) roots = roots.filter(function (r) { return r.charAt(0) === filterLetter; });
   if (filterText) roots = roots.filter(function (r) { return r.indexOf(filterText) >= 0; });
-  if (currentSort === 'freq') roots.sort(function (a, b) { return rootsMap[b].length - rootsMap[a].length; });
-  else roots.sort(function (a, b) { return a.localeCompare(b, 'ar'); });
+  if (currentSort === 'freqDesc') roots.sort(function (a, b) { return rootsMap[b].length - rootsMap[a].length; });
+  else if (currentSort === 'freqAsc') roots.sort(function (a, b) { return rootsMap[a].length - rootsMap[b].length; });
+  else if (currentSort === 'alphaAsc') roots.sort(function (a, b) { return a.localeCompare(b, 'ar'); });
+  else roots.sort(function (a, b) { return b.localeCompare(a, 'ar'); });
   return roots;
 }
 
 function setSort(s) {
   currentSort = s;
-  document.getElementById('btnFreq').classList.toggle('active', s === 'freq');
-  document.getElementById('btnAlpha').classList.toggle('active', s === 'alpha');
+  ['btnFreqDesc','btnFreqAsc','btnAlphaAsc','btnAlphaDesc'].forEach(function(id){
+    document.getElementById(id).classList.remove('active');
+  });
+  var map = { freqDesc:'btnFreqDesc', freqAsc:'btnFreqAsc', alphaAsc:'btnAlphaAsc', alphaDesc:'btnAlphaDesc' };
+  if (map[s]) document.getElementById(map[s]).classList.add('active');
   closeDetail();
   render();
 }
@@ -350,7 +357,7 @@ function render() {
     var root = roots[i];
     var count = rootsMap[root].length;
     var pct = Math.round(count / maxCount * 100);
-    var rank = currentSort === 'freq' ? '#' + (i + 1) : '';
+    var rank = (currentSort === 'freqDesc' || currentSort === 'freqAsc') ? '#' + (i + 1) : '';
     html += '<div class="root-card' + (openRoot === root ? ' open' : '') + '" onclick="toggleDetail(\'' + esc(root) + '\')" id="card_' + esc(root) + '">'
       + '<div class="root-rank">' + rank + '</div>'
       + '<div class="root-word">' + root + '</div>'

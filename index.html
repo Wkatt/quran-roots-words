@@ -470,21 +470,7 @@
 
 
 
-<div class="init-screen" id="initScreen">
-  <div class="init-icon">📖</div>
-  <div class="init-title">مرحباً بك في مستكشف القرآن العظيم</div>
-  <div class="init-sub">اضغط الزر لتحميل البيانات — مرة واحدة فقط ثم تُحفظ تلقائياً</div>
-  <button class="init-btn" id="initBtn" onclick="initLoad()">تحميل البيانات والبدء</button>
-  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
-  <div class="progress-text" id="progressText"></div>
-  <div style="margin-top:24px;">
-    <span id="localUploadToggle" onclick="document.getElementById('localUploadArea').style.display='block';this.style.display='none';" style="font-size:0.78rem;color:#b09070;cursor:pointer;text-decoration:underline dotted;opacity:0.7;">&#x1F4C2; أو تحميل ملف محلي (للعمل بدون إنترنت)</span>
-    <div id="localUploadArea" style="display:none;text-align:center;">
-      <label for="localFileInput" style="font-size:0.78rem;color:#9a7a5a;display:block;margin-bottom:6px;">اختر ملف data.xlsx من جهازك:</label>
-      <input type="file" id="localFileInput" accept=".xlsx,.xls" onchange="initLoadLocal(this)" style="font-size:0.78rem;color:#7a5c3a;max-width:260px;">
-    </div>
-  </div>
-</div>
+<div class="init-screen" id="initScreen" style="display:none;"></div>
 
 <div class="search-container" id="searchContainer">
   <div class="search-tabs">
@@ -751,7 +737,7 @@ function showSearchUI(){
   document.getElementById('searchContainer').style.display='block';
   document.getElementById('statsBar').style.display='block';
   document.getElementById('fontBar').style.display='flex';
-  document.getElementById('statsBar').innerHTML='السجلات: '+allData.length+' | الجذور: '+rc+' | الكلمات: '+wc+' | الآيات: '+ayahsArr.length+' &nbsp;<span style="color:#b04020;cursor:pointer;font-size:0.8rem;" onclick="clearSaved()">✕ مسح البيانات</span> &nbsp;<label for="localFileInputMain" style="color:#8a6a4a;cursor:pointer;font-size:0.78rem;text-decoration:underline dotted;">📂 تحميل ملف محلي</label><input type="file" id="localFileInputMain" accept=".xlsx,.xls" style="display:none;" onchange="initLoadLocal(this)">';
+  document.getElementById('statsBar').innerHTML='السجلات: '+allData.length+' | الجذور: '+rc+' | الكلمات: '+wc+' | الآيات: '+ayahsArr.length;
   renderSidebar();
 }
 
