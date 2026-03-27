@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quranrootswords.netlify.app/sitemap.xml

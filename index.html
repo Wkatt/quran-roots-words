@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مستكشف القرآن العظيم</title>
+<title>مستكشف القرآن العظيم — جذور الكلمات والحقول الدلالية</title>
+<meta name="description" content="أداة لغوية لاستكشاف جذور الكلمات القرآنية وحقولها الدلالية. ابحث في أي كلمة قرآنية واكتشف جذرها ومعانيها وعلاقاتها بسائر الكلمات في القرآن الكريم.">
+<meta name="keywords" content="القرآن الكريم, جذور الكلمات القرآنية, تدبر القرآن, الحقول الدلالية, تفسير القرآن, لغة القرآن, البحث القرآني, معجم قرآني, اشتقاق الكلمات, نفي الترادف">
+<meta name="author" content="مستكشف القرآن العظيم">
+<link rel="canonical" href="https://quranrootswords.netlify.app/">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://quranrootswords.netlify.app/">
+<meta property="og:title" content="مستكشف القرآن العظيم — جذور الكلمات والحقول الدلالية">
+<meta property="og:description" content="أداة لغوية لاستكشاف جذور الكلمات القرآنية وحقولها الدلالية. ابحث في أي كلمة قرآنية واكتشف جذرها ومعانيها وعلاقاتها بسائر الكلمات في القرآن الكريم.">
+<meta property="og:locale" content="ar_SA">
+<meta property="og:site_name" content="مستكشف القرآن العظيم">
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#6b3a1f">
@@ -992,8 +1003,8 @@ function handleSearch(){
     recordSearch(q,'root');
     var list=Object.keys(rootsMap).filter(function(k){return normalizeForSearch(k).indexOf(qNorm)>=0;}).sort();
     if(list.length===1)renderRootResults(list[0]);
-    else if(list.length>1){var exact=list.find(function(k){return normalizeForSearch(k)===qNorm;});if(exact){renderRootResults(exact);}else{var suggestions=list.map(function(k){return'<span class="chip" style="cursor:pointer;" onclick="document.getElementById(\'searchInput\').value=\''+esc(k)+'\';handleSearch()">'+k+'</span>';}).join('');document.getElementById('resultsArea').innerHTML='<div class="no-results"><div style="margin-bottom:12px;">تعددت الجذور المطابقة لـ \u00ab'+q+'\u00bb \u2014 اختر جذراً:</div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">'+suggestions+'</div></div>';}}
-    else document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يُعثر على جذر: '+q+'</div>';
+    else if(list.length>1){var exact=list.find(function(k){return normalizeForSearch(k)===qNorm;});if(exact){renderRootResults(exact);}else{var suggestions=list.map(function(k){return'<span class="chip" style="cursor:pointer;" onclick="document.getElementById(\'searchInput\').value=\''+esc(k)+'\';handleSearch()">'+k+'</span>';}).join('');document.getElementById('resultsArea').innerHTML='<div class="no-results"><div style="margin-bottom:12px;">تعددت الجذور المطابقة لـ \u00ab'+escHtml(q)+'\u00bb \u2014 اختر جذراً:</div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">'+suggestions+'</div></div>';}}
+    else document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يُعثر على جذر: '+escHtml(q)+'</div>';
   } else {
     activeRootFilter=null;activeWordFormFilter=null;
     if(!q){document.getElementById('chipsArea').innerHTML='';document.getElementById('resultsArea').innerHTML='';['rootFilterBar','sortBar','toolbar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});hideLoadMore();return;}
@@ -1032,7 +1043,7 @@ function searchPhrase(q){
 
 function renderPhraseResults(q,results){
   var area=document.getElementById('resultsArea');
-  if(!results.length){area.innerHTML='<div class="no-results">لم يتم العثور على نتائج للعبارة: «'+q+'»</div>';hideLoadMore();return;}
+  if(!results.length){area.innerHTML='<div class="no-results">لم يتم العثور على نتائج للعبارة: «'+escHtml(q)+'»</div>';hideLoadMore();return;}
   var sorted=results.slice();if(currentSort==='sura')sorted.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
   var header='<div class="root-header phrase-header"><div class="root-title phrase-title">«'+q+'»</div><div style="color:#2b4c8c;font-size:1.1rem">'+results.length+' آية</div></div>';
   area.innerHTML=header+'<div id="pagedCards"></div>';
@@ -1140,7 +1151,7 @@ function displayWordResults(q,entries){
 }
 
 function renderWordSearchResults(q,entries){
-  if(!entries.length){document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يتم العثور على نتائج: '+q+'</div>';hideLoadMore();return;}
+  if(!entries.length){document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يتم العثور على نتائج: '+escHtml(q)+'</div>';hideLoadMore();return;}
   exportTitle='بحث الكلمة: '+q;
   exportData=entries.map(function(e){return{word:e.word,root:e.root,sura_name:e.sura_name,sura_num:e.sura_num,pos:e.pos,ayah_text:e.ayah_text};});
   var rs={};for(var i=0;i<entries.length;i++)if(entries[i].root)rs[entries[i].root]=1;
@@ -1238,6 +1249,7 @@ function exportDetailedExcel(){
 
 // ===== مساعدات =====
 function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function contextBlock(label,text){if(!text)return'';var id='ctx'+(++ctxId);return'<div class="context-toggle" onclick="toggleCtx(\''+id+'\')"><span id="arr'+id+'">&#9664;</span> '+label+'</div><div class="context-body" id="'+id+'" style="font-size:'+(currentFontSize*0.8)+'rem">'+text+'</div>';}
 function toggleCtx(id){var el=document.getElementById(id),arr=document.getElementById('arr'+id);var open=el.style.display==='block';el.style.display=open?'none':'block';if(arr)arr.style.transform=open?'':'rotate(-90deg)';}
 function entryCard(e,num){
