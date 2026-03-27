@@ -14,7 +14,7 @@
 <title>إحصائيات الكلمات — مستكشف القرآن العظيم</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Amiri','Traditional Arabic',serif;background:#f5f0e8;color:#2c1a0e;min-height:100vh;direction:rtl;}
@@ -179,17 +179,6 @@ body.dark .panel-body::-webkit-scrollbar-track{background:#1a1208;}
 <div id="printArea" style="display:none"></div>
 
 <script>
-// ===== Dark Mode =====
-function toggleDark(){
-  document.body.classList.toggle('dark');
-  var d=document.body.classList.contains('dark');
-  document.getElementById('darkBtn').textContent=d?'☀️':'🌙';
-  localStorage.setItem('qeDark',d?'1':'0');
-}
-if(localStorage.getItem('qeDark')==='1'){
-  document.body.classList.add('dark');
-  document.getElementById('darkBtn').textContent='☀️';
-}
 
 // ===== State =====
 var wordsData={};

@@ -262,13 +262,9 @@ function setLetter(l) {
 
 /* ── Load: JSON first, then IndexedDB ── */
 window.addEventListener('load', function () {
-  Promise.all([
-    fetch('./data/roots-detail.json').then(function (r) { return r.json(); }),
-    fetch('./data/ayahs.json').then(function (r) { return r.json(); })
-  ])
-    .then(function (results) {
-      var data = results[0];
-      var ayahs = results[1];
+  fetch('./data/roots-detail.json')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
       rootsMap = {};
       var roots = Object.keys(data);
       for (var i = 0; i < roots.length; i++) {
@@ -277,9 +273,7 @@ window.addEventListener('load', function () {
         rootsMap[root] = [];
         for (var j = 0; j < entries.length; j++) {
           var e = entries[j];
-          var ayahKey = e.s + ':' + e.p;
-          var ayah = ayahs[ayahKey] || {};
-          rootsMap[root].push({ root: root, word: e.w, ayah_text: ayah.t || '', sura_name: ayah.sn || '', sura_num: e.s, pos: e.p });
+          rootsMap[root].push({ root: root, word: e.w, ayah_text: e.t, sura_name: e.sn, sura_num: e.s, pos: e.p });
         }
       }
       maxCount = 0;

@@ -16,6 +16,9 @@
         { href: 'stats-words.html', label: '📝 إحصائيات الكلمات' },
       ]
     },
+    { href: 'ai-guide.html',        label: '🤖 التحليل بالذكاء الاصطناعي' },
+    { href: 'why.html',             label: '💡 لماذا هذا الموقع؟' },
+    { href: 'about.html',           label: 'ℹ️ عن الموقع'     },
   ];
 
   // Detect current page
@@ -252,5 +255,31 @@
     document.addEventListener('DOMContentLoaded', inject);
   } else {
     inject();
+  }
+})();
+
+// ===== Dark Mode (shared across all pages) =====
+(function () {
+  // Apply class immediately — prevents flash of light mode
+  if (localStorage.getItem('qeDark') === '1') {
+    document.body.classList.add('dark');
+  }
+
+  window.toggleDark = function () {
+    document.body.classList.toggle('dark');
+    var isDark = document.body.classList.contains('dark');
+    var btn = document.getElementById('darkBtn');
+    if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+    localStorage.setItem('qeDark', isDark ? '1' : '0');
+  };
+
+  function updateDarkBtn() {
+    var btn = document.getElementById('darkBtn');
+    if (btn && localStorage.getItem('qeDark') === '1') btn.textContent = '☀️';
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateDarkBtn);
+  } else {
+    updateDarkBtn();
   }
 })();

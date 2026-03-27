@@ -21,7 +21,7 @@
   gtag('js', new Date());
   gtag('config', 'G-DGJW3108XZ');
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
 <style>
@@ -439,9 +439,50 @@
   .wp-field-save-detail{background:#2b4c8c;}
   .wp-field-save-detail:disabled{opacity:.5;cursor:not-allowed;}
   .wp-field-btns{display:flex;gap:6px;flex-wrap:wrap;}
+  /* زر AI */
+  .wp-field-save-ai{background:#1a5c9c;border-radius:8px 0 0 8px;}
+  .wp-field-save-ai.copied{background:#1a6b4a;}
+  .wp-field-ai-wrap{display:inline-flex;align-items:stretch;}
+  .wp-field-ai-help{background:#0e3a6e;color:#c8dff8;border:none;border-radius:0 8px 8px 0;padding:0 7px;cursor:pointer;font-size:.82rem;font-weight:bold;transition:background .15s;}
+  .wp-field-ai-help:hover{background:#1a5c9c;color:#fff;}
+  /* Popup AI */
+  .ai-help-popup{display:none;position:fixed;z-index:9999;background:#fff;border:1.5px solid #1a5c9c44;border-radius:14px;box-shadow:0 8px 32px #0004;padding:18px 20px;max-width:320px;font-family:inherit;direction:rtl;text-align:right;}
+  body.dark .ai-help-popup{background:#1a2a3a;border-color:#2a5a9c66;color:#d0e8ff;}
+  .ai-help-popup.visible{display:block;}
+  .ai-help-popup h4{font-size:1rem;color:#0e3a6e;margin-bottom:10px;}
+  body.dark .ai-help-popup h4{color:#7ab8f5;}
+  .ai-help-popup ol{padding-right:18px;margin:0;}
+  .ai-help-popup li{font-size:.88rem;color:#2c3a4a;margin-bottom:8px;line-height:1.6;}
+  body.dark .ai-help-popup li{color:#b0ccee;}
+  .ai-help-popup li strong{color:#0e3a6e;}
+  body.dark .ai-help-popup li strong{color:#7ab8f5;}
+  .ai-help-popup .ai-help-close{position:absolute;top:10px;left:14px;background:none;border:none;font-size:1.1rem;cursor:pointer;color:#888;line-height:1;}
+  .ai-help-popup .ai-help-close:hover{color:#333;}
+  .ai-help-chip{display:inline-block;background:#1a5c9c;color:#fff;border-radius:5px;padding:1px 7px;font-size:.78rem;vertical-align:middle;}
+  .ai-help-chip.blue{background:#2b4c8c;}
+  .ai-note{font-size:.78rem;color:#7a9abf;margin-top:10px;border-top:1px solid #e0ecff;padding-top:8px;}
+  body.dark .ai-note{color:#5a80a8;border-color:#2a3a4a;}
+
+  /* ===== Skeleton Loading ===== */
+  .sk-card{background:#fff;border:1px solid #e0d0b8;border-radius:12px;margin-bottom:20px;overflow:hidden;}
+  body.dark .sk-card{background:#221508;border-color:#4a3520;}
+  .sk-hrow{background:#fdf5e6;padding:12px 20px;border-bottom:1px solid #e8d8b8;display:flex;gap:10px;align-items:center;}
+  body.dark .sk-hrow{background:#2a1c0a;border-color:#4a3520;}
+  .sk-brow{padding:16px 20px;display:flex;flex-direction:column;gap:10px;}
+  .sk-line{height:13px;border-radius:7px;background:linear-gradient(90deg,#e0d0b8 25%,#f5ead0 50%,#e0d0b8 75%);background-size:200% 100%;animation:sk-shimmer 1.4s infinite;}
+  body.dark .sk-line{background:linear-gradient(90deg,#3a2a10 25%,#4a3a18 50%,#3a2a10 75%);background-size:200% 100%;}
+  @keyframes sk-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .sk-w20{width:20%;}.sk-w30{width:30%;}.sk-w50{width:50%;}.sk-w70{width:70%;}.sk-w90{width:90%;}
+
+  /* ===== Load More Button ===== */
+  .load-more-wrap{text-align:center;padding:20px 20px 40px;}
+  .load-more-btn{background:linear-gradient(135deg,#fff8f0,#fdf0dc);border:1px solid #c9a84c88;border-radius:24px;color:#8b4513;font-family:'Amiri','Traditional Arabic',serif;font-size:1rem;padding:10px 32px;cursor:pointer;transition:all .2s;}
+  .load-more-btn:hover{background:#c9a84c;color:#fff;border-color:#c9a84c;box-shadow:0 4px 14px #c9a84c33;}
+  body.dark .load-more-btn{background:#2a1c0a;color:#c9a84c;border-color:#7a5c3a66;}
+  body.dark .load-more-btn:hover{background:#c9a84c;color:#1a1208;}
 </style>
 <!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.100.1/dist/umd/supabase.min.js" integrity="sha384-RJpiDscpUIa2tmNUABXIB4EgEoaAMRcl5+yJJxYC+kXKvCFctiqLTn9j1AwOc9n1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPA_URL = 'https://vsmpqiqmlnbxiihebtoo.supabase.co';
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzbXBxaXFtbG5ieGlpaGVidG9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MjIyNzIsImV4cCI6MjA4OTE5ODI3Mn0.kyEiJ17zAIBVCWuqSovpHEXQokxHuwD5gUMBKHEmdso';
@@ -547,6 +588,9 @@
 <div class="main-with-sidebar">
 <div class="main-content-col">
 <div class="results-area" id="resultsArea"></div>
+<div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
+  <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreResults()">⬇ تحميل المزيد</button>
+</div>
 </div>
 <div class="sidebar-col" id="sidebarCol" style="display:none;">
   <div class="sidebar-panel">
@@ -609,14 +653,44 @@ var exportData=[], exportTitle='';
 var currentFontSize=1.35;
 var chartVisible=true;
 
-// ===== Dark Mode =====
-function toggleDark(){
-  document.body.classList.toggle('dark');
-  var isDark=document.body.classList.contains('dark');
-  document.getElementById('darkBtn').textContent=isDark?'☀️':'🌙';
-  localStorage.setItem('qeDark',isDark?'1':'0');
+// ===== Pagination (Load More) =====
+var RESULTS_PER_PAGE=25;
+var _pagedAll=[],_pagedShown=0,_pagedRenderFn=null;
+
+function initPaging(all,renderFn){
+  _pagedAll=all;_pagedShown=0;_pagedRenderFn=renderFn;
+  _pagedShown=Math.min(RESULTS_PER_PAGE,_pagedAll.length);
+  _pagedRenderFn(_pagedAll.slice(0,_pagedShown));
+  _updateLoadMoreBtn();
 }
-if(localStorage.getItem('qeDark')==='1'){document.body.classList.add('dark');document.getElementById('darkBtn').textContent='☀️';}
+function loadMoreResults(){
+  _pagedShown=Math.min(_pagedShown+RESULTS_PER_PAGE,_pagedAll.length);
+  _pagedRenderFn(_pagedAll.slice(0,_pagedShown));
+  _updateLoadMoreBtn();
+  // scroll to last loaded result
+  var cards=document.getElementById('pagedCards');
+  if(cards){var allCards=cards.querySelectorAll('.entry-card');var target=allCards[_pagedShown-RESULTS_PER_PAGE];if(target)target.scrollIntoView({behavior:'smooth',block:'start'});}
+}
+function hideLoadMore(){document.getElementById('loadMoreWrap').style.display='none';}
+function _updateLoadMoreBtn(){
+  var remaining=_pagedAll.length-_pagedShown;
+  var wrap=document.getElementById('loadMoreWrap');
+  wrap.style.display=remaining>0?'block':'none';
+  if(remaining>0)document.getElementById('loadMoreBtn').textContent='⬇ تحميل '+Math.min(remaining,RESULTS_PER_PAGE)+' المزيد  ('+remaining+' متبقية)';
+}
+
+// ===== Skeleton Loading =====
+function showSearchSkeleton(){
+  var sk='';
+  for(var i=0;i<3;i++){
+    sk+='<div class="sk-card">'+
+      '<div class="sk-hrow"><div class="sk-line sk-w20"></div><div class="sk-line sk-w30"></div><div class="sk-line sk-w20"></div></div>'+
+      '<div class="sk-brow"><div class="sk-line sk-w90"></div><div class="sk-line sk-w70"></div><div class="sk-line sk-w50"></div></div>'+
+    '</div>';
+  }
+  document.getElementById('resultsArea').innerHTML=sk;
+  hideLoadMore();
+}
 
 // ===== Font Size =====
 function changeFontSize(v){
@@ -667,7 +741,7 @@ function autoLoad(pTab,pQ){
     .then(function(res){if(!res.ok)throw new Error('تعذّر تحميل الملف ('+res.status+')');document.getElementById('loadingSub').textContent='جاري معالجة البيانات...';return res.arrayBuffer();})
     .then(function(buf){document.getElementById('loadingSub').textContent='جاري الحفظ للزيارات القادمة...';var wb=XLSX.read(buf,{type:'array'});var ws=wb.Sheets[wb.SheetNames[0]];var rows=XLSX.utils.sheet_to_json(ws,{defval:''});processRows(rows);return dbSet('allData',allData);})
     .then(function(){document.getElementById('loadingOverlay').style.display='none';showSearchUI();if(pTab&&pQ){switchTab(pTab);document.getElementById('searchInput').value=pQ;handleSearch();}})
-    .catch(function(err){document.getElementById('loadingText').textContent='⚠️ خطأ في التحميل';document.getElementById('loadingSub').innerHTML=err.message+'<br><button onclick="location.reload()" style="margin-top:12px;padding:8px 20px;background:#c9a84c;border:none;border-radius:8px;color:#fff;font-family:inherit;cursor:pointer;font-size:1rem;">🔄 إعادة المحاولة</button>';});
+    .catch(function(err){document.getElementById('loadingText').textContent='⚠️ خطأ في التحميل';var sub=document.getElementById('loadingSub');sub.textContent=err.message;var btn=document.createElement('button');btn.style.cssText='margin-top:12px;padding:8px 20px;background:#c9a84c;border:none;border-radius:8px;color:#fff;font-family:inherit;cursor:pointer;font-size:1rem;display:block;';btn.textContent='🔄 إعادة المحاولة';btn.onclick=function(){location.reload();};sub.appendChild(btn);});
 }
 
 function setProgress(p){document.getElementById('progressFill').style.width=p+'%';}
@@ -832,6 +906,7 @@ function clearSearch(){
   document.getElementById('chipsArea').innerHTML='';
   document.getElementById('resultsArea').innerHTML='';
   ['rootFilterBar','sortBar','toolbar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});
+  hideLoadMore();
   inp.focus();
 }
 
@@ -911,7 +986,8 @@ function handleSearch(){
   var qNorm=normalizeForSearch(q);
   if(currentTab==='root'){
     document.getElementById('rootFilterBar').style.display='none';activeRootFilter=null;
-    if(!q){document.getElementById('resultsArea').innerHTML='';document.getElementById('sortBar').style.display='none';document.getElementById('toolbar').style.display='none';document.getElementById('statsChart').style.display='none';document.getElementById('shareBar').style.display='none';return;}
+    if(!q){document.getElementById('resultsArea').innerHTML='';document.getElementById('sortBar').style.display='none';document.getElementById('toolbar').style.display='none';document.getElementById('statsChart').style.display='none';document.getElementById('shareBar').style.display='none';hideLoadMore();return;}
+    showSearchSkeleton();
     if(typeof gtag!=='undefined')gtag('event','search',{search_term:q,search_type:'root'});
     recordSearch(q,'root');
     var list=Object.keys(rootsMap).filter(function(k){return normalizeForSearch(k).indexOf(qNorm)>=0;}).sort();
@@ -920,7 +996,8 @@ function handleSearch(){
     else document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يُعثر على جذر: '+q+'</div>';
   } else {
     activeRootFilter=null;activeWordFormFilter=null;
-    if(!q){document.getElementById('chipsArea').innerHTML='';document.getElementById('resultsArea').innerHTML='';['rootFilterBar','sortBar','toolbar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});return;}
+    if(!q){document.getElementById('chipsArea').innerHTML='';document.getElementById('resultsArea').innerHTML='';['rootFilterBar','sortBar','toolbar','statsChart','shareBar'].forEach(function(id){document.getElementById(id).style.display='none';});hideLoadMore();return;}
+    showSearchSkeleton();
     if(typeof gtag!=='undefined')gtag('event','search',{search_term:q,search_type:'word'});
     recordSearch(q,'word');
     var seen={},matched=[];
@@ -939,7 +1016,8 @@ function normalizeForPhrase(s){if(!s)return'';var r=normalizeArabic(stripDiacrit
 
 function searchPhrase(q){
   document.getElementById('sortBar').style.display='none';document.getElementById('toolbar').style.display='none';document.getElementById('statsChart').style.display='none';document.getElementById('shareBar').style.display='none';
-  if(!q||q.length<2){document.getElementById('resultsArea').innerHTML='';return;}
+  if(!q||q.length<2){document.getElementById('resultsArea').innerHTML='';hideLoadMore();return;}
+  showSearchSkeleton();
   if(typeof gtag!=='undefined')gtag('event','search',{search_term:q,search_type:'phrase'});
   recordSearch(q,'phrase');
   var qNorm=normalizeForPhrase(q);if(!qNorm)return;
@@ -954,20 +1032,23 @@ function searchPhrase(q){
 
 function renderPhraseResults(q,results){
   var area=document.getElementById('resultsArea');
-  if(!results.length){area.innerHTML='<div class="no-results">لم يتم العثور على نتائج للعبارة: «'+q+'»</div>';return;}
+  if(!results.length){area.innerHTML='<div class="no-results">لم يتم العثور على نتائج للعبارة: «'+q+'»</div>';hideLoadMore();return;}
   var sorted=results.slice();if(currentSort==='sura')sorted.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
-  var html='<div class="root-header phrase-header"><div class="root-title phrase-title">«'+q+'»</div><div style="color:#2b4c8c;font-size:1.1rem">'+results.length+' آية</div></div>';
-  html+=renderGrouped(sorted,function(ay,num){
-    return'<div class="entry-card"><div class="entry-header"><span style="color:#aaa;font-size:.9rem">'+num+'</span><span class="badge blue">'+ay.sura_name+'</span><span class="badge blue">آية '+ay.pos+'</span>'+
-    '<button class="fav-btn'+(isBookmarked('ayah::'+ay.sura_num+'::'+ay.pos)?' faved':'')+'" title="حفظ في المفضلة" onclick="toggleAyahFav(this,\'ayah::'+esc(ay.sura_num)+'::'+esc(ay.pos)+'\',\''+esc(ay.sura_name)+'\',\''+esc(ay.pos)+'\',\'\',\''+esc(ay.ayah_text)+'\')">'+(isBookmarked('ayah::'+ay.sura_num+'::'+ay.pos)?'⭐':'☆')+'</button>'+
-    '<button title="وضع القراءة المركّزة" class="fr-open-btn" style="background:transparent;border:1px solid #7a9ae855;border-radius:8px;padding:3px 10px;font-size:0.82rem;cursor:pointer;color:#2b4c8c;transition:all .18s;flex-shrink:0;" onclick="openFocusReaderFromCard(this)">🔍</button>'+
-    '<button class="share-ayah-btn" onclick="openShareModal(\''+esc(ay.ayah_text)+'\',\''+esc(ay.sura_name)+'\',\''+esc(ay.pos)+'\',\'\',\'\')">📤</button>'+
-    '</div>'+
-    '<div class="ayah-section"><div class="ayah-text" style="font-size:'+currentFontSize+'rem">'+_wpBuildAyahPhrase(ay.ayah_text,q,ay.sura_name,ay.pos,ay.ayah_text_normal||ay.ayah_text_no_tash)+
-    '<button class="copy-btn" onclick="copyAyah(this,\''+esc(ay.ayah_text)+'\')">نسخ</button></div>'+
-    contextBlock('خمس آيات قبلها',ay.before)+contextBlock('خمس آيات بعدها',ay.after)+'</div></div>';
-  },currentSort==='sura');
-  area.innerHTML=html;
+  var header='<div class="root-header phrase-header"><div class="root-title phrase-title">«'+q+'»</div><div style="color:#2b4c8c;font-size:1.1rem">'+results.length+' آية</div></div>';
+  area.innerHTML=header+'<div id="pagedCards"></div>';
+  var _q=q;
+  initPaging(sorted,function(items){
+    document.getElementById('pagedCards').innerHTML=renderGrouped(items,function(ay,num){
+      return'<div class="entry-card"><div class="entry-header"><span style="color:#aaa;font-size:.9rem">'+num+'</span><span class="badge blue">'+ay.sura_name+'</span><span class="badge blue">آية '+ay.pos+'</span>'+
+      '<button class="fav-btn'+(isBookmarked('ayah::'+ay.sura_num+'::'+ay.pos)?' faved':'')+'" title="حفظ في المفضلة" onclick="toggleAyahFav(this,\'ayah::'+esc(ay.sura_num)+'::'+esc(ay.pos)+'\',\''+esc(ay.sura_name)+'\',\''+esc(ay.pos)+'\',\'\',\''+esc(ay.ayah_text)+'\')">'+(isBookmarked('ayah::'+ay.sura_num+'::'+ay.pos)?'⭐':'☆')+'</button>'+
+      '<button title="وضع القراءة المركّزة" class="fr-open-btn" style="background:transparent;border:1px solid #7a9ae855;border-radius:8px;padding:3px 10px;font-size:0.82rem;cursor:pointer;color:#2b4c8c;transition:all .18s;flex-shrink:0;" onclick="openFocusReaderFromCard(this)">🔍</button>'+
+      '<button class="share-ayah-btn" onclick="openShareModal(\''+esc(ay.ayah_text)+'\',\''+esc(ay.sura_name)+'\',\''+esc(ay.pos)+'\',\'\',\'\')">📤</button>'+
+      '</div>'+
+      '<div class="ayah-section"><div class="ayah-text" style="font-size:'+currentFontSize+'rem">'+_wpBuildAyahPhrase(ay.ayah_text,_q,ay.sura_name,ay.pos,ay.ayah_text_normal||ay.ayah_text_no_tash)+
+      '<button class="copy-btn" onclick="copyAyah(this,\''+esc(ay.ayah_text)+'\')">نسخ</button></div>'+
+      contextBlock('خمس آيات قبلها',ay.before)+contextBlock('خمس آيات بعدها',ay.after)+'</div></div>';
+    },currentSort==='sura');
+  });
 }
 
 function renderGrouped(sorted,cardFn,groupBySura){
@@ -999,7 +1080,10 @@ function renderRootResults(root){
 
 function renderRootCards(root,entries){
   var sorted=entries.slice();if(currentSort==='sura')sorted.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
-  var el=document.getElementById('rootResultCards');if(el)el.innerHTML=renderGrouped(sorted,function(e,num){return entryCard(e,num);},currentSort==='sura');
+  var el=document.getElementById('rootResultCards');
+  if(!el)return;
+  el.innerHTML='<div id="pagedCards"></div>';
+  initPaging(sorted,function(items){document.getElementById('pagedCards').innerHTML=renderGrouped(items,function(e,num){return entryCard(e,num);},currentSort==='sura');});
 }
 
 function filterRootByWord(root,word){
@@ -1056,15 +1140,15 @@ function displayWordResults(q,entries){
 }
 
 function renderWordSearchResults(q,entries){
-  if(!entries.length){document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يتم العثور على نتائج: '+q+'</div>';return;}
+  if(!entries.length){document.getElementById('resultsArea').innerHTML='<div class="no-results">لم يتم العثور على نتائج: '+q+'</div>';hideLoadMore();return;}
   exportTitle='بحث الكلمة: '+q;
   exportData=entries.map(function(e){return{word:e.word,root:e.root,sura_name:e.sura_name,sura_num:e.sura_num,pos:e.pos,ayah_text:e.ayah_text};});
   var rs={};for(var i=0;i<entries.length;i++)if(entries[i].root)rs[entries[i].root]=1;
   var roots=Object.keys(rs).join(' | ');
   var sorted=entries.slice();if(currentSort==='sura')sorted.sort(function(a,b){return(+a.sura_num-+b.sura_num)||(+a.pos-+b.pos);});
-  var html='<div class="root-header" style="border-color:#2a7a55"><div class="root-title" style="color:#2a7a55">'+q+'</div><div><div style="color:#2a7a55;font-size:1.1rem">'+entries.length+' مواضع</div><div class="root-meta">الجذور: '+roots+'</div></div></div>';
-  html+=renderGrouped(sorted,function(e,num){return entryCard(e,num);},currentSort==='sura');
-  document.getElementById('resultsArea').innerHTML=html;
+  var header='<div class="root-header" style="border-color:#2a7a55"><div class="root-title" style="color:#2a7a55">'+q+'</div><div><div style="color:#2a7a55;font-size:1.1rem">'+entries.length+' مواضع</div><div class="root-meta">الجذور: '+roots+'</div></div></div>';
+  document.getElementById('resultsArea').innerHTML=header+'<div id="pagedCards"></div>';
+  initPaging(sorted,function(items){document.getElementById('pagedCards').innerHTML=renderGrouped(items,function(e,num){return entryCard(e,num);},currentSort==='sura');});
 }
 
 // ===== نسخ الآية =====
@@ -1389,7 +1473,14 @@ function _wpRenderFields(root){
       }
     }
     html+='</div>';
-    html+='<div class="wp-field-btns">';html+='<button class="wp-field-save-btn wp-field-save-summary" onclick="event.stopPropagation();_wpExportFieldSummary('+i+')">&#x1F4C4; Excel ملخّص</button>';html+='<button class="wp-field-save-btn wp-field-save-detail" onclick="event.stopPropagation();_wpExportFieldExcel('+i+')">&#x1F4CB; Excel مفصّل</button>';html+='</div>';
+    html+='<div class="wp-field-btns">';
+    html+='<button class="wp-field-save-btn wp-field-save-summary" onclick="event.stopPropagation();_wpExportFieldSummary('+i+')">&#x1F4C4; Excel ملخّص</button>';
+    html+='<button class="wp-field-save-btn wp-field-save-detail" onclick="event.stopPropagation();_wpExportFieldExcel('+i+')">&#x1F4CB; Excel مفصّل</button>';
+    html+='<div class="wp-field-ai-wrap">';
+    html+='<button class="wp-field-save-btn wp-field-save-ai" data-ainum="wp_'+i+'" onclick="event.stopPropagation();_wpCopyFieldPrompt('+i+')">&#x1F916; حلِّل كامل الجذور بالذكاء الاصطناعي</button>';
+    html+='<button class="wp-field-ai-help" onclick="event.stopPropagation();showAiHelpPopup(event)">؟</button>';
+    html+='</div>';
+    html+='</div>';
     html+='</div>';
   }
   section.innerHTML=html;
@@ -1403,6 +1494,162 @@ function _wpChipSearch(el){
   switchTab('root');
   document.getElementById('searchInput').value=r;
   handleSearch();
+}
+
+// ===== AI Prompt Copy =====
+function _buildAiPrompt(fd){
+  var rootsList=fd.roots.join('، ');
+  return [
+'╔══════════════════════════════════════════════╗',
+'║   🤖 تحليل الحقل الدلالي بالذكاء الاصطناعي   ║',
+'╚══════════════════════════════════════════════╝',
+'',
+'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+'📎 قبل أي شيء — ارفع ملف Excel المفصّل:',
+'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+'',
+'اسم الملف المطلوب:',
+'   مفصّل_'+fd.name+'.xlsx',
+'',
+'📥 كيف تحصل عليه؟',
+'   ١. ارجع لصفحة الحقول في الموقع',
+'   ٢. افتح بطاقة حقل [ '+fd.name+' ]',
+'   ٣. اضغط الزر الأزرق  📋 Excel مفصّل  لتنزيله',
+'   ٤. ارفع الملف هنا الآن',
+'',
+'⚠️  لا تبدأ التحليل قبل رفع الملف — كل البيانات والآيات فيه.',
+'',
+'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+'✅ بعد رفع الملف: نفّذ التعليمات أدناه كاملة.',
+'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+'',
+'══════════════════════════════════════════════',
+'المهمة: دراسة تحليلية مقارنة شاملة',
+'الحقل الدلالي: '+fd.name,
+'الجذور ('+fd.roots.length+'): '+rootsList,
+'══════════════════════════════════════════════',
+'',
+'بنية الملف المرفوع:',
+'العمود A: رقم | B: الكلمة | C: الجذر | D: السورة | E: رقم السورة | F: رقم الآية',
+'العمود G: خمس آيات قبلها | H: الآية الكريمة | I: خمس آيات بعدها',
+'',
+'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+'❓ سؤال قبل البدء — اختر طريقة التحليل:',
+'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+'',
+'   أ) جذر واحد في كل جلسة:',
+'      تقول لي "ابدأ بـ [اسم الجذر]" وأكمله كاملاً قبل أن ننتقل.',
+'      الأنسب للتعمق والمراجعة معك خطوة بخطوة.',
+'',
+'   ب) جميع الجذور دفعة واحدة:',
+'      أحلل الحقل كاملاً بالترتيب حتى الجدول النهائي.',
+'      الأنسب إن كنت تريد الصورة الكاملة دون توقف.',
+'',
+'قل لي أيهما تفضل — ثم سنبدأ.',
+'',
+'══════════ المنهج الإلزامي — لا تحيد عنه ══════════',
+'',
+'⏳ خذ وقتك الكافي — الدقة أهم من السرعة.',
+'   لا تتسرع في إصدار تعريف. لا تنتقل من جذر لآخر حتى يُغلق تماماً.',
+'   إن شعرت بالتعارض في أي موضع — توقف وراجع، لا تتجاوز.',
+'',
+'لا تستعن بأي مصدر خارجي — القرآن يُفسَّر بالقرآن حصراً.',
+'',
+'١. تثبيت الرؤية الجذرية أولاً:',
+'   لا نبدأ بتعريف. نبدأ بحصر جميع الاشتقاقات من عمود B.',
+'   نبحث عن القاسم المشترك بينها جميعاً.',
+'   نخرج برؤية موحدة للجذر قبل أي حكم.',
+'',
+'٢. المرور على كل الآيات — بلا استثناء:',
+'   مُرّ على كل صف في الملف واحداً واحداً.',
+'   لكل آية: اقرأ عمود G (خمس آيات قبلها) وعمود I (خمس آيات بعدها)',
+'   قبل أي استنتاج — السياق ركيزة التحليل لا حاشية.',
+'   نرفض أي تعريف يسقط في موضع واحد.',
+'',
+'٣. اختبار الاستبدال — لكل جذر يبدو قريباً من آخر:',
+'   ضع الجذر الثاني مكانه في الآية.',
+'   هل تتماسك الآية؟ هل يختل المعنى؟',
+'   هذا الاختبار هو الفيصل بين الجذرين — لا تتخطاه.',
+'',
+'٤. منع التداخل بين الجذور:',
+'   لا نفترض الترادف التام — كل لفظ له هويته الخاصة.',
+'   الترادف = اشتراك صفتين على موصوف واحد مع احتفاظ كل منهما بدلالة مختلفة.',
+'',
+'٥. مراعاة الرسم القرآني — عند اختلاف الرسم لكلمة واحدة:',
+'   الألف ↔ الواو: الألف → حسي/دنيوي | الواو → معنوي/أخروي.',
+'   الياء مثبتة ↔ محذوفة: إثبات → كلي | حذف → جزئي.',
+'   التاء المفتوحة (ت) ↔ المربوطة (ة): مرتبطة بشخص ↔ صفة عامة.',
+'   الوصل والفصل، والواو والفاء — كل فرق يُختبر دلالياً.',
+'',
+'٦. لا تُعتمد نتيجة حتى:',
+'   تنسجم مع جميع المواضع، لا تناقض فيها، ولا تحتاج ترقيعاً.',
+'',
+'══════════ هيكل الناتج الإلزامي لكل جذر ══════════',
+'',
+'▌ افتح بـ: زبدة — التعريف النهائي المحكم للجذر في سطر أو سطرين.',
+'   (هذا أول ما يظهر — قبل الشواهد والتفاصيل)',
+'',
+'ثم تفصيل:',
+'   • جميع الاشتقاقات الواردة في الملف',
+'   • القاسم المشترك بينها',
+'   • الشواهد الجوهرية مع قراءة السياق',
+'   • اختبار الاستبدال مع أقرب جذر إليه',
+'   • تعديل التعريف إن لزم بعد الاختبار',
+'',
+'══════════ الخاتمة الإلزامية للحقل كاملاً ══════════',
+'',
+'▌ اختم دائماً بجدول مقارنة شامل بين جميع جذور الحقل يتضمن:',
+'   | الجذر | التعريف المحكم | مجال الاستخدام | يختلف عن ... بـ ... |',
+'   ثم خريطة دلالية (سُلَّم أو مستويات) مستخلصة من الاستقراء.',
+  ].join('\n');
+}
+
+function _wpCopyFieldPrompt(fieldIdx){
+  var fd=_wpCurrentFields[fieldIdx];
+  if(!fd)return;
+  var btns=document.querySelectorAll('[data-ainum="wp_'+fieldIdx+'"]');
+  var prompt=_buildAiPrompt(fd);
+  navigator.clipboard.writeText(prompt).then(function(){_aiShowCopied(btns);}).catch(function(){_aiFallbackCopy(prompt,btns);});
+}
+
+function _aiShowCopied(btns){
+  btns.forEach(function(b){
+    var orig=b.textContent;
+    b.textContent='✅ تم النسخ!';
+    b.classList.add('copied');
+    setTimeout(function(){b.textContent=orig;b.classList.remove('copied');},2500);
+  });
+}
+
+function _aiFallbackCopy(text,btns){
+  var ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:0;left:0;';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+  _aiShowCopied(btns);
+}
+
+function showAiHelpPopup(e){
+  e.stopPropagation();
+  var popup=document.getElementById('aiHelpPopup');
+  var overlay=document.getElementById('aiHelpOverlay');
+  if(!popup)return;
+  var rect=e.currentTarget.getBoundingClientRect();
+  var top=rect.bottom+8;
+  if(top+320>window.innerHeight)top=rect.top-8-300;
+  var left=Math.min(rect.right-320,window.innerWidth-330);
+  if(left<8)left=8;
+  popup.style.top=top+'px';popup.style.left=left+'px';
+  popup.classList.add('visible');
+  overlay.style.display='block';
+}
+
+function closeAiHelp(){
+  var p=document.getElementById('aiHelpPopup');
+  var o=document.getElementById('aiHelpOverlay');
+  if(p)p.classList.remove('visible');
+  if(o)o.style.display='none';
 }
 
 // ===== Word Popup =====
@@ -2044,6 +2291,22 @@ if('serviceWorker' in navigator){
     <div class="favpage-empty">جاري التحميل...</div>
   </div>
 </div>
+
+<!-- ===== Popup توضيح زر AI ===== -->
+<div id="aiHelpPopup" class="ai-help-popup" role="dialog">
+  <button class="ai-help-close" onclick="closeAiHelp()">✕</button>
+  <h4>🤖 كيف تحلّل الحقل بالذكاء الاصطناعي؟</h4>
+  <ol>
+    <li>اضغط <strong>🤖 حلِّل كامل الجذور بالذكاء الاصطناعي</strong><br>سيتم نسخ البرومت تلقائياً</li>
+    <li>افتح <strong>Claude</strong> (الأفضل) أو ChatGPT<br>وابدأ محادثة جديدة، ثم الصق البرومت</li>
+    <li>حمّل ملف الآيات أولاً:<br>اضغط <span class="ai-help-chip blue">📋 Excel مفصّل</span> لتنزيله</li>
+    <li>عندما يطلب الذكاء الاصطناعي الملف —<br><strong>ارفع ملف الـ Excel المفصّل</strong> في المحادثة</li>
+    <li>سيبدأ التحليل العميق تلقائياً 🎯</li>
+  </ol>
+  <p class="ai-note">💡 يُفضَّل استخدام Claude لأنه الأدق في تحليل النصوص القرآنية</p>
+</div>
+<div id="aiHelpOverlay" style="display:none;position:fixed;inset:0;z-index:9998;" onclick="closeAiHelp()"></div>
+<script>document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAiHelp();});</script>
 
 <script src="nav.js?v=5"></script>
 </body>

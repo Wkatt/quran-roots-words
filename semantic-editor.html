@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر الحقول الدلالية · نسخة خفيفة (نسخ بدل النقل)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <!-- SheetJS لقراءة وكتابة الإكسيل -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        /* جميع الأنماط كما هي دون تغيير */
+        *{box-sizing:border-box;margin:0;padding:0;}
+        :root{
+            --bg:#f5f0e8;--surface:#fff8f0;--surface2:#f0e8d8;
+            --border:#d4b896;--border2:#e0d0b8;
+            --brown:#6b3a1f;--brown2:#3d1f0a;--brown3:#8b4513;
+            --gold:#c9a84c;--gold2:#a07830;
+            --text:#2c1a0e;--text2:#7a5c3a;--text3:#9a7a5a;
+            --green:#1a6b4a;--green-bg:#e8f5ee;
+            --blue:#2b4c8c;--blue-bg:#eef2ff;
+            --red:#c0392b;--red-bg:#fdf0ee;
+        }
+        body.dark{
+            --bg:#1a1208;--surface:#221508;--surface2:#2a1c0a;
+            --border:#4a3520;--border2:#3a2510;
+            --text:#e8d8b8;--text2:#b09070;--text3:#8a6040;
+            --green-bg:#0e2a1a;--blue-bg:#1a2040;--red-bg:#2a1208;
+        }
+        body{font-family:'Amiri',serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;font-size:15px;user-select:none;}
+
+        /* ─── HEADER ─── */
+        .hd{background:linear-gradient(135deg,var(--brown),var(--brown2));border-bottom:3px solid var(--gold);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+        .hd-title{color:#f5e6c8;font-size:1.2rem;font-weight:bold;}
+        .hd-sub{color:#d4b896;font-size:.78rem;margin-top:2px;}
+        .hd-right{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+        .btn{background:var(--gold);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:bold;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+        .btn:hover{background:var(--gold2);transform:translateY(-1px);}
+        .btn.outline{background:transparent;border:2px solid var(--gold);color:var(--gold);}
+        .btn.outline:hover{background:var(--gold);color:#fff;}
+        .btn.sm{padding:4px 10px;font-size:.78rem;}
+        .btn.red{background:var(--red);}
+        .btn.red:hover{background:#a93226;}
+        .btn.ghost{background:#ffffff22;color:#f5e6c8;border:1px solid #ffffff33;}
+        .btn.ghost:hover{background:#ffffff33;}
+        .change-badge{background:#c9a84c;color:#fff;border-radius:12px;padding:2px 9px;font-size:.78rem;font-weight:bold;}
+
+        /* ─── VIEW TABS ─── */
+        .view-tabs{display:flex;gap:6px;padding:10px 16px 0;background:var(--surface);}
+        .view-tab{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text2);padding:6px 14px;cursor:pointer;font-family:inherit;font-size:.88rem;font-weight:bold;transition:all .15s;}
+        .view-tab:hover{color:var(--text);}
+        .view-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+        .hidden{display:none!important;}
+
+        /* ─── ROOTS TABLE ─── */
+        .roots-view{overflow-y:auto;}
+        .roots-table{width:100%;border-collapse:collapse;}
+        .roots-table th{background:var(--surface2);padding:10px 12px;text-align:right;border-bottom:2px solid var(--gold);color:var(--gold);font-size:.9rem;position:sticky;top:0;z-index:1;}
+        .roots-table td{padding:8px 12px;border-bottom:1px solid var(--border2);font-size:.95rem;vertical-align:top;}
+        .roots-table tr:hover td{background:var(--surface2);}
+        .root-cell{font-family:'Amiri',serif;font-size:1.15rem;color:var(--gold2);}
+        .rt-field-tag{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:.78rem;margin:2px;cursor:pointer;color:var(--text2);}
+        .rt-field-tag:hover{border-color:var(--gold);color:var(--brown3);}
+
+        /* ─── LAYOUT ─── */
+        .layout{display:grid;grid-template-columns:240px 1fr 280px;height:calc(100vh - 56px);overflow:hidden;}
+
+        /* ─── SIDEBAR ─── */
+        .sidebar{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+        .sb-top{padding:8px;border-bottom:1px solid var(--border2);}
+        .sb-search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:.88rem;color:var(--text);outline:none;direction:rtl;}
+        .sb-search:focus{border-color:var(--gold);}
+        .prog-bar{height:3px;background:var(--border2);}
+        .prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--green));transition:width .4s;}
+        .prog-text{padding:3px 8px;font-size:.7rem;color:var(--text3);text-align:center;border-bottom:1px solid var(--border2);}
+        .sb-list{flex:1;overflow-y:auto;padding:4px 0;}
+        .sb-cat{padding:5px 10px 2px;font-size:.68rem;color:var(--text3);font-weight:bold;letter-spacing:.04em;border-top:1px solid var(--border2);margin-top:3px;text-transform:uppercase;}
+        .sb-cat:first-child{border-top:none;margin-top:0;}
+        .sb-item{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;cursor:pointer;transition:background .1s;border-right:3px solid transparent;gap:6px;}
+        .sb-item:hover{background:var(--surface2);}
+        .sb-item.active{background:var(--surface2);border-right-color:var(--gold);font-weight:bold;}
+        .sb-name{font-size:.82rem;color:var(--text);flex:1;line-height:1.3;}
+        .sb-badges{display:flex;gap:3px;flex-shrink:0;}
+        .sb-b{font-size:.68rem;background:var(--surface2);border-radius:8px;padding:1px 5px;color:var(--text2);}
+        .sb-b.mod{background:var(--green-bg);color:var(--green);}
+        .sb-b.rev{background:#e8f0ff;color:var(--blue);}
+        .sb-sort{display:flex;gap:4px;margin-top:6px;}
+        .sb-sort-btn{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:3px 0;font-family:inherit;font-size:.72rem;color:var(--text2);cursor:pointer;transition:all .12s;text-align:center;}
+        .sb-sort-btn:hover{border-color:var(--gold);color:var(--brown3);}
+        .sb-sort-btn.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:bold;}
+        body.dark .sb-sort-btn.active{color:#fff;}
+        .sb-del-field{background:none;border:none;cursor:pointer;color:var(--red);font-size:.85rem;padding:0 2px;opacity:0;transition:opacity .15s;flex-shrink:0;line-height:1;}
+        .sb-item:hover .sb-del-field{opacity:1;}
+        .sb-del-field:hover{color:#a93226;}
+
+        /* ─── MAIN ─── */
+        .main{overflow-y:auto;padding:14px 16px;background:var(--bg);}
+        .no-sel{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);text-align:center;gap:10px;}
+        .no-sel .icon{font-size:3rem;}
+
+        /* nav */
+        .fld-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+        .nav-btns{display:flex;gap:5px;}
+        .nav-idx{font-size:.75rem;color:var(--text3);}
+
+        /* field card */
+        .field-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 16px;margin-bottom:12px;}
+        .fc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+        .fc-name{font-size:1.1rem;color:var(--brown3);font-weight:bold;flex:1;}
+        body.dark .fc-name{color:var(--gold);}
+        .fc-name-inp{background:var(--surface2);border:1px solid var(--gold);border-radius:7px;padding:4px 10px;font-family:inherit;font-size:1rem;color:var(--text);outline:none;flex:1;}
+        .fc-stats{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;}
+        .fc-stat{background:var(--surface2);border-radius:16px;padding:2px 10px;font-size:.76rem;color:var(--text2);}
+        .fc-stat.r{background:var(--green-bg);color:var(--green);}
+        .fc-stat.f{background:var(--blue-bg);color:var(--blue);}
+        .fc-stat.m{background:#fff8e0;color:#8a6010;}
+        body.dark .fc-stat.m{background:#2a2000;color:#c9a84c;}
+
+        /* add root */
+        .add-area{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:12px;}
+        .add-label{font-size:.76rem;color:var(--text3);font-weight:bold;margin-bottom:6px;}
+        .add-row{display:flex;gap:6px;}
+        .add-inp{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-family:inherit;font-size:.95rem;color:var(--text);outline:none;direction:rtl;}
+        .add-inp:focus{border-color:var(--gold);}
+        .sug-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;}
+        .sug{background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:3px 10px;font-size:.88rem;color:var(--text2);cursor:pointer;transition:all .12s;}
+        .sug:hover{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+        .sug.exists{opacity:.45;cursor:not-allowed;}
+        .sug .freq{font-size:.7rem;color:var(--text3);}
+
+        /* roots section */
+        .roots-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+        .roots-hd-label{font-size:.78rem;color:var(--text3);font-weight:bold;}
+        .roots-hd-hint{font-size:.72rem;color:var(--text3);}
+
+        /* ROOTS GRID */
+        .roots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;}
+
+        /* ROOT CARD — draggable */
+        .rc{background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:8px 10px;cursor:grab;position:relative;transition:border-color .12s,box-shadow .12s,opacity .15s,transform .12s;}
+        .rc:hover{border-color:var(--gold);box-shadow:0 3px 10px rgba(201,168,76,.2);}
+        .rc.selected{border-color:var(--gold);box-shadow:0 0 0 2px #c9a84c44;}
+        .rc.dragging{opacity:.35;transform:scale(.95);cursor:grabbing;}
+        .rc.new-root{border-color:var(--green);background:var(--green-bg);}
+        .rc-root{font-size:1rem;color:var(--brown3);font-weight:bold;margin-bottom:2px;}
+        body.dark .rc-root{color:var(--gold);}
+        .rc-freq{font-size:.72rem;color:var(--text3);}
+        .rc-nf{font-size:.7rem;color:var(--text3);}
+        /* action btns */
+        .rc-del{position:absolute;top:5px;left:5px;width:18px;height:18px;border-radius:4px;border:none;cursor:pointer;background:#f5e0de;color:var(--red);font-size:.65rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .12s;}
+        .rc:hover .rc-del{opacity:1;}
+        .rc-del:hover{background:var(--red);color:#fff;}
+        .rc-tag{position:absolute;bottom:4px;left:4px;font-size:.6rem;border-radius:3px;padding:1px 4px;}
+        .rc-tag.new{background:var(--green-bg);color:var(--green);}
+
+        /* ─── DETAIL PANEL ─── */
+        .detail{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
+
+        /* DROP ZONE header */
+        .dz-hint{background:linear-gradient(135deg,#fff8f0,#fdf5e8);border-bottom:2px solid var(--gold);padding:10px 14px;text-align:center;font-size:.82rem;color:var(--brown3);font-weight:bold;transition:all .2s;position:sticky;top:0;z-index:10;}
+        body.dark .dz-hint{background:linear-gradient(135deg,#2a1c0a,#221508);}
+        .dz-hint.drag-over-panel{background:linear-gradient(135deg,var(--green-bg),#c8f0dc) !important;border-color:var(--green) !important;color:var(--green) !important;transform:scale(1.01);}
+
+        /* Fields list in detail */
+        .det-fields{flex:1;overflow-y:auto;padding:8px;}
+        .det-field-item{border:2px solid var(--border2);border-radius:10px;margin-bottom:7px;transition:all .2s;overflow:hidden;}
+        .det-field-item:hover{border-color:var(--gold);}
+        .det-field-item.drop-target{border-color:var(--green);background:var(--green-bg);box-shadow:0 0 0 3px #1a6b4a33;transform:scale(1.01);}
+        .det-field-item.active-field{border-color:var(--gold);background:var(--surface2);}
+        .dfi-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;cursor:pointer;background:var(--surface);}
+        body.dark .dfi-header{background:var(--surface);}
+        .det-field-item.drop-target .dfi-header{background:transparent;}
+        .dfi-name{font-size:.85rem;color:var(--text);font-weight:bold;}
+        .dfi-count{font-size:.72rem;color:var(--text2);background:var(--surface2);border-radius:8px;padding:1px 7px;}
+        .det-field-item.drop-target .dfi-name{color:var(--green);}
+        .dfi-roots{display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px 8px;max-height:90px;overflow:hidden;}
+        .dfi-root{background:var(--surface2);border-radius:5px;padding:2px 8px;font-size:.8rem;color:var(--text2);}
+        .dfi-root.just-dropped{background:var(--green-bg);color:var(--green);font-weight:bold;animation:pop .3s ease;}
+        @keyframes pop{0%{transform:scale(1.3);}100%{transform:scale(1);}}
+
+        /* Root detail section */
+        .root-det{background:var(--surface2);border-top:1px solid var(--border2);padding:12px 14px;flex-shrink:0;}
+        .rd-title{font-size:.76rem;color:var(--text3);font-weight:bold;margin-bottom:7px;}
+        .rd-root{font-size:1.6rem;color:var(--brown3);font-weight:bold;margin-bottom:3px;}
+        body.dark .rd-root{color:var(--gold);}
+        .rd-freq{font-size:.8rem;color:var(--text3);margin-bottom:8px;}
+        .rd-freq strong{color:var(--gold);}
+        .rd-examples{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px;}
+        .rd-ex{background:var(--surface);border-radius:5px;padding:2px 8px;font-size:.82rem;}
+        .rd-fields{display:flex;flex-wrap:wrap;gap:4px;}
+        .rd-fld{background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:2px 8px;font-size:.75rem;color:var(--text2);cursor:pointer;transition:background .1s;}
+        .rd-fld:hover{background:var(--surface2);border-color:var(--gold);}
+        .rd-fld.current{border-color:var(--gold);color:var(--brown3);font-weight:bold;}
+        body.dark .rd-fld.current{color:var(--gold);}
+
+        /* drag ghost */
+        .drag-ghost{position:fixed;pointer-events:none;z-index:9999;background:var(--gold);color:#fff;border-radius:8px;padding:6px 14px;font-family:'Amiri',serif;font-size:1rem;font-weight:bold;box-shadow:0 8px 24px rgba(0,0,0,.35);transform:translate(-50%,-50%);display:none;}
+
+        /* changes panel */
+        .changes-float{position:fixed;bottom:14px;left:14px;width:300px;background:var(--surface);border:1px solid var(--gold);border-radius:11px;box-shadow:0 8px 28px rgba(0,0,0,.2);z-index:100;display:none;}
+        .changes-float.show{display:block;}
+        .cf-hd{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border2);}
+        .cf-title{font-size:.85rem;color:var(--brown3);font-weight:bold;}
+        body.dark .cf-title{color:var(--gold);}
+        .cf-list{max-height:180px;overflow-y:auto;padding:7px;}
+        .cf-item{padding:4px 7px;font-size:.76rem;border-radius:5px;margin-bottom:3px;display:flex;gap:5px;}
+        .cf-item.add{background:var(--green-bg);color:var(--green);}
+        .cf-item.del{background:var(--red-bg);color:var(--red);}
+        .cf-item.move{background:var(--blue-bg);color:var(--blue);}
+        .cf-item.rename{background:#fff8e0;color:#8a6010;}
+        body.dark .cf-item.rename{background:#2a2000;color:#c9a84c;}
+        .cf-ft{padding:7px 12px;border-top:1px solid var(--border2);display:flex;gap:5px;}
+
+        /* toast */
+        .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#3d1f0a;color:#f5e6c8;padding:8px 18px;border-radius:9px;font-size:.88rem;z-index:9000;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+        .toast.show{opacity:1;}
+
+        /* modal */
+        .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;}
+        .modal-bg.show{display:flex;}
+        .modal{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:22px;max-width:360px;width:90%;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.3);}
+        .modal-icon{font-size:2.2rem;margin-bottom:8px;}
+        .modal-title{font-size:1rem;color:var(--brown3);font-weight:bold;margin-bottom:7px;}
+        body.dark .modal-title{color:var(--gold);}
+        .modal-msg{font-size:.85rem;color:var(--text2);margin-bottom:16px;line-height:1.6;}
+        .modal-btns{display:flex;gap:7px;justify-content:center;}
+
+        /* منطقة تحميل الملف */
+        .load-area{background:var(--surface);border:2px dashed var(--gold);border-radius:16px;padding:30px;margin:20px;text-align:center;}
+        .load-area.hide{display:none;}
+        .file-label{background:var(--surface2);border:2px solid var(--border);border-radius:40px;padding:12px 30px;font-size:1rem;cursor:pointer;display:inline-block;transition:.2s;}
+        .file-label:hover{border-color:var(--gold);color:var(--brown3);}
+        #fileInput{display:none;}
+        .file-info{color:var(--green);margin-top:10px;}
+
+        ::-webkit-scrollbar{width:4px;}
+        ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+        /* ── INSPECT SHARED ── */
+        .fg-lbl{font-size:.7rem;color:var(--text3);font-weight:bold;text-transform:uppercase;letter-spacing:.04em;}
+        .fg-chip{display:inline-block;background:var(--surface2);border:1px solid var(--border2);border-radius:16px;padding:3px 9px;font-size:.75rem;color:var(--text2);cursor:pointer;transition:all .12s;user-select:none;}
+        .fg-chip:hover{border-color:var(--gold);color:var(--brown3);}
+        .fg-chip.on{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:bold;}
+        body.dark .fg-chip.on{color:#fff;}
+
+        /* root rows in inspect */
+        .ir{display:flex;align-items:stretch;border-bottom:1px solid var(--border2);transition:background .1s;cursor:pointer;}
+        .ir:hover{background:var(--surface2);}
+        .ir.active{background:var(--blue-bg);border-right:3px solid var(--blue);}
+        body.dark .ir.active{background:#101828;}
+        .ir.warn{background:#fff6f6;}
+        body.dark .ir.warn{background:#1e0c0c;}
+        .ir.multi{background:#f0f4ff;}
+        body.dark .ir.multi{background:#0e1420;}
+        .ir-chk{display:flex;align-items:center;padding:0 10px;flex-shrink:0;}
+        .ir-body{flex:1;padding:8px 12px;min-width:0;}
+        .ir-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+        .ir-root{font-size:1.1rem;color:var(--brown3);font-weight:bold;font-family:'Amiri',serif;}
+        body.dark .ir-root{color:var(--gold);}
+        .ir-badge{font-size:.7rem;border-radius:10px;padding:1px 7px;}
+        .ir-fields{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
+        .ir-ft{background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;font-size:.7rem;color:var(--text2);}
+        .ir-ex{font-size:.74rem;color:var(--text3);margin-top:3px;font-family:'Amiri',serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+        /* field item in detail panel */
+        .df-item{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:6px 10px;margin-bottom:5px;}
+        .df-name{flex:1;font-size:.82rem;color:var(--text);cursor:pointer;}
+        .df-name:hover{color:var(--brown3);}
+        .df-count{font-size:.7rem;color:var(--text3);background:var(--surface);border-radius:8px;padding:1px 6px;flex-shrink:0;}
+        .df-del{background:none;border:none;color:var(--red);cursor:pointer;font-size:.82rem;padding:0 2px;opacity:.55;flex-shrink:0;transition:opacity .12s;}
+        .df-del:hover{opacity:1;}
+
+        /* peer roots inside field in detail */
+        .peer-grid{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;max-height:120px;overflow-y:auto;}
+        .peer-root{background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:2px 8px;font-size:.8rem;color:var(--text2);font-family:'Amiri',serif;cursor:pointer;transition:all .1s;}
+        .peer-root:hover{border-color:var(--gold);color:var(--brown3);}
+        .peer-root.is-self{border-color:var(--gold);color:var(--brown3);font-weight:bold;}
+
+        /* field suggestion rows */
+        .fsug-row{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:5px 9px;margin-bottom:3px;cursor:pointer;transition:all .12s;gap:6px;}
+        .fsug-row:hover{border-color:var(--green);background:var(--green-bg);}
+        .fsug-row.already{opacity:.4;cursor:not-allowed;}
+        .fsug-name{flex:1;font-size:.8rem;color:var(--text);}
+        .fsug-cnt{font-size:.68rem;color:var(--text3);}
+    </style>
+</head>
+<body>
+
+<!-- ───── شاشة الباسورد ───── -->
+<div id="lockScreen" style="
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#3d1f0a,#6b3a1f);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Amiri',serif;direction:rtl;
+">
+  <div style="
+    background:#fff8f0;border-radius:16px;padding:40px 36px;
+    text-align:center;width:320px;box-shadow:0 8px 40px #0008;
+    border:2px solid #c9a84c;
+  ">
+    <div style="font-size:2.5rem;margin-bottom:10px;">🔒</div>
+    <div style="font-size:1.3rem;font-weight:bold;color:#6b3a1f;margin-bottom:6px;">محرر الحقول الدلالية</div>
+    <div style="font-size:.88rem;color:#9a7a5a;margin-bottom:24px;">أدخل كلمة المرور للمتابعة</div>
+    <input id="pwdInput" type="password" placeholder="كلمة المرور" style="
+      width:100%;padding:10px 14px;border-radius:8px;border:2px solid #d4b896;
+      font-family:'Amiri',serif;font-size:1rem;text-align:center;
+      outline:none;color:#2c1a0e;background:#fffdf8;
+      margin-bottom:10px;direction:ltr;letter-spacing:2px;
+    " onkeydown="if(event.key==='Enter')checkPwd()">
+    <div id="pwdError" style="color:#c0392b;font-size:.82rem;min-height:18px;margin-bottom:8px;"></div>
+    <button onclick="checkPwd()" style="
+      width:100%;padding:10px;background:linear-gradient(135deg,#c9a84c,#a07830);
+      color:#fff;border:none;border-radius:8px;font-family:'Amiri',serif;
+      font-size:1rem;font-weight:bold;cursor:pointer;transition:all .2s;
+    " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+      دخول ←
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const HASH = '7a3f9e2b1d4c8f6a0e5b2d9c7f4a1e8b3d6c9f2a5e8b1d4c7f0a3e6b9d2c5f8';
+  async function sha256(str){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  window.checkPwd = async function(){
+    const val = document.getElementById('pwdInput').value;
+    const h = await sha256(val);
+    // الباسورد الصحيح يُولّد هاشه أدناه — نحسبه أول مرة
+    // مؤقتاً: مقارنة مباشرة حتى نولّد الهاش
+    if(val === 'Quran@@123'){
+      document.getElementById('lockScreen').style.display='none';
+    } else {
+      const err = document.getElementById('pwdError');
+      err.textContent = '❌ كلمة المرور غير صحيحة';
+      document.getElementById('pwdInput').value='';
+      document.getElementById('pwdInput').focus();
+      setTimeout(()=>err.textContent='',2500);
+    }
+  };
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById('pwdInput').focus();
+  });
+})();
+</script>
+
+<!-- HEADER -->
+<div class="hd">
+    <div>
+        <div class="hd-title">🛠️ محرر الحقول الدلالية (نسخ بالجر)</div>
+        <div class="hd-sub" id="hdSub">حمّل ملف Excel لبدء العمل</div>
+    </div>
+    <div class="hd-right">
+        <span id="chCount" style="display:none;color:#f5e6c8;font-size:.82rem;">
+            تعديلات: <span class="change-badge" id="chN">0</span>
+        </span>
+        <button class="btn ghost sm" id="chBtn" style="display:none;" onclick="toggleChanges()">سجل التعديلات</button>
+        <button class="btn ghost sm" id="undoBtn" style="display:none;" onclick="undoLast()" title="Ctrl+Z">↩ تراجع</button>
+        <button class="btn ghost" onclick="toggleDark()">🌙</button>
+        <button class="btn" id="exportBtn" onclick="exportExcel()" disabled>⬇️ تصدير Excel</button>
+    </div>
+</div>
+
+<!-- منطقة تحميل الملف (تظهر دائماً حتى يتم تحميل ملف) -->
+<div id="loadArea" class="load-area">
+    <div style="font-size:1.2rem; margin-bottom:15px;">📂 حمل ملف Excel الذي صدّرته سابقاً</div>
+    <label for="fileInput" class="file-label">🔍 اختر ملف Excel</label>
+    <input type="file" id="fileInput" accept=".xlsx, .xls">
+    <div class="file-info" id="fileInfo"></div>
+    <div style="margin-top:20px; color:var(--text3);">سيتم استعادة جميع الحقول والجذور والتعديلات السابقة</div>
+</div>
+
+<!-- التخطيط الأساسي (مخفي حتى التحميل) -->
+<div id="mainLayout" style="display:none;">
+
+    <!-- VIEW TABS -->
+    <div class="view-tabs">
+        <button class="view-tab active" id="tab-fields" onclick="switchView('fields')">📂 الحقول</button>
+        <button class="view-tab" id="tab-roots" onclick="switchView('roots')">🔤 الجذور</button>
+        <button class="view-tab" id="tab-inspect" onclick="switchView('inspect')">🔬 تصفية ومراقبة الجذور</button>
+    </div>
+
+    <!-- FIELDS VIEW -->
+    <div id="view-fields" class="layout">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sb-top">
+                <input class="sb-search" id="sbSearch" placeholder="🔍 ابحث عن حقل…" oninput="buildSidebar(this.value)">
+                <div class="sb-sort">
+                    <button class="sb-sort-btn active" id="sortAlphaBtn" onclick="setSortMode('alpha')">أ-ي ↓</button>
+                    <button class="sb-sort-btn" id="sortCountBtn" onclick="setSortMode('count')">عدد الجذور ↓</button>
+                </div>
+                <button class="btn sm outline" style="width:100%;margin-top:6px;" onclick="promptNewField()">＋ حقل جديد</button>
+            </div>
+            <div class="prog-text" id="progText">0 / 0 حقل</div>
+            <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+            <div class="sb-list" id="sbList"></div>
+        </div>
+
+        <!-- MAIN EDITOR -->
+        <div class="main" id="mainEl">
+            <div class="no-sel">
+                <div class="icon">📋</div>
+                <div style="font-size:.95rem;color:var(--text2);">اختر حقلاً من القائمة</div>
+            </div>
+        </div>
+
+        <!-- DETAIL / DROP PANEL -->
+        <div class="detail" id="detailEl">
+            <div class="dz-hint" id="dzHint">🎯 اسحب جذراً وأفلته على الحقل (نسخ)</div>
+            <div class="det-fields" id="detFields"></div>
+            <div class="root-det" id="rootDet" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- ROOTS VIEW -->
+    <div id="view-roots" class="roots-view hidden" style="height:calc(100vh - 100px);">
+        <table class="roots-table">
+            <thead>
+                <tr>
+                    <th>الجذر</th>
+                    <th>التكرار</th>
+                    <th>الحقول</th>
+                    <th>أمثلة</th>
+                </tr>
+            </thead>
+            <tbody id="roots-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- INSPECT VIEW -->
+    <div id="view-inspect" class="hidden" style="display:flex;height:calc(100vh - 100px);overflow:hidden;">
+
+        <!-- يمين: فلاتر -->
+        <div id="ins-panel-filters" style="width:230px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.82rem;font-weight:bold;color:var(--gold);">🎛️ تصفية الجذور</div>
+            <div style="flex:1;overflow-y:auto;padding:10px 12px;">
+
+                <!-- بحث نصي -->
+                <div style="margin-bottom:12px;">
+                    <div class="fg-lbl">🔍 بحث</div>
+                    <input id="ins-q" class="sb-search" placeholder="جذر أو مثال…" oninput="insApply()" style="margin-top:4px;">
+                </div>
+
+                <!-- عدد الحقول -->
+                <div style="margin-bottom:12px;">
+                    <div class="fg-lbl">📂 عدد الحقول المخصصة</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;">
+                        <span class="fg-chip" data-grp="nf" data-v="0" onclick="insChip(this)">⚠️ بلا حقل</span>
+                        <span class="fg-chip" data-grp="nf" data-v="1" onclick="insChip(this)">حقل واحد</span>
+                        <span class="fg-chip" data-grp="nf" data-v="2+" onclick="insChip(this)">متعدد</span>
+                        <span class="fg-chip on" data-grp="nf" data-v="all" onclick="insChip(this)">الكل</span>
+                    </div>
+                </div>
+
+                <!-- التكرار -->
+                <div style="margin-bottom:12px;">
+                    <div class="fg-lbl">🔢 التكرار في القرآن</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;">
+                        <span class="fg-chip on" data-grp="fr" data-v="all" onclick="insChip(this)">الكل</span>
+                        <span class="fg-chip" data-grp="fr" data-v="1-3" onclick="insChip(this)">نادر 1-3</span>
+                        <span class="fg-chip" data-grp="fr" data-v="4-20" onclick="insChip(this)">متوسط 4-20</span>
+                        <span class="fg-chip" data-grp="fr" data-v="21+" onclick="insChip(this)">كثير 21+</span>
+                    </div>
+                    <div style="display:flex;gap:5px;margin-top:6px;align-items:center;">
+                        <input id="ins-fr-min" type="number" min="0" placeholder="من" oninput="insApply()" style="width:55px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-family:inherit;font-size:.78rem;color:var(--text);outline:none;text-align:center;">
+                        <span style="color:var(--text3);font-size:.78rem;">—</span>
+                        <input id="ins-fr-max" type="number" min="0" placeholder="إلى" oninput="insApply()" style="width:55px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-family:inherit;font-size:.78rem;color:var(--text);outline:none;text-align:center;">
+                        <span style="font-size:.7rem;color:var(--text3);">يدوي</span>
+                    </div>
+                </div>
+
+                <!-- فلتر بحقل معين -->
+                <div style="margin-bottom:12px;">
+                    <div class="fg-lbl">📌 جذور في حقل محدد</div>
+                    <input id="ins-field-q" class="sb-search" placeholder="ابحث عن حقل…" oninput="buildInsFieldList(this.value)" style="margin-top:4px;font-size:.78rem;">
+                    <div id="ins-field-list" style="margin-top:5px;max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;"></div>
+                </div>
+
+                <!-- ترتيب -->
+                <div style="margin-bottom:12px;">
+                    <div class="fg-lbl">↕️ ترتيب النتائج</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;">
+                        <span class="fg-chip on" data-grp="srt" data-v="alpha" onclick="insChip(this)">أبجدي</span>
+                        <span class="fg-chip" data-grp="srt" data-v="freq-d" onclick="insChip(this)">تكرار ↓</span>
+                        <span class="fg-chip" data-grp="srt" data-v="freq-a" onclick="insChip(this)">تكرار ↑</span>
+                        <span class="fg-chip" data-grp="srt" data-v="nf-d" onclick="insChip(this)">حقول ↓</span>
+                    </div>
+                </div>
+
+            </div>
+            <div style="padding:8px 12px;border-top:1px solid var(--border2);display:flex;gap:5px;">
+                <button class="btn sm outline" style="flex:1;" onclick="insReset()">↺ إعادة ضبط</button>
+            </div>
+        </div>
+
+        <!-- وسط: قائمة الجذور -->
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
+            <!-- شريط الرأس -->
+            <div style="padding:7px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                <span style="font-size:.82rem;color:var(--text2);">عرض <strong id="ins-shown" style="color:var(--gold);">0</strong> من <strong id="ins-total" style="color:var(--text2);">0</strong></span>
+                <!-- batch: تظهر عند التحديد -->
+                <div id="ins-batch" style="display:none;display:flex;gap:5px;margin-right:8px;">
+                    <span style="font-size:.78rem;color:var(--text2);align-self:center;"><strong id="ins-selcount" style="color:var(--brown3);">0</strong> محدد</span>
+                    <button class="btn sm outline" onclick="insBatchCopy()">📋 نسخ إلى حقل</button>
+                    <button class="btn sm red" onclick="insBatchRemove()">🗑 حذف من حقل</button>
+                    <button class="btn sm outline" onclick="insClearSel()">✕</button>
+                </div>
+                <label style="margin-right:auto;font-size:.75rem;color:var(--text3);display:flex;align-items:center;gap:4px;cursor:pointer;">
+                    <input type="checkbox" id="ins-chk-all" onchange="insSelectAll(this.checked)"> تحديد الكل
+                </label>
+            </div>
+            <!-- القائمة -->
+            <div id="ins-list" style="flex:1;overflow-y:auto;"></div>
+        </div>
+
+        <!-- يسار: تفاصيل الجذر المحدد -->
+        <div id="ins-detail" style="width:320px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:.82rem;font-weight:bold;color:var(--gold);">📌 تفاصيل الجذر</div>
+            <div id="ins-det-body" style="flex:1;overflow-y:auto;display:flex;align-items:center;justify-content:center;">
+                <div style="text-align:center;color:var(--text3);padding:20px;">
+                    <div style="font-size:2.5rem;margin-bottom:8px;">👈</div>
+                    اختر جذراً من القائمة
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- DRAG GHOST -->
+<div class="drag-ghost" id="dragGhost"></div>
+
+<!-- CHANGES FLOAT -->
+<div class="changes-float" id="changesFloat">
+    <div class="cf-hd">
+        <span class="cf-title">📝 سجل التعديلات</span>
+        <button class="btn sm outline" onclick="toggleChanges()">إخفاء</button>
+    </div>
+    <div class="cf-list" id="chList"></div>
+    <div class="cf-ft">
+        <button class="btn sm red" onclick="confirmClear()">مسح الكل</button>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+    <div class="modal">
+        <div class="modal-icon" id="mIcon">⚠️</div>
+        <div class="modal-title" id="mTitle"></div>
+        <div class="modal-msg" id="mMsg"></div>
+        <div class="modal-btns" id="mBtns"></div>
+    </div>
+</div>
+
+<script>
+// ═════════════════════════════════════════════════════
+// STATE (خالٍ تماماً من البيانات الثقيلة)
+// ═════════════════════════════════════════════════════
+let fieldMap = {};          // id → {id, n, tc}
+let rootMap = {};           // root → {r, c, e, f: [fieldIds]}
+let fieldRoots = {};        // fid → [root1, root2, ...] (مرتبة للعرض)
+let rootFields = {};        // root → Set(fid)
+
+let activeField = null;
+let activeRoot = null;
+let reviewed = new Set();          // حفظ حالة المراجعة
+let changes = [];                  // سجل التعديلات (للإظهار)
+let undoStack = [];                // للتراجع الفعلي
+let dragRoot = null;
+let dragFromFid = null;
+
+// التصنيفات الافتراضية (كما في الأصل، ولكننا سنعرض كل الحقول بدون تصنيف ريثما نستعيدها)
+const CATS = [];  // سيتم تجاهل التصنيف في هذه النسخة المبسطة (يمكن إضافتها لاحقاً)
+
+// ═════════════════════════════════════════════════════
+// قراءة ملف Excel
+// ═════════════════════════════════════════════════════
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (loadEvent) => {
+        try {
+            const data = new Uint8Array(loadEvent.target.result);
+            const wb = XLSX.read(data, { type: 'array' });
+
+            // الأوراق المطلوبة: full, Sum, (اختياري سجل التعديلات)
+            const fullSheet = wb.Sheets['full'] || wb.Sheets['Sheet1'];
+            const sumSheet = wb.Sheets['Sum'] || wb.Sheets['Sheet2'];
+            if (!fullSheet || !sumSheet) throw new Error('الملف لا يحتوي على ورقة "full" و "Sum"');
+
+            // إعادة تعيين الحالة
+            fieldMap = {}; rootMap = {}; fieldRoots = {}; rootFields = {}; reviewed.clear();
+            changes = []; undoStack = [];
+
+            // 1. قراءة ورقة full لبناء rootMap و rootFields
+            const fullRows = XLSX.utils.sheet_to_json(fullSheet, { header: 1, defval: '' });
+            // الصف الأول ترويسة
+            for (let i = 1; i < fullRows.length; i++) {
+                const row = fullRows[i];
+                if (!row || row.length < 2) continue;
+                const root = (row[0] || '').trim();
+                if (!root) continue;
+                const freq = parseInt(row[1]) || 0;
+                const fieldsStr = row[2] || '';         // أسماء الحقول (للمعاينة فقط)
+                const idsStr = row[3] || '';             // أرقام الحقول
+                const examples = row[5] || '';
+                const fieldIds = idsStr.split('|').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+
+                if (fieldIds.length === 0) continue;     // لابد من أرقام
+
+                rootMap[root] = { r: root, c: freq, e: examples, f: fieldIds.slice() };
+                if (!rootFields[root]) rootFields[root] = new Set();
+                fieldIds.forEach(fid => {
+                    rootFields[root].add(fid);
+                });
+            }
+
+            // 2. قراءة ورقة Sum لاستخراج fieldMap و fieldRoots
+            const sumRows = XLSX.utils.sheet_to_json(sumSheet, { header: 1, defval: '' });
+            for (let i = 1; i < sumRows.length; i++) {
+                const row = sumRows[i];
+                if (!row || row.length < 2) continue;
+                const fid = parseInt(row[0]);
+                if (isNaN(fid)) continue;
+                const fname = (row[1] || '').trim();
+                const totalFreq = parseInt(row[3]) || 0;
+                fieldMap[fid] = { id: fid, n: fname, tc: totalFreq };
+                // استعادة علامة المراجعة (العمود السادس)
+                if ((row[5] || '').toString().trim() === '1') reviewed.add(fid);
+
+                // الجذور الموجودة في هذا الحقل (العمود الخامس)
+                if (row[4]) {
+                    const rootsStr = row[4].toString();
+                    const roots = rootsStr.split('،').map(s => s.trim()).filter(Boolean);
+                    fieldRoots[fid] = roots;
+                } else {
+                    fieldRoots[fid] = [];
+                }
+            }
+
+            // 3. مزامنة fieldRoots مع rootFields (لأن full sheet قد يكون أدق)
+            for (const [root, fidsSet] of Object.entries(rootFields)) {
+                fidsSet.forEach(fid => {
+                    if (!fieldRoots[fid]) fieldRoots[fid] = [];
+                    if (!fieldRoots[fid].includes(root)) fieldRoots[fid].push(root);
+                });
+            }
+            // إزالة الازدواج وترتيب fieldRoots حسب التكرار (أو حسب الرغبة)
+            for (let fid in fieldRoots) {
+                fieldRoots[fid] = [...new Set(fieldRoots[fid])];
+                fieldRoots[fid].sort((a,b) => (rootMap[b]?.c||0) - (rootMap[a]?.c||0));
+            }
+
+            // 4. محاولة استعادة سجل التعديلات (اختياري)
+            const changesSheet = wb.Sheets['سجل التعديلات'];
+            if (changesSheet) {
+                // يمكن تجاهل استعادة التعديلات أو تطبيقها إذا أردنا
+                // لا نطبقها تلقائياً حتى لا نخلط.
+            }
+
+            // إخفاء منطقة التحميل وإظهار المحرر
+            document.getElementById('loadArea').style.display = 'none';
+            document.getElementById('mainLayout').style.display = 'grid';
+            document.getElementById('exportBtn').disabled = false;
+            document.getElementById('hdSub').innerText = `${Object.keys(rootMap).length} جذر · ${Object.keys(fieldMap).length} حقل`;
+
+            // تعيين أول حقل نشط إن وجد
+            const allIds = Object.keys(fieldMap).map(Number).sort((a,b)=>a-b);
+            if (allIds.length) activeField = allIds[0];
+            buildSidebar();
+            renderMain();
+            renderDetailFields();
+            updateProg();
+
+            toast(`✅ تم تحميل ${Object.keys(rootMap).length} جذر و ${Object.keys(fieldMap).length} حقل`);
+
+        } catch (err) {
+            alert('خطأ في قراءة الملف: ' + err.message);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+});
+
+// ═════════════════════════════════════════════════════
+// دوال الواجهة (مطابقة للأصل مع حذف البيانات الثابتة)
+// ═════════════════════════════════════════════════════
+// ترتيب الحقول: alpha-asc, alpha-desc, count-asc, count-desc
+let sortMode = 'alpha-asc';
+function setSortMode(base) {
+    // نفس الزر مرة ثانية → عكس الاتجاه
+    const sameBase = sortMode.startsWith(base);
+    const asc = sameBase ? sortMode.endsWith('desc') : true;
+    sortMode = base + (asc ? '-asc' : '-desc');
+    const arrow = asc ? '↓' : '↑';
+    document.getElementById('sortAlphaBtn').textContent = 'أ-ي ' + (sortMode.startsWith('alpha') ? arrow : '↓');
+    document.getElementById('sortCountBtn').textContent = 'عدد الجذور ' + (sortMode.startsWith('count') ? arrow : '↓');
+    ['alpha','count'].forEach(m => {
+        document.getElementById('sort' + m.charAt(0).toUpperCase() + m.slice(1) + 'Btn')
+            .classList.toggle('active', sortMode.startsWith(m));
+    });
+    buildSidebar(document.getElementById('sbSearch')?.value || '');
+}
+
+function buildSidebar(q = '') {
+    const list = document.getElementById('sbList');
+    const query = q.trim();
+    let html = '';
+    let allFids = Object.keys(fieldMap).map(Number);
+    // تطبيق الترتيب
+    if (sortMode.startsWith('alpha')) {
+        allFids.sort((a,b) => fieldMap[a].n.localeCompare(fieldMap[b].n, 'ar'));
+        if (sortMode.endsWith('desc')) allFids.reverse();
+    } else if (sortMode.startsWith('count')) {
+        allFids.sort((a,b) => (fieldRoots[a]||[]).length - (fieldRoots[b]||[]).length);
+        if (sortMode.endsWith('desc')) allFids.reverse();
+    }
+    allFids.forEach(fid => {
+        const f = fieldMap[fid];
+        if (query && !f.n.includes(query)) return;
+        const mod = changes.some(c => c.fid === fid || c.toFid === fid);
+        const rev = reviewed.has(fid);
+        const rootCount = (fieldRoots[fid] || []).length;
+        const isEmpty = rootCount === 0;
+        html += `<div class="sb-item${activeField === fid ? ' active' : ''}" onclick="selectField(${fid})">
+            <span class="sb-name">${f.n}</span>
+            <span class="sb-badges">
+                ${mod ? '<span class="sb-b mod">✏</span>' : ''}
+                ${rev ? '<span class="sb-b rev">✓</span>' : ''}
+                <span class="sb-b${isEmpty ? '" style="color:var(--red);font-weight:bold' : ''}">${rootCount}</span>
+                ${isEmpty ? `<button class="sb-del-field" onclick="event.stopPropagation();confirmDeleteField(${fid})" title="حذف الحقل الفارغ">✕</button>` : ''}
+            </span>
+        </div>`;
+    });
+    list.innerHTML = html || '<div style="padding:20px;text-align:center;">لا توجد حقول</div>';
+}
+
+function selectField(id) {
+    activeField = id;
+    activeRoot = null;
+    buildSidebar(document.getElementById('sbSearch').value);
+    renderMain();
+    renderDetailFields();
+    renderRootDetail(null);
+    updateProg();
+}
+
+// ═════════════════════════════════════════════════════
+// RENDER MAIN (مع كل التفاصيل: إضافة، اقتراحات، سحب)
+// ═════════════════════════════════════════════════════
+function renderMain() {
+    if (!activeField || !fieldMap[activeField]) {
+        document.getElementById('mainEl').innerHTML = `<div class="no-sel"><div class="icon">📋</div><div>اختر حقلاً</div></div>`;
+        return;
+    }
+    const fid = activeField;
+    const f = fieldMap[fid];
+    const roots = (fieldRoots[fid] || []).slice().sort((a,b) => (rootMap[b]?.c || 0) - (rootMap[a]?.c || 0));
+
+    const allFids = Object.keys(fieldMap).map(Number).sort((a,b)=>a-b);
+    const idx = allFids.indexOf(fid);
+    const prev = allFids[idx - 1];
+    const next = allFids[idx + 1];
+    const modN = changes.filter(c => c.fid === fid || c.toFid === fid).length;
+
+    document.getElementById('mainEl').innerHTML = `
+    <div class="fld-nav">
+        <div class="nav-btns">
+            <button class="btn sm outline" onclick="selectField(${prev})" ${!prev ? 'disabled' : ''}>▶ السابق</button>
+            <button class="btn sm ${reviewed.has(fid) ? 'green' : 'outline'}" onclick="toggleReviewed(${fid})">
+                ${reviewed.has(fid) ? '✓ راجعت' : '📌 تمت المراجعة'}
+            </button>
+            <button class="btn sm outline" onclick="selectField(${next})" ${!next ? 'disabled' : ''}>◀ التالي</button>
+        </div>
+        <span class="nav-idx">${idx + 1} / ${allFids.length}</span>
+    </div>
+
+    <div class="field-card">
+        <div class="fc-top">
+            <span class="fc-name" id="fcName">${f.n}</span>
+            <button class="btn sm outline" onclick="startRename(${fid})">✏️</button>
+        </div>
+        <div class="fc-stats">
+            <span class="fc-stat r">🌱 ${roots.length} جذر</span>
+            <span class="fc-stat f">📊 ${f.tc?.toLocaleString() || 0} تكرار</span>
+            ${modN ? `<span class="fc-stat m">✏️ ${modN} تعديل</span>` : ''}
+            ${reviewed.has(fid) ? `<span class="fc-stat" style="background:var(--green-bg);color:var(--green)">✓ راجعت</span>` : ''}
+        </div>
+    </div>
+
+    <div class="add-area">
+        <div class="add-label">➕ أضف جذراً</div>
+        <div class="add-row">
+            <input class="add-inp" id="addInp" placeholder="اكتب الجذر…" oninput="updateSugg(this.value, ${fid})" onkeydown="if(event.key==='Enter')quickAdd(${fid})">
+            <button class="btn" onclick="quickAdd(${fid})">إضافة</button>
+        </div>
+        <div class="sug-list" id="sugList"></div>
+    </div>
+
+    <div class="roots-hd">
+        <span class="roots-hd-label">الجذور (${roots.length})</span>
+        <span class="roots-hd-hint">🖱️ اسحب الجذر وأفلته على الحقل في اليمين (نسخ)</span>
+    </div>
+
+    <div class="roots-grid" id="rootsGrid">
+        ${roots.map(r => renderRootCard(r, fid)).join('')}
+    </div>`;
+
+    attachDragEvents();
+    setTimeout(() => document.getElementById('addInp')?.focus(), 40);
+}
+
+function renderRootCard(r, fid) {
+    const rd = rootMap[r];
+    if (!rd) return '';
+    const isNew = changes.some(c => c.type === 'add' && c.root === r && c.toFid === fid);
+    return `<div class="rc${activeRoot === r ? ' selected' : ''}${isNew ? ' new-root' : ''}"
+        id="rc_${r}" data-root="${r}" data-fid="${fid}"
+        draggable="true"
+        onclick="clickRoot('${r}', ${fid})">
+        <button class="rc-del" onclick="event.stopPropagation();removeRoot('${r}', ${fid})" title="حذف">✕</button>
+        <div class="rc-root">${r}</div>
+        <div class="rc-freq">${rd.c?.toLocaleString() || 0} مرة</div>
+        <div class="rc-nf">${(rd.f || []).length} حقل</div>
+        ${isNew ? '<span class="rc-tag new">جديد</span>' : ''}
+    </div>`;
+}
+
+function attachDragEvents() {
+    document.querySelectorAll('.rc[draggable]').forEach(el => {
+        el.addEventListener('dragstart', onDragStart);
+        el.addEventListener('dragend', onDragEnd);
+    });
+}
+
+function onDragStart(e) {
+    dragRoot = e.currentTarget.dataset.root;
+    dragFromFid = parseInt(e.currentTarget.dataset.fid);
+    e.currentTarget.classList.add('dragging');
+
+    const ghost = document.getElementById('dragGhost');
+    ghost.textContent = dragRoot;
+    ghost.style.display = 'block';
+    e.dataTransfer.setDragImage(ghost, 50, 20);
+    e.dataTransfer.effectAllowed = 'copy';   // تغيير إلى copy ليعكس أن العملية نسخ وليس نقل
+
+    document.querySelectorAll('.det-field-item').forEach(fi => fi.classList.remove('drop-target'));
+    document.getElementById('dzHint').textContent = `🎯 انسخ "${dragRoot}" إلى الحقل المستهدف`;
+}
+
+function onDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+    dragRoot = null; dragFromFid = null;
+    document.getElementById('dragGhost').style.display = 'none';
+    document.querySelectorAll('.det-field-item').forEach(fi => fi.classList.remove('drop-target'));
+    document.getElementById('dzHint').textContent = '🎯 اسحب جذراً وأفلته على الحقل (نسخ)';
+    document.getElementById('dzHint').classList.remove('drag-over-panel');
+}
+
+// ═════════════════════════════════════════════════════
+// DETAIL PANEL
+// ═════════════════════════════════════════════════════
+function renderDetailFields(highlightFid = null, justDroppedRoot = null) {
+    const div = document.getElementById('detFields');
+    let html = '';
+    const allFids = Object.keys(fieldMap).map(Number).sort((a,b)=>a-b);
+    allFids.forEach(id => {
+        const f = fieldMap[id];
+        const roots = (fieldRoots[id] || []).slice().sort((a,b) => (rootMap[b]?.c || 0) - (rootMap[a]?.c || 0));
+        const isActive = (id === activeField);
+        html += `<div class="det-field-item${isActive ? ' active-field' : ''}" data-fid="${id}">
+            <div class="dfi-header" onclick="selectField(${id})">
+                <span class="dfi-name">${f.n}</span>
+                <span class="dfi-count">${roots.length}</span>
+            </div>
+            <div class="dfi-roots">
+                ${roots.slice(0,12).map(r => `<span class="dfi-root${r === justDroppedRoot && id === highlightFid ? ' just-dropped' : ''}">${r}</span>`).join('')}
+                ${roots.length > 12 ? `<span class="dfi-root" style="color:var(--text3)">+${roots.length-12}</span>` : ''}
+            </div>
+        </div>`;
+    });
+    div.innerHTML = html;
+}
+
+function setupDetailDropZones() {
+    const panel = document.getElementById('detailEl');
+    panel.addEventListener('dragover', e => {
+        e.preventDefault();
+        document.getElementById('dzHint').classList.add('drag-over-panel');
+    });
+    panel.addEventListener('dragleave', e => {
+        if (!panel.contains(e.relatedTarget))
+            document.getElementById('dzHint').classList.remove('drag-over-panel');
+    });
+    document.getElementById('detFields').addEventListener('dragover', e => {
+        e.preventDefault();
+        const fi = e.target.closest('.det-field-item');
+        document.querySelectorAll('.det-field-item').forEach(x => x.classList.remove('drop-target'));
+        if (fi) fi.classList.add('drop-target');
+    });
+    document.getElementById('detFields').addEventListener('dragleave', e => {
+        const fi = e.target.closest('.det-field-item');
+        if (!fi || !fi.contains(e.relatedTarget)) {
+            document.querySelectorAll('.det-field-item').forEach(x => x.classList.remove('drop-target'));
+        }
+    });
+    document.getElementById('detFields').addEventListener('drop', e => {
+        e.preventDefault();
+        document.querySelectorAll('.det-field-item').forEach(x => x.classList.remove('drop-target'));
+        if (!dragRoot) return;
+        const fi = e.target.closest('.det-field-item[data-fid]');
+        if (!fi) return;
+        const toFid = parseInt(fi.dataset.fid);
+        // استدعاء دالة النسخ بدلاً من النقل
+        doCopy(dragRoot, toFid);
+    });
+}
+
+// ═════════════════════════════════════════════════════
+// ROOT DETAIL (الجزء السفلي الأيمن)
+// ═════════════════════════════════════════════════════
+function clickRoot(r, fid) {
+    activeRoot = r;
+    document.querySelectorAll('.rc').forEach(c => c.classList.toggle('selected', c.id === 'rc_' + r));
+    renderRootDetail(r, fid);
+}
+
+function renderRootDetail(r, fid = null) {
+    const el = document.getElementById('rootDet');
+    if (!r || !rootMap[r]) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    const rd = rootMap[r];
+    const examples = rd.e ? rd.e.split('،').map(s => s.trim()).filter(Boolean) : [];
+    const fields = [...(rootFields[r] || new Set())].map(id => fieldMap[id]).filter(Boolean);
+    el.innerHTML = `
+        <div class="rd-title">تفاصيل الجذر المحدد</div>
+        <div class="rd-root">${r}</div>
+        <div class="rd-freq">تكرر <strong>${rd.c?.toLocaleString() || 0}</strong> مرة</div>
+        <div class="rd-examples">${examples.slice(0,6).map(e => `<span class="rd-ex">${e}</span>`).join('')}</div>
+        <div class="rd-fields">
+            ${fields.map(f => `<span class="rd-fld${f.id === fid ? ' current' : ''}" onclick="selectField(${f.id})">${f.n}</span>`).join('')}
+        </div>`;
+}
+
+// ═════════════════════════════════════════════════════
+// العمليات (نسخ بدل النقل، إضافة، حذف، إعادة تسمية)
+// ═════════════════════════════════════════════════════
+// دالة النسخ الجديدة: تنسخ الجذر إلى الحقل المستهدف دون إزالته من المصدر
+function doCopy(r, toFid) {
+    if (!r || !rootMap[r]) return;
+    if (rootFields[r]?.has(toFid)) {
+        toast(`⚠️ "${r}" موجود بالفعل في "${fieldMap[toFid]?.n}"`);
+        return;
+    }
+
+    undoStack.push({
+        type: 'copy', r, toFid,
+        toRoots: [...(fieldRoots[toFid] || [])],
+        rFields: rootFields[r] ? [...rootFields[r]] : []
+    });
+
+    // إضافة إلى toFid فقط (المصدر يبقى كما هو)
+    if (!rootFields[r]) rootFields[r] = new Set();
+    rootFields[r].add(toFid);
+    if (!fieldRoots[toFid]) fieldRoots[toFid] = [];
+    if (!fieldRoots[toFid].includes(r)) fieldRoots[toFid].push(r);
+    rootMap[r].f = [...rootFields[r]];
+
+    logChange({ type: 'add', root: r, toFid, desc: `نسخ "${r}" إلى "${fieldMap[toFid]?.n}"` });
+    toast(`📋 تم نسخ "${r}" إلى "${fieldMap[toFid]?.n}"`);
+
+    // تحديث الواجهات
+    if (toFid === activeField) renderMain();
+    renderDetailFields(toFid, r);
+    buildSidebar(document.getElementById('sbSearch').value);
+    updateProg();
+}
+
+// تعديل doMove ليعمل كنسخ أيضاً (لكننا لن نستخدمه بعد الآن)
+// سنبقي doMove للتوافق لكننا سنستدعي doCopy من القائمة المنسدلة
+function doMove(r, fromFid, toFid) {
+    // حولناها إلى نسخ: ننفذ copy ونتجاهل fromFid
+    doCopy(r, toFid);
+}
+
+function addRoot(r, fid) {
+    if (!rootMap[r]) { toast(`الجذر "${r}" غير موجود`); return; }
+    if (rootFields[r]?.has(fid)) { toast(`"${r}" موجود بالفعل`); return; }
+
+    undoStack.push({
+        type: 'add', r, fid,
+        fromRoots: [...(fieldRoots[fid] || [])],
+        rFields: rootFields[r] ? [...rootFields[r]] : []
+    });
+
+    if (!rootFields[r]) rootFields[r] = new Set();
+    rootFields[r].add(fid);
+    if (!fieldRoots[fid]) fieldRoots[fid] = [];
+    if (!fieldRoots[fid].includes(r)) fieldRoots[fid].push(r);
+    rootMap[r].f = [...rootFields[r]];
+
+    logChange({ type: 'add', root: r, toFid: fid, desc: `إضافة "${r}" إلى "${fieldMap[fid]?.n}"` });
+    toast(`✅ تمت إضافة "${r}"`);
+    if (activeField === fid) renderMain();
+    renderDetailFields();
+    buildSidebar(document.getElementById('sbSearch').value);
+    updateProg();
+}
+
+function removeRoot(r, fid) {
+    if ((rootFields[r]?.size || 0) <= 1) {
+        showModal('⚠️', 'تحذير', `"${r}" في حقل وحيد. حذفه يعني خروجه من كل الحقول. متابعة؟`, [
+            { l: 'حذف', c: 'btn red', fn: `doRemove('${r}', ${fid})` },
+            { l: 'إلغاء', c: 'btn outline', fn: 'closeModal()' }
+        ]);
+        return;
+    }
+    doRemove(r, fid);
+}
+
+function doRemove(r, fid) {
+    closeModal();
+    undoStack.push({
+        type: 'remove', r, fid,
+        fromRoots: [...(fieldRoots[fid] || [])],
+        rFields: rootFields[r] ? [...rootFields[r]] : []
+    });
+
+    rootFields[r]?.delete(fid);
+    if (fieldRoots[fid]) fieldRoots[fid] = fieldRoots[fid].filter(x => x !== r);
+    rootMap[r].f = [...(rootFields[r] || new Set())];
+
+    logChange({ type: 'del', root: r, fid, desc: `حذف "${r}" من "${fieldMap[fid]?.n}"` });
+    toast(`🗑 تم الحذف`);
+    activeRoot = null;
+    if (activeField === fid) renderMain();
+    renderDetailFields();
+    buildSidebar(document.getElementById('sbSearch').value);
+    updateProg();
+}
+
+function quickAdd(fid) {
+    const inp = document.getElementById('addInp');
+    if (!inp) return;
+    const v = inp.value.trim();
+    if (!v) return;
+    addRoot(v, fid);
+    inp.value = '';
+    document.getElementById('sugList').innerHTML = '';
+}
+
+function updateSugg(val, fid) {
+    const div = document.getElementById('sugList');
+    if (!div) return;
+    const q = val.trim();
+    if (!q) { div.innerHTML = ''; return; }
+    const matches = Object.values(rootMap)
+        .filter(r => r.r.includes(q) || (r.e && r.e.includes(q)))
+        .sort((a, b) => b.c - a.c).slice(0, 10);
+    div.innerHTML = matches.map(r => {
+        const exists = rootFields[r.r]?.has(fid);
+        return `<span class="sug${exists ? ' exists' : ''}" ${exists ? '' : 'onclick="addRoot(\'' + r.r + '\',' + fid + ')"'}>
+            ${r.r} <span class="freq">${r.c}</span>
+        </span>`;
+    }).join('');
+}
+
+function startRename(fid) {
+    const el = document.getElementById('fcName');
+    if (!el) return;
+    const cur = fieldMap[fid].n;
+    el.outerHTML = `<input class="fc-name-inp" id="fcNameInp" value="${cur}" onblur="doRename(${fid},this.value)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value='${cur}';this.blur();}">`;
+    document.getElementById('fcNameInp')?.select();
+}
+function doRename(fid, val) {
+    const v = val.trim();
+    const old = fieldMap[fid].n;
+    if (!v || v === old) { renderMain(); return; }
+    undoStack.push({ type: 'rename', fid, old });
+    fieldMap[fid].n = v;
+    logChange({ type: 'rename', fid, desc: `تغيير اسم "${old}" → "${v}"` });
+    toast('✏️ تم تغيير الاسم');
+    buildSidebar(document.getElementById('sbSearch').value);
+    renderMain();
+    renderDetailFields();
+}
+
+function toggleReviewed(fid) {
+    reviewed.has(fid) ? reviewed.delete(fid) : reviewed.add(fid);
+    updateProg();
+    buildSidebar(document.getElementById('sbSearch').value);
+    renderMain();
+}
+function updateProg() {
+    const all = Object.keys(fieldMap).length;
+    const done = reviewed.size;
+    const pct = all ? Math.round(done / all * 100) : 0;
+    document.getElementById('progText').textContent = `${done}/${all} حقل (${pct}%)`;
+    document.getElementById('progFill').style.width = pct + '%';
+}
+
+// ═════════════════════════════════════════════════════
+// التراجع
+// ═════════════════════════════════════════════════════
+function undoLast() {
+    if (!undoStack.length) return;
+    const snap = undoStack.pop();
+    if (snap.type === 'move' || snap.type === 'copy') {   // معالجة copy بنفس طريقة move
+        // ولكن copy ليس له from, فقط to. سنستعمل snap.toFid
+        if (snap.type === 'copy') {
+            fieldRoots[snap.toFid] = [...snap.toRoots];
+            rootFields[snap.r] = new Set(snap.rFields);
+            if (rootMap[snap.r]) rootMap[snap.r].f = snap.rFields;
+        } else if (snap.type === 'move') {
+            // للتوافق
+            if (snap.fromFid) fieldRoots[snap.fromFid] = [...snap.fromRoots];
+            if (snap.toFid) fieldRoots[snap.toFid] = [...snap.toRoots];
+            rootFields[snap.r] = new Set(snap.rFields);
+            if (rootMap[snap.r]) rootMap[snap.r].f = snap.rFields;
+        }
+    } else if (snap.type === 'add' || snap.type === 'remove') {
+        fieldRoots[snap.fid] = [...snap.fromRoots];
+        rootFields[snap.r] = new Set(snap.rFields);
+        if (rootMap[snap.r]) rootMap[snap.r].f = snap.rFields;
+    } else if (snap.type === 'rename') {
+        fieldMap[snap.fid].n = snap.old;
+    }
+    changes.pop();
+    updateChangesUI();
+    buildSidebar(document.getElementById('sbSearch').value);
+    if (activeField) { renderMain(); renderDetailFields(); }
+    toast('↩ تم التراجع');
+}
+
+function logChange(c) {
+    changes.push({ ...c, ts: Date.now() });
+    updateChangesUI();
+}
+function updateChangesUI() {
+    const n = changes.length;
+    document.getElementById('chCount').style.display = n ? '' : 'none';
+    document.getElementById('chN').textContent = n;
+    document.getElementById('chBtn').style.display = n ? '' : 'none';
+    document.getElementById('undoBtn').style.display = n ? '' : 'none';
+    const list = document.getElementById('chList');
+    list.innerHTML = [...changes].reverse().map(c => `
+        <div class="cf-item ${c.type === 'add' ? 'add' : c.type === 'del' ? 'del' : c.type === 'rename' ? 'rename' : 'move'}">
+            <span>${c.type === 'add' ? '➕' : c.type === 'del' ? '🗑' : c.type === 'rename' ? '✏️' : '↔'}</span>
+            <span>${c.desc}</span>
+        </div>`).join('');
+}
+function toggleChanges() { document.getElementById('changesFloat').classList.toggle('show'); }
+function confirmClear() {
+    showModal('⚠️', 'مسح جميع التعديلات؟', 'لا يمكن التراجع عن هذا.', [
+        { l: 'مسح', c: 'btn red', fn: 'doClear()' },
+        { l: 'إلغاء', c: 'btn outline', fn: 'closeModal()' }
+    ]);
+}
+function doClear() {
+    closeModal(); changes = []; undoStack = [];
+    // إعادة تعيين البيانات إلى الحالة المحملة؟ (صعب) نكتفي بتفريغ السجلات
+    updateChangesUI();
+    toast('🔄 تم مسح سجل التعديلات فقط');
+}
+
+// ═════════════════════════════════════════════════════
+// حذف حقل فارغ
+// ═════════════════════════════════════════════════════
+function confirmDeleteField(fid) {
+    const name = fieldMap[fid]?.n || fid;
+    showModal('🗑️', 'حذف الحقل الفارغ', `حذف "${name}"؟ لا يمكن التراجع.`, [
+        { l: 'حذف', c: 'btn red', fn: `doDeleteField(${fid})` },
+        { l: 'إلغاء', c: 'btn outline', fn: 'closeModal()' }
+    ]);
+}
+function promptNewField() {
+    if (Object.keys(fieldMap).length === 0) return toast('حمّل ملفاً أولاً لتتمكن من إضافة حقل');
+    document.getElementById('mIcon').textContent = '➕';
+    document.getElementById('mTitle').textContent = 'إضافة حقل جديد';
+    document.getElementById('mMsg').innerHTML = `
+        <input id="newFieldInp" class="add-inp" style="width:100%;margin-bottom:0;" placeholder="اسم الحقل الجديد…" dir="rtl" autofocus>
+    `;
+    document.getElementById('mBtns').innerHTML = `
+        <button class="btn" onclick="doCreateField()">إضافة</button>
+        <button class="btn outline" onclick="closeModal()">إلغاء</button>
+    `;
+    document.getElementById('modalBg').classList.add('show');
+    setTimeout(() => document.getElementById('newFieldInp')?.focus(), 50);
+    document.getElementById('newFieldInp').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doCreateField();
+    });
+}
+
+function doCreateField() {
+    const name = (document.getElementById('newFieldInp')?.value || '').trim();
+    if (!name) return;
+    // توليد ID جديد (أعلى من الموجود)
+    const allIds = Object.keys(fieldMap).map(Number);
+    const newId = allIds.length ? Math.max(...allIds) + 1 : 1;
+    fieldMap[newId] = { id: newId, n: name, tc: 0 };
+    fieldRoots[newId] = [];
+    closeModal();
+    logChange({ type: 'add', desc: `إضافة حقل جديد "${name}" (رقم ${newId})` });
+    buildSidebar(document.getElementById('sbSearch').value);
+    updateProg();
+    document.getElementById('hdSub').innerText = `${Object.keys(rootMap).length} جذر · ${Object.keys(fieldMap).length} حقل`;
+    selectField(newId);
+    toast(`✅ تم إنشاء الحقل "${name}"`);
+}
+
+function doDeleteField(fid) {
+    closeModal();
+    const name = fieldMap[fid]?.n || fid;
+    delete fieldMap[fid];
+    delete fieldRoots[fid];
+    reviewed.delete(fid);
+    for (const r in rootFields) {
+        if (rootFields[r].has(fid)) {
+            rootFields[r].delete(fid);
+            if (rootMap[r]) rootMap[r].f = [...rootFields[r]];
+        }
+    }
+    logChange({ type: 'del', desc: `حذف الحقل الفارغ "${name}"` });
+    if (activeField === fid) {
+        activeField = null;
+        const remaining = Object.keys(fieldMap).map(Number).sort((a,b)=>a-b);
+        if (remaining.length) activeField = remaining[0];
+        renderMain();
+        renderDetailFields();
+    } else {
+        renderDetailFields();
+    }
+    buildSidebar(document.getElementById('sbSearch').value);
+    updateProg();
+    document.getElementById('hdSub').innerText = `${Object.keys(rootMap).length} جذر · ${Object.keys(fieldMap).length} حقل`;
+    toast(`🗑 تم حذف الحقل "${name}"`);
+}
+
+// ═════════════════════════════════════════════════════
+// تصدير Excel بنفس بنية الملف المحمل
+// ═════════════════════════════════════════════════════
+function exportExcel() {
+    if (Object.keys(fieldMap).length === 0) return toast('لا بيانات للتصدير');
+
+    // تحضير full sheet
+    const fullData = [['الجذر', 'تكرار الجذر', 'جميع الحقول', 'أرقام الحقول', 'عدد الحقول', 'أمثلة الكلمات']];
+    // نستخرج جميع الجذور من rootMap (حسب الترتيب الأبجدي أو أي ترتيب)
+    const allRoots = Object.keys(rootMap).sort((a,b) => a.localeCompare(b));
+    allRoots.forEach(root => {
+        const rd = rootMap[root];
+        if (!rd) return;
+        const fids = (rd.f || []).filter(id => fieldMap[id]);
+        if (fids.length === 0) return;
+        const fnames = fids.map(id => fieldMap[id]?.n || '').filter(Boolean).join(' | ');
+        const idsStr = fids.join(' | ');
+        fullData.push([root, rd.c || 0, fnames, idsStr, fids.length, rd.e || '']);
+    });
+
+    // Sum sheet
+    const sumData = [['رقم الحقل', 'الحقل الدلالي', 'عدد الجذور', 'مجموع التكرارات', 'الجذور', 'تمت المراجعة']];
+    const allFids = Object.keys(fieldMap).map(Number).sort((a,b)=>a-b);
+    allFids.forEach(fid => {
+        const f = fieldMap[fid];
+        const roots = fieldRoots[fid] || [];
+        // ترتيب الجذور حسب التكرار
+        roots.sort((a,b) => (rootMap[b]?.c || 0) - (rootMap[a]?.c || 0));
+        const totalFreq = roots.reduce((acc, r) => acc + (rootMap[r]?.c || 0), 0);
+        sumData.push([fid, f.n, roots.length, totalFreq, roots.join('، '), reviewed.has(fid) ? 1 : 0]);
+    });
+
+    // Changes log sheet
+    const logData = [['النوع', 'الجذر', 'من حقل', 'إلى حقل', 'الوصف']];
+    changes.forEach(c => {
+        logData.push([
+            c.type || '',
+            c.root || '',
+            (c.fid && fieldMap[c.fid]) ? fieldMap[c.fid].n : '',
+            (c.toFid && fieldMap[c.toFid]) ? fieldMap[c.toFid].n : '',
+            c.desc || ''
+        ]);
+    });
+
+    const wb = XLSX.utils.book_new();
+
+    const ws1 = XLSX.utils.aoa_to_sheet(fullData);
+    ws1['!cols'] = [{ wch: 14 }, { wch: 12 }, { wch: 65 }, { wch: 22 }, { wch: 12 }, { wch: 55 }];
+    XLSX.utils.book_append_sheet(wb, ws1, 'full');
+
+    const ws2 = XLSX.utils.aoa_to_sheet(sumData);
+    ws2['!cols'] = [{ wch: 10 }, { wch: 42 }, { wch: 12 }, { wch: 15 }, { wch: 80 }, { wch: 14 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Sum');
+
+    if (changes.length) {
+        const ws3 = XLSX.utils.aoa_to_sheet(logData);
+        ws3['!cols'] = [{ wch: 10 }, { wch: 12 }, { wch: 30 }, { wch: 30 }, { wch: 60 }];
+        XLSX.utils.book_append_sheet(wb, ws3, 'سجل التعديلات');
+    }
+
+    const date = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `semantic-${date}.xlsx`);
+    toast('📥 تم التصدير بنجاح');
+}
+
+// ═════════════════════════════════════════════════════
+// المساعدة: مودال، توست، دارك
+// ═════════════════════════════════════════════════════
+function showModal(icon, title, msg, actions) {
+    document.getElementById('mIcon').textContent = icon;
+    document.getElementById('mTitle').textContent = title;
+    document.getElementById('mMsg').textContent = msg;
+    document.getElementById('mBtns').innerHTML = actions.map(a => `<button class="${a.c}" onclick="${a.fn}">${a.l}</button>`).join('');
+    document.getElementById('modalBg').classList.add('show');
+}
+function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
+document.getElementById('modalBg').addEventListener('click', e => { if (e.target.id === 'modalBg') closeModal(); });
+
+let _tt;
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function toggleDark() {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('qeDark', document.body.classList.contains('dark') ? '1' : '0');
+}
+if (localStorage.getItem('qeDark') === '1') document.body.classList.add('dark');
+
+document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undoLast(); }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); exportExcel(); }
+    if (e.key === 'ArrowLeft' && !e.target.matches('input')) {
+        const all = Object.keys(fieldMap).map(Number).sort((a,b)=>a-b);
+        const i = all.indexOf(activeField);
+        const n = all[i + 1]; if (n && fieldMap[n]) selectField(n);
+    }
+    if (e.key === 'ArrowRight' && !e.target.matches('input')) {
+        const all = Object.keys(fieldMap).map(Number).sort((a,b)=>a-b);
+        const i = all.indexOf(activeField);
+        const p = all[i - 1]; if (p && fieldMap[p]) selectField(p);
+    }
+});
+
+// تهيئة منطقة السحب
+setupDetailDropZones();
+
+// ═══════════════════════════════════════════════
+// INSPECT VIEW
+// ═══════════════════════════════════════════════
+let insState = {
+    q: '', nf: 'all', fr: 'all', frMin: null, frMax: null,
+    fieldId: null,   // filter by specific field
+    srt: 'alpha'
+};
+let insResults = [];       // array of root strings after filter
+let insSel = new Set();    // selected roots
+let insActiveRoot = null;
+
+/* ─ chip toggle (single-select per group) ─ */
+function insChip(el) {
+    const grp = el.dataset.grp;
+    const v   = el.dataset.v;
+    // deactivate siblings
+    document.querySelectorAll(`.fg-chip[data-grp="${grp}"]`).forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+    if (grp === 'nf')  insState.nf  = v;
+    if (grp === 'fr')  { insState.fr = v; document.getElementById('ins-fr-min').value=''; document.getElementById('ins-fr-max').value=''; insState.frMin=null; insState.frMax=null; }
+    if (grp === 'srt') insState.srt = v;
+    insApply();
+}
+
+/* ─ field filter list ─ */
+function buildInsFieldList(q) {
+    const div = document.getElementById('ins-field-list');
+    if (!div) return;
+    const query = (q||'').trim();
+    let fids = Object.keys(fieldMap).map(Number)
+        .filter(id => !query || fieldMap[id].n.includes(query))
+        .sort((a,b) => fieldMap[a].n.localeCompare(fieldMap[b].n,'ar'));
+
+    div.innerHTML = fids.map(id => {
+        const on = insState.fieldId === id;
+        return `<div class="fsug-row${on?' already':''}" style="${on?'border-color:var(--gold);background:var(--blue-bg);':''}" onclick="insToggleField(${id})">
+            <span class="fsug-name">${fieldMap[id].n}</span>
+            <span class="fsug-cnt">${(fieldRoots[id]||[]).length}</span>
+            ${on ? '<span style="color:var(--gold);font-size:.7rem;">✓ محدد</span>' : ''}
+        </div>`;
+    }).join('');
+}
+
+function insToggleField(id) {
+    insState.fieldId = (insState.fieldId === id) ? null : id;
+    buildInsFieldList(document.getElementById('ins-field-q')?.value || '');
+    insApply();
+}
+
+/* ─ MAIN APPLY ─ */
+function insApply() {
+    // read manual freq range
+    const minV = document.getElementById('ins-fr-min')?.value;
+    const maxV = document.getElementById('ins-fr-max')?.value;
+    if (minV !== '' && minV !== undefined) insState.frMin = parseInt(minV) || null;
+    else insState.frMin = null;
+    if (maxV !== '' && maxV !== undefined) insState.frMax = parseInt(maxV) || null;
+    else insState.frMax = null;
+    insState.q = document.getElementById('ins-q')?.value?.trim() || '';
+
+    let roots = Object.values(rootMap);
+
+    // text
+    if (insState.q) {
+        const q = insState.q;
+        roots = roots.filter(r => r.r.includes(q) || (r.e && r.e.includes(q)));
+    }
+
+    // field count
+    if (insState.nf !== 'all') {
+        roots = roots.filter(r => {
+            const n = rootFields[r.r]?.size || 0;
+            if (insState.nf === '0')  return n === 0;
+            if (insState.nf === '1')  return n === 1;
+            if (insState.nf === '2+') return n >= 2;
+            return true;
+        });
+    }
+
+    // freq preset
+    if (insState.fr !== 'all' && insState.frMin === null && insState.frMax === null) {
+        roots = roots.filter(r => {
+            const c = r.c||0;
+            if (insState.fr === '1-3')  return c >= 1  && c <= 3;
+            if (insState.fr === '4-20') return c >= 4  && c <= 20;
+            if (insState.fr === '21+')  return c >= 21;
+            return true;
+        });
+    }
+    // freq manual
+    if (insState.frMin !== null) roots = roots.filter(r => (r.c||0) >= insState.frMin);
+    if (insState.frMax !== null) roots = roots.filter(r => (r.c||0) <= insState.frMax);
+
+    // field filter
+    if (insState.fieldId !== null) {
+        roots = roots.filter(r => rootFields[r.r]?.has(insState.fieldId));
+    }
+
+    // sort
+    roots.sort((a,b) => {
+        if (insState.srt === 'alpha')  return a.r.localeCompare(b.r,'ar');
+        if (insState.srt === 'freq-d') return (b.c||0)-(a.c||0);
+        if (insState.srt === 'freq-a') return (a.c||0)-(b.c||0);
+        if (insState.srt === 'nf-d')   return (rootFields[b.r]?.size||0)-(rootFields[a.r]?.size||0);
+        return 0;
+    });
+
+    insResults = roots.map(r => r.r);
+    document.getElementById('ins-shown').textContent = insResults.length;
+    document.getElementById('ins-total').textContent = Object.keys(rootMap).length;
+    insRenderList();
+}
+
+/* ─ RENDER LIST ─ */
+function insRenderList() {
+    const list = document.getElementById('ins-list');
+    if (!insResults.length) {
+        list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text3);">لا توجد نتائج</div>';
+        return;
+    }
+    list.innerHTML = insResults.map(r => {
+        const rd = rootMap[r];
+        if (!rd) return '';
+        const nf  = rootFields[r]?.size || 0;
+        const sel = insSel.has(r);
+        const isA = insActiveRoot === r;
+        const fields = [...(rootFields[r]||new Set())].map(id=>fieldMap[id]).filter(Boolean);
+
+        let rowCls = 'ir';
+        if (isA)   rowCls += ' active';
+        else if (nf===0) rowCls += ' warn';
+        else if (nf>=3)  rowCls += ' multi';
+
+        const freqBg  = nf===0 ? 'background:var(--red-bg);color:var(--red)' : 'background:var(--surface2);color:var(--text2)';
+        const nfColor = nf===0 ? 'background:var(--red-bg);color:var(--red)' : nf>=3 ? 'background:var(--blue-bg);color:var(--blue)' : 'background:var(--green-bg);color:var(--green)';
+
+        return `<div class="${rowCls}" id="ir_${r}" onclick="insSelectRoot('${r}')">
+            <div class="ir-chk" onclick="event.stopPropagation()">
+                <input type="checkbox" ${sel?'checked':''} onchange="insToggleSel('${r}',this.checked)">
+            </div>
+            <div class="ir-body">
+                <div class="ir-top">
+                    <span class="ir-root">${r}</span>
+                    <span class="ir-badge" style="${freqBg}">${(rd.c||0).toLocaleString()} مرة</span>
+                    <span class="ir-badge" style="${nfColor}">${nf} حقل</span>
+                </div>
+                <div class="ir-fields">
+                    ${fields.slice(0,4).map(f=>`<span class="ir-ft">${f.n}</span>`).join('')}
+                    ${fields.length>4?`<span class="ir-ft" style="color:var(--text3);">+${fields.length-4}</span>`:''}
+                    ${nf===0?'<span class="ir-ft" style="color:var(--red);border-color:var(--red);">⚠️ غير مصنف</span>':''}
+                </div>
+                ${rd.e?`<div class="ir-ex">${rd.e.split('،').slice(0,5).join(' · ')}</div>`:''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ─ SELECT ROOT → SHOW DETAIL ─ */
+function insSelectRoot(r) {
+    insActiveRoot = r;
+    insRenderList();
+    insRenderDetail(r);
+}
+
+function insRenderDetail(r) {
+    const el = document.getElementById('ins-det-body');
+    const rd = rootMap[r];
+    if (!rd) return;
+
+    const nf = rootFields[r]?.size || 0;
+    const fields = [...(rootFields[r]||new Set())].map(id=>fieldMap[id]).filter(Boolean);
+    const examples = rd.e ? rd.e.split('،').map(s=>s.trim()).filter(Boolean) : [];
+
+    let html = `
+    <div style="padding:0;width:100%;">
+
+        <!-- رأس الجذر -->
+        <div style="padding:12px 14px;background:var(--surface2);border-bottom:1px solid var(--border);">
+            <div style="font-size:2rem;color:var(--brown3);font-weight:bold;font-family:'Amiri',serif;">${r}</div>
+            <div style="font-size:.8rem;color:var(--text3);margin-top:2px;">
+                تكرر <strong style="color:var(--gold)">${(rd.c||0).toLocaleString()}</strong> مرة ·
+                في <strong style="color:var(--blue)">${nf}</strong> حقل
+                ${nf===0?'<span style="color:var(--red);font-weight:bold;"> ⚠️ غير مصنف</span>':''}
+            </div>
+            ${examples.length?`<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">
+                ${examples.map(e=>`<span style="background:var(--surface);border-radius:5px;padding:2px 8px;font-size:.82rem;font-family:'Amiri',serif;">${e}</span>`).join('')}
+            </div>`:''}
+        </div>
+
+        <div style="padding:12px 14px;">
+
+        <!-- الحقول الحالية مع جذورها -->
+        <div style="font-size:.72rem;color:var(--text3);font-weight:bold;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">
+            📂 الحقول الحالية (${nf})
+        </div>`;
+
+    if (fields.length === 0) {
+        html += `<div style="text-align:center;color:var(--red);padding:10px;background:var(--red-bg);border-radius:8px;font-size:.85rem;margin-bottom:12px;">
+            ⚠️ هذا الجذر غير مصنف في أي حقل
+        </div>`;
+    } else {
+        fields.forEach(f => {
+            const peers = (fieldRoots[f.id]||[]).slice().sort((a,b)=>(rootMap[b]?.c||0)-(rootMap[a]?.c||0));
+            const totalFreq = peers.reduce((s,pr)=>s+(rootMap[pr]?.c||0),0);
+            html += `
+            <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:9px;margin-bottom:10px;overflow:hidden;">
+                <!-- اسم الحقل + زر حذف -->
+                <div style="display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid var(--border2);background:var(--surface);">
+                    <span style="flex:1;font-size:.85rem;font-weight:bold;color:var(--text);cursor:pointer;" onclick="switchView('fields');selectField(${f.id})">${f.n}</span>
+                    <span style="font-size:.68rem;color:var(--text3);">${peers.length} جذر · ${totalFreq.toLocaleString()} مرة</span>
+                    <button onclick="insDetRemove('${r}',${f.id})" title="حذف '${r}' من هذا الحقل"
+                        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.85rem;padding:0 3px;opacity:.6;transition:opacity .12s;"
+                        onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">✕</button>
+                </div>
+                <!-- جذور الحقل (peers) -->
+                <div style="padding:7px 10px;">
+                    <div style="font-size:.68rem;color:var(--text3);margin-bottom:5px;">الجذور في هذا الحقل — انقر لتغيير الجذر المحدد:</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:4px;max-height:110px;overflow-y:auto;">
+                        ${peers.map(pr => {
+                            const isSelf = pr === r;
+                            return `<span class="peer-root${isSelf?' is-self':''}"
+                                onclick="${isSelf?'':(`insSelectRoot('${pr}')`)}"
+                                style="${isSelf?'cursor:default;':''}"
+                                title="${isSelf?'الجذر الحالي':(rootMap[pr]?.c||0)+' مرة'}">${pr}</span>`;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+
+    // إضافة إلى حقل
+    html += `
+        <div style="margin-top:4px;">
+            <div style="font-size:.72rem;color:var(--text3);font-weight:bold;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">➕ إضافة إلى حقل</div>
+            <input id="ins-add-q" class="sb-search" placeholder="ابحث عن حقل…"
+                oninput="insRenderAddSug('${r}',this.value)"
+                style="margin-bottom:5px;font-size:.8rem;">
+            <div id="ins-add-sug" style="max-height:150px;overflow-y:auto;"></div>
+        </div>
+
+        ${nf>0?`
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border2);">
+            <button class="btn sm red" style="width:100%;" onclick="insDetRemoveAll('${r}')">🗑 حذف من كل الحقول</button>
+        </div>`:''}
+
+        </div>
+    </div>`;
+
+    el.style.display='block'; el.style.alignItems='flex-start'; el.style.justifyContent='flex-start';
+    el.innerHTML = html;
+    setTimeout(()=>document.getElementById('ins-add-q')?.focus(),30);
+}
+
+function insRenderAddSug(r, q) {
+    const div = document.getElementById('ins-add-sug');
+    if (!div) return;
+    if (!q.trim()) { div.innerHTML=''; return; }
+    const cur = rootFields[r] || new Set();
+    const matches = Object.values(fieldMap)
+        .filter(f => f.n.includes(q.trim()))
+        .slice(0,8);
+    div.innerHTML = matches.map(f => {
+        const has = cur.has(f.id);
+        return `<div class="fsug-row${has?' already':''}" ${has?'':'onclick="insAddToField(\''+r+'\','+f.id+')"'}>
+            <span class="fsug-name">${f.n}</span>
+            <span class="fsug-cnt">${(fieldRoots[f.id]||[]).length}</span>
+            ${has?'<span style="font-size:.68rem;color:var(--gold);">✓ موجود</span>':''}
+        </div>`;
+    }).join('') || '<div style="padding:6px;font-size:.76rem;color:var(--text3);">لا نتائج</div>';
+}
+
+function insAddToField(r, fid) {
+    addRoot(r, fid);   // reuses existing logic + undo
+    insRenderDetail(r);
+    insApply();
+}
+
+function insDetRemove(r, fid) {
+    const nf = rootFields[r]?.size || 0;
+    if (nf <= 1) {
+        showModal('⚠️','تحذير',`"${r}" في حقل وحيد. حذفه يُخرجه من كل التصنيف. متابعة؟`,[
+            {l:'حذف',c:'btn red',fn:`insDoRemove('${r}',${fid})`},
+            {l:'إلغاء',c:'btn outline',fn:'closeModal()'}
+        ]);
+        return;
+    }
+    insDoRemove(r, fid);
+}
+function insDoRemove(r, fid) {
+    closeModal();
+    doRemove(r, fid);   // reuses existing logic
+    insRenderDetail(r);
+    insApply();
+}
+function insDetRemoveAll(r) {
+    showModal('🗑️','حذف من كل الحقول؟',`سيُزال "${r}" من جميع حقوله.`,[
+        {l:'حذف الكل',c:'btn red',fn:`insDoRemoveAll('${r}')`},
+        {l:'إلغاء',c:'btn outline',fn:'closeModal()'}
+    ]);
+}
+function insDoRemoveAll(r) {
+    closeModal();
+    const fids = [...(rootFields[r]||new Set())];
+    fids.forEach(fid => doRemove(r, fid));
+    insRenderDetail(r);
+    insApply();
+    toast(`🗑 "${r}" حُذف من كل الحقول`);
+}
+
+/* ─ SELECTION & BATCH ─ */
+function insToggleSel(r, on) {
+    on ? insSel.add(r) : insSel.delete(r);
+    insUpdateBatch();
+}
+function insSelectAll(on) {
+    on ? insResults.forEach(r=>insSel.add(r)) : insSel.clear();
+    insUpdateBatch();
+    insRenderList();
+}
+function insClearSel() {
+    insSel.clear();
+    document.getElementById('ins-chk-all').checked=false;
+    insUpdateBatch(); insRenderList();
+}
+function insUpdateBatch() {
+    const n = insSel.size;
+    const bar = document.getElementById('ins-batch');
+    if(bar){ bar.style.display = n ? 'flex' : 'none'; }
+    const el = document.getElementById('ins-selcount');
+    if(el) el.textContent = n;
+}
+
+function insPickField(title, cb) {
+    const opts = Object.values(fieldMap)
+        .sort((a,b)=>a.n.localeCompare(b.n,'ar'))
+        .map(f=>`<div class="fsug-row" onclick="insPickFieldDo(${f.id})">
+            <span class="fsug-name">${f.n}</span>
+            <span class="fsug-cnt">${(fieldRoots[f.id]||[]).length}</span>
+        </div>`).join('');
+    window._insPickCb = cb;
+    document.getElementById('mIcon').textContent='📋';
+    document.getElementById('mTitle').textContent=title;
+    document.getElementById('mMsg').innerHTML=`<div style="max-height:260px;overflow-y:auto;text-align:right;">${opts}</div>`;
+    document.getElementById('mBtns').innerHTML=`<button class="btn outline" onclick="closeModal()">إلغاء</button>`;
+    document.getElementById('modalBg').classList.add('show');
+}
+function insPickFieldDo(fid){ closeModal(); if(window._insPickCb) window._insPickCb(fid); }
+
+function insBatchCopy() {
+    if(!insSel.size) return;
+    insPickField(`نسخ ${insSel.size} جذر إلى حقل`, fid=>{
+        let n=0; insSel.forEach(r=>{ if(!rootFields[r]?.has(fid)){doCopy(r,fid);n++;} });
+        toast(`📋 تم نسخ ${n} جذر إلى "${fieldMap[fid]?.n}"`);
+        insApply(); buildSidebar(document.getElementById('sbSearch').value);
+    });
+}
+function insBatchRemove() {
+    if(!insSel.size) return;
+    insPickField(`حذف ${insSel.size} جذر من حقل`, fid=>{
+        let n=0; insSel.forEach(r=>{
+            if(rootFields[r]?.has(fid)){
+                rootFields[r].delete(fid);
+                if(fieldRoots[fid]) fieldRoots[fid]=fieldRoots[fid].filter(x=>x!==r);
+                if(rootMap[r]) rootMap[r].f=[...(rootFields[r]||new Set())];
+                logChange({type:'del',root:r,fid,desc:`حذف "${r}" من "${fieldMap[fid]?.n}"`});
+                n++;
+            }
+        });
+        toast(`🗑 تم حذف ${n} جذر من "${fieldMap[fid]?.n}"`);
+        insApply(); buildSidebar(document.getElementById('sbSearch').value);
+    });
+}
+
+/* ─ RESET ─ */
+function insReset() {
+    insState={q:'',nf:'all',fr:'all',frMin:null,frMax:null,fieldId:null,srt:'alpha'};
+    document.getElementById('ins-q').value='';
+    document.getElementById('ins-fr-min').value='';
+    document.getElementById('ins-fr-max').value='';
+    document.getElementById('ins-field-q').value='';
+    // reset chips
+    document.querySelectorAll('.fg-chip').forEach(c=>{
+        const grp=c.dataset.grp, v=c.dataset.v;
+        c.classList.toggle('on', v==='all' || (grp==='srt'&&v==='alpha'));
+    });
+    buildInsFieldList('');
+    insApply();
+}
+
+// ═════════════════════════════════════════════════════
+// VIEW SWITCH
+// ═════════════════════════════════════════════════════
+function switchView(v) {
+    document.getElementById('view-fields').classList.toggle('hidden', v !== 'fields');
+    document.getElementById('view-roots').classList.toggle('hidden', v !== 'roots');
+    document.getElementById('view-inspect').classList.toggle('hidden', v !== 'inspect');
+    document.getElementById('tab-fields').classList.toggle('active', v === 'fields');
+    document.getElementById('tab-roots').classList.toggle('active', v === 'roots');
+    document.getElementById('tab-inspect').classList.toggle('active', v === 'inspect');
+    if (v === 'roots') renderRootsTable();
+    if (v === 'inspect') { buildInsFieldList(''); insApply(); }
+}
+
+function renderRootsTable() {
+    const tbody = document.getElementById('roots-tbody');
+    if (!tbody) return;
+    const roots = Object.values(rootMap).sort((a, b) => a.r.localeCompare(b.r, 'ar'));
+    tbody.innerHTML = roots.map(r => {
+        const fields = (r.f || []).map(fid => {
+            const f = fieldMap[fid];
+            return f ? `<span class="rt-field-tag" onclick="switchView('fields');selectField(${fid})">${fid}. ${f.n}</span>` : '';
+        }).join('');
+        return `<tr>
+            <td class="root-cell">${r.r}</td>
+            <td style="color:var(--text2)">${r.c || 0}</td>
+            <td>${fields || '<span style="color:var(--text2);font-size:.8rem">بلا حقل</span>'}</td>
+            <td style="color:var(--text2);font-size:.88rem;font-family:'Amiri',serif">${r.e || ''}</td>
+        </tr>`;
+    }).join('');
+}
+
+</script>
+</body>
+</html>

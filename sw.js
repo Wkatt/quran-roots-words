@@ -1,11 +1,11 @@
 // ===== مستكشف القرآن العظيم — Service Worker =====
 // غيّر هذا الرقم مع كل deploy جديد لإجبار التحديث
-const CACHE_VERSION = 'quran-v3';
+const CACHE_VERSION = 'quran-v4';
 
 const STATIC_ASSETS = [
   '/', '/index.html', '/browse.html', '/roots.html', '/fields.html',
   '/stats.html', '/stats-roots.html', '/stats-words.html',
-  '/offline.html', '/manifest.json',
+  '/about.html', '/offline.html', '/manifest.json', '/nav.js',
   '/icons/icon-192.png', '/icons/icon-512.png'
 ];
 
@@ -48,8 +48,11 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // HTML — network first (يضمن أحدث نسخة دائماً)
-  if (e.request.headers.get('accept') && e.request.headers.get('accept').includes('text/html')) {
+  // HTML و JS — network first (يضمن أحدث نسخة دائماً)
+  if (
+    (e.request.headers.get('accept') && e.request.headers.get('accept').includes('text/html')) ||
+    url.pathname.endsWith('.js')
+  ) {
     e.respondWith(
       fetch(e.request).then(function(r) {
         var cl = r.clone();

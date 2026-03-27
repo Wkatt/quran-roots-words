@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عن الموقع — مستكشف القرآن العظيم</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DGJW3108XZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DGJW3108XZ');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Amiri', 'Traditional Arabic', serif; background: #f5f0e8; color: #2c1a0e; min-height: 100vh; direction: rtl; }
+body.dark { background: #1a1208; color: #e8d8b8; }
+
+/* ===== Header ===== */
+.header { background: linear-gradient(135deg, #6b3a1f, #3d1f0a); border-bottom: 3px solid #c9a84c; padding: 16px 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.header-title { font-size: 1.5rem; color: #f5e6c8; }
+.header-sub { color: #d4b896; font-size: 0.85rem; margin-top: 2px; }
+.header-controls { display: flex; gap: 8px; align-items: center; }
+.hc-btn { background: #ffffff22; border: 1px solid #ffffff33; border-radius: 8px; color: #f5e6c8; padding: 6px 12px; cursor: pointer; font-size: 0.95rem; text-decoration: none; transition: background .2s; font-family: inherit; }
+.hc-btn:hover { background: #ffffff33; }
+
+/* ===== Hero ===== */
+.hero {
+  background: linear-gradient(160deg, #6b3a1f 0%, #3d1f0a 60%, #1a0f05 100%);
+  text-align: center;
+  padding: 60px 24px 50px;
+  border-bottom: 3px solid #c9a84c;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, #c9a84c18 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-bismillah {
+  font-size: 2.2rem;
+  color: #c9a84c;
+  letter-spacing: .08em;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.hero-title {
+  font-size: 2.6rem;
+  color: #f5e6c8;
+  font-weight: bold;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.hero-tagline {
+  font-size: 1.15rem;
+  color: #d4b896;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.9;
+}
+
+/* ===== Page Body ===== */
+.page-body { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+/* ===== Section ===== */
+.section { margin-bottom: 48px; }
+.section-title {
+  font-size: 1.45rem;
+  color: #6b3a1f;
+  font-weight: bold;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #c9a84c44;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+body.dark .section-title { color: #c9a84c; border-color: #7a5c3a55; }
+
+.section-text {
+  font-size: 1.08rem;
+  line-height: 2.1;
+  color: #3a2010;
+}
+body.dark .section-text { color: #d8c8a8; }
+
+/* ===== Quran Verse Box ===== */
+.verse-box {
+  background: linear-gradient(135deg, #fffdf5, #fdf5e0);
+  border: 1px solid #c9a84c66;
+  border-radius: 14px;
+  padding: 22px 28px;
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+body.dark .verse-box { background: linear-gradient(135deg, #2a1f0a, #221508); border-color: #7a5c3a55; }
+.verse-box::before {
+  content: '❝';
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 2rem;
+  color: #c9a84c44;
+  line-height: 1;
+}
+.verse-arabic {
+  font-size: 1.55rem;
+  color: #6b3a1f;
+  line-height: 2.2;
+  margin-bottom: 8px;
+}
+body.dark .verse-arabic { color: #c9a84c; }
+.verse-ref {
+  font-size: 0.85rem;
+  color: #9a7a5a;
+}
+body.dark .verse-ref { color: #7a6050; }
+
+/* ===== Praise box ===== */
+.praise-box {
+  background: linear-gradient(135deg, #fdf5e0, #f5ead0);
+  border-right: 5px solid #c9a84c;
+  border-radius: 0 12px 12px 0;
+  padding: 22px 24px;
+  margin-bottom: 28px;
+  font-size: 1.1rem;
+  line-height: 2.2;
+  color: #3a2010;
+}
+body.dark .praise-box { background: linear-gradient(135deg, #2a1f0a, #221508); color: #d8c8a8; border-color: #c9a84c88; }
+
+/* ===== Feature Grid ===== */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.feature-card {
+  background: #fff;
+  border: 1px solid #e0d0b8;
+  border-radius: 14px;
+  padding: 20px 18px;
+  transition: transform .2s, box-shadow .2s;
+}
+body.dark .feature-card { background: #221508; border-color: #4a3520; }
+.feature-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px #c9a84c18; border-color: #c9a84c88; }
+.feature-icon { font-size: 2rem; margin-bottom: 10px; }
+.feature-title { font-size: 1.05rem; font-weight: bold; color: #6b3a1f; margin-bottom: 6px; }
+body.dark .feature-title { color: #c9a84c; }
+.feature-desc { font-size: 0.9rem; color: #7a5c3a; line-height: 1.8; }
+body.dark .feature-desc { color: #9a8060; }
+
+/* ===== Audience Chips ===== */
+.audience-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.audience-chip {
+  background: #fff8f0;
+  border: 1px solid #c9a84c88;
+  border-radius: 24px;
+  padding: 8px 20px;
+  font-size: 0.95rem;
+  color: #8b4513;
+}
+body.dark .audience-chip { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a66; }
+
+/* ===== Timeline ===== */
+.timeline { position: relative; padding-right: 28px; margin-top: 16px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  right: 8px; top: 6px; bottom: 6px;
+  width: 2px;
+  background: linear-gradient(to bottom, #c9a84c, #c9a84c44);
+  border-radius: 2px;
+}
+.timeline-item { position: relative; margin-bottom: 26px; }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  right: -24px;
+  top: 8px;
+  width: 12px; height: 12px;
+  background: #c9a84c;
+  border-radius: 50%;
+  border: 2px solid #f5f0e8;
+  box-shadow: 0 0 0 2px #c9a84c44;
+}
+body.dark .timeline-item::before { border-color: #1a1208; }
+.timeline-date { font-size: 0.82rem; color: #7a4e00; font-weight: bold; margin-bottom: 4px; }
+body.dark .timeline-date { color: #c9a84c; }
+.timeline-text { font-size: 1rem; color: #3a2010; line-height: 1.9; }
+body.dark .timeline-text { color: #d8c8a8; }
+
+/* ===== WIP Badge ===== */
+.wip-box {
+  background: linear-gradient(135deg, #fff8ec, #fdf0d8);
+  border: 1px dashed #c9a84c99;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+body.dark .wip-box { background: linear-gradient(135deg, #2a1c0a, #221508); border-color: #7a5c3a88; }
+.wip-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 2px; }
+.wip-content { font-size: 0.98rem; line-height: 2; color: #5a3a10; }
+body.dark .wip-content { color: #c0a070; }
+
+/* ===== Thanks Box ===== */
+.thanks-box {
+  background: linear-gradient(135deg, #f0faf5, #e8f5ee);
+  border: 1px solid #2a7a5566;
+  border-radius: 14px;
+  padding: 24px 26px;
+  font-size: 1.05rem;
+  line-height: 2.3;
+  color: #1a4a2e;
+}
+body.dark .thanks-box { background: linear-gradient(135deg, #0d2a1a, #0a2015); color: #7ad8a0; border-color: #2a7a5544; }
+
+/* ===== Contact Card ===== */
+.contact-card {
+  background: linear-gradient(135deg, #6b3a1f, #3d1f0a);
+  border-radius: 16px;
+  padding: 30px 28px;
+  text-align: center;
+  color: #f5e6c8;
+}
+.contact-card p { font-size: 1.05rem; line-height: 2; color: #d4b896; margin-bottom: 20px; }
+.contact-btn {
+  display: inline-block;
+  background: #c9a84c;
+  color: #2c1a0e;
+  border-radius: 30px;
+  padding: 12px 36px;
+  font-size: 1.05rem;
+  font-family: inherit;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background .2s, transform .2s, box-shadow .2s;
+  border: none;
+  cursor: pointer;
+}
+.contact-btn:hover { background: #e5c060; transform: translateY(-2px); box-shadow: 0 6px 20px #c9a84c55; }
+
+/* ===== Footer ===== */
+.about-footer {
+  text-align: center;
+  padding: 30px 20px 50px;
+  font-size: 0.9rem;
+  color: #9a7a5a;
+  border-top: 1px solid #e0d0b8;
+}
+body.dark .about-footer { color: #6a5040; border-color: #3a2a10; }
+.about-footer span { color: #c9a84c; }
+
+/* ===== Dark mode ===== */
+.dark-toggle-btn { background: #ffffff22; border: 1px solid #ffffff33; border-radius: 8px; color: #f5e6c8; padding: 6px 12px; cursor: pointer; font-size: 0.95rem; font-family: inherit; transition: background .2s; }
+.dark-toggle-btn:hover { background: #ffffff33; }
+
+/* AI section — dark overrides */
+body.dark .feature-card[style*="border-color: #c9a84c88"] { background: linear-gradient(135deg, #2a1f0a, #221508) !important; }
+body.dark .wip-box[style*="background: linear-gradient(135deg, #f0f8ff"] { background: linear-gradient(135deg, #0a1a2a, #0d1e30) !important; border-color: #3a6a9a88 !important; }
+body.dark .wip-box[style*="background: linear-gradient(135deg, #f0f8ff"] .wip-content { color: #88b8e0 !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">📖 عن الموقع</div>
+    <div class="header-sub">مستكشف القرآن العظيم</div>
+  </div>
+  <div class="header-controls">
+    <a href="index.html" class="hc-btn">🔍 البحث</a>
+    <button class="hc-btn dark-toggle-btn" onclick="toggleDark()" id="darkBtn" title="وضع ليلي">🌙</button>
+  </div>
+</div>
+
+<script src="nav.js"></script>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+  <div class="hero-title">مستكشف القرآن العظيم</div>
+  <div class="hero-tagline">
+    أداة بحثية تحليلية لكتاب الله عزّ وجلّ —<br>
+    تُيسّر استكشاف جذور القرآن الكريم وحقوله الدلالية وإحصاءاته
+  </div>
+</div>
+
+<div class="page-body">
+
+  <!-- ── الحمد والثناء ── -->
+  <div class="section">
+    <div class="section-title">🤲 حمدٌ وثناء</div>
+
+    <div class="verse-box">
+      <div class="verse-arabic">﴿ وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ ۚ عَلَيْهِ تَوَكَّلْتُ وَإِلَيْهِ أُنِيبُ ﴾</div>
+      <div class="verse-ref">سورة هود — الآية ٨٨</div>
+    </div>
+
+    <div class="praise-box">
+      الحمدُ لله الذي بنعمته تتمّ الصالحات، وبتوفيقه تيسّر هذا العمل وأُنجز على هذه الصورة.
+      أحمده سبحانه حمدًا كثيرًا طيبًا مباركًا فيه على ما أفاض من فضله ويسّر من أسبابه،
+      وعلى توفيقه في كل خطوة من خطوات هذا المشروع — من فكرته الأولى إلى لحظة إطلاقه.
+      وأسأله تعالى أن يجعله خالصًا لوجهه الكريم، نافعًا لكل من يتدبّر كتابه العظيم.
+    </div>
+  </div>
+
+  <!-- ── ما هو الموقع ── -->
+  <div class="section">
+    <div class="section-title">🔭 ما هو مستكشف القرآن العظيم؟</div>
+    <p class="section-text">
+      مستكشف القرآن العظيم موقع بحثي تحليلي مجاني، يُتيح لكل مهتمٍّ بكتاب الله
+      أن يغوص في نسيجه اللغوي العميق بطريقة منظّمة وسهلة.
+      يقدّم الموقع أدوات للبحث في الجذور والكلمات، ويعرض إحصاءات دقيقة عن تكرار
+      كل جذر في القرآن الكريم وتوزّعه على السور والآيات، ويصنّف هذه الجذور ضمن
+      حقول دلالية موضوعية تُعين على فهم المعاني وترابطها.
+    </p>
+  </div>
+
+  <!-- ── المميزات ── -->
+  <div class="section">
+    <div class="section-title">✨ ماذا يقدّم الموقع؟</div>
+    <div class="feature-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-title">بحث متقدّم</div>
+        <div class="feature-desc">ابحث بالجذر أو الكلمة وشاهد جميع مواضعها في القرآن مع نص الآية الكاملة وموضع الكلمة فيها.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🌿</div>
+        <div class="feature-title">مستكشف الجذور</div>
+        <div class="feature-desc">١٧٧٠ جذراً قرآنياً تشمل جميع جذور القرآن الكريم، مرتّبة حسب الورود أو الترتيب الأبجدي، مع إحصاءات التكرار وتوزيع السور.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🏷️</div>
+        <div class="feature-title">الحقول الدلالية</div>
+        <div class="feature-desc">تصنيف الجذور ضمن حقول موضوعية متخصصة — العبادات، الأخلاق، العلوم، الطبيعة، وغيرها — لفهم البنية المعنوية للقرآن.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">إحصاءات شاملة</div>
+        <div class="feature-desc">نظرة إحصائية عامة، وإحصاءات مفصّلة للجذور والكلمات، مع مخططات بيانية توضيحية.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📖</div>
+        <div class="feature-title">متصفّح القرآن</div>
+        <div class="feature-desc">تصفّح آيات القرآن الكريم سورةً سورة بخط عثماني أصيل مع إمكانية التكبير والتنقل بسلاسة.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📴</div>
+        <div class="feature-title">يعمل بدون إنترنت</div>
+        <div class="feature-desc">بعد أول تشغيل، يُحفظ الموقع بالكامل على جهازك ويعمل دون الحاجة إلى اتصال بالإنترنت.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <div class="feature-title">تصدير البيانات</div>
+        <div class="feature-desc">تصدير نتائج البحث وبيانات الحقول إلى Excel للاستفادة منها في الأبحاث والدراسات.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🌙</div>
+        <div class="feature-title">وضع ليلي</div>
+        <div class="feature-desc">واجهة مريحة للعينين في الإضاءة المنخفضة مع دعم كامل لخطوط الرسم القرآني.</div>
+      </div>
+
+      <div class="feature-card" style="border-color: #c9a84c88; background: linear-gradient(135deg, #fffdf5, #fdf5e0);">
+        <div class="feature-icon">🤖</div>
+        <div class="feature-title">تحليل الحقل بالذكاء الاصطناعي</div>
+        <div class="feature-desc">تحليل لغوي وموضوعي متكامل لجذور الحقل الدلالي بالكامل — يُبرز الروابط المعنوية والفروق الدقيقة بين الجذور باستخدام الذكاء الاصطناعي.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── تحليل الذكاء الاصطناعي ── -->
+  <div class="section">
+    <div class="section-title">🤖 تحليل جذور الحقل بالذكاء الاصطناعي</div>
+
+    <div class="praise-box" style="border-right-color: #c9a84c; background: linear-gradient(135deg, #fffdf5, #fdf5e0);">
+      ميزة جديدة تُضاف إلى أدوات الموقع — تجمع بين استيعاب الذكاء الاصطناعي للسياق اللغوي
+      وعمق التدبّر في كلام الله عزّ وجلّ.
+    </div>
+
+    <p class="section-text" style="margin-bottom: 22px;">
+      حين تفتح أيَّ حقلٍ دلاليٍّ في الموقع، يمكنك الآن الحصول على <strong>تحليل شامل ومتكامل
+      لجميع جذور ذلك الحقل</strong> دفعةً واحدة — لا جذرًا جذرًا. يستوعب الذكاء الاصطناعي
+      الحقلَ بكليّته ويُقدّم قراءةً موحّدة تربط بين عناصره.
+    </p>
+
+    <div class="feature-grid" style="margin-bottom: 24px;">
+
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <div class="feature-title">شبكة المعاني</div>
+        <div class="feature-desc">كشف الروابط المعنوية بين جذور الحقل — ما يتشابه منها وما يتمايز، وكيف تتكامل في بناء المعنى القرآني.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚖️</div>
+        <div class="feature-title">الفروق الدلالية</div>
+        <div class="feature-desc">تمييز دقيق بين الجذور المتقاربة في المعنى — يُجيب عن: لماذا استُخدم هذا الجذر دون ذاك في هذا السياق؟</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📐</div>
+        <div class="feature-title">البنية الداخلية للحقل</div>
+        <div class="feature-desc">فهم كيف يُشكّل مجموع جذور الحقل منظومةً متّسقة ومتوازنة في القرآن الكريم.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💡</div>
+        <div class="feature-title">إضاءات للتدبّر</div>
+        <div class="feature-desc">تنبيهات ودلالات تُعين المتدبّر على استيعاب أعمق لآيات الحقل وإدراك أثر اختيار كلٍّ منها.</div>
+      </div>
+
+    </div>
+
+    <div class="wip-box" style="background: linear-gradient(135deg, #f0f8ff, #e8f4fd); border-color: #5a9fd488;">
+      <div class="wip-icon">💬</div>
+      <div class="wip-content" style="color: #1a3a5a;">
+        <strong>كيف تستخدم الميزة؟</strong><br>
+        ادخل إلى أي حقل دلالي من صفحة الحقول، ثم اضغط على زر
+        <strong>"تحليل الحقل بالذكاء الاصطناعي"</strong> — وسيفتح لك نافذة تحليل شاملة
+        تستعرض جذور الحقل بعيون لغوية واعية ومنهج تدبّري متأنٍّ.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── لمن الموقع ── -->
+  <div class="section">
+    <div class="section-title">👥 لمن هذا الموقع؟</div>
+    <p class="section-text" style="margin-bottom: 16px;">
+      صُمِّم الموقع ليكون أداةً مفيدة لطيف واسع من المهتمين بكتاب الله:
+    </p>
+    <div class="audience-list">
+      <span class="audience-chip">🎓 طلاب العلوم الإسلامية</span>
+      <span class="audience-chip">📚 الباحثون والأكاديميون</span>
+      <span class="audience-chip">🌱 المتدبّرون لآيات القرآن</span>
+      <span class="audience-chip">✍️ كتّاب التفسير والدراسات</span>
+      <span class="audience-chip">🗣️ معلّمو اللغة العربية</span>
+      <span class="audience-chip">❤️ كل محبٍّ لكتاب الله</span>
+    </div>
+  </div>
+
+  <!-- ── مصادر البيانات ── -->
+  <div class="section">
+    <div class="section-title">📂 مصادر البيانات</div>
+    <p class="section-text">
+      تعتمد بيانات الموقع على مصادر قرآنية موثّقة، وقد بُذل جهد كبير في تدقيق
+      الجذور ومراجعتها وتنقيحها يدويًا على مدار أكثر من سنتين. الهدف أن تكون
+      البيانات دقيقة وأمينة لكلام الله عزّ وجلّ، مع الإقرار بأن الكمال لله وحده،
+      وأي خطأ مُلاحَظ نرحّب بالإشارة إليه.
+    </p>
+  </div>
+
+  <!-- ── الحقول تحت التطوير ── -->
+  <div class="section">
+    <div class="section-title">🏷️ الحقول الدلالية — قيد التطوير</div>
+    <p class="section-text" style="margin-bottom: 14px;">
+      يُعدّ تصنيف الجذور القرآنية ضمن حقول دلالية موضوعية من أدقّ جوانب هذا
+      المشروع وأكثرها تعقيدًا، إذ يستلزم مراجعة لغوية ومعرفية متأنّية.
+    </p>
+    <div class="wip-box">
+      <div class="wip-icon">🔧</div>
+      <div class="wip-content">
+        <strong>الحقول الدلالية لا تزال تحت المراجعة والتطوير.</strong><br>
+        التصنيفات الحالية اجتهادية وقابلة للتغيير، وقد يتبدّل موضع جذرٍ ما
+        من حقل إلى آخر مع استمرار العمل. كل مقترح علمي أو ملاحظة منهجية
+        في هذا الشأن هي إضافة حقيقية ومرحَّب بها.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── مسيرة المشروع ── -->
+  <div class="section">
+    <div class="section-title">🗓️ مسيرة المشروع</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date">٢٠٢٤م</div>
+        <div class="timeline-text">بداية العمل في جمع الجذور القرآنية وتدقيقها وتنقيحها يدويًا، ووضع أسس التصنيف الدلالي.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">٢٠٢٥م</div>
+        <div class="timeline-text">استمرار مرحلة التنقيح والمراجعة، وبناء قاعدة البيانات، وتطوير الواجهة وأدوات البحث.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">مارس ٢٠٢٦م</div>
+        <div class="timeline-text">إطلاق الموقع رسميًا للعموم، مع الاستمرار في تطوير الحقول الدلالية وإضافة مزايا جديدة.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── الشكر والتقدير ── -->
+  <div class="section">
+    <div class="section-title">💚 شكرٌ وعرفان</div>
+    <div class="thanks-box">
+      هذا المشروع ثمرةٌ لدعم ومحبة لا تُقدَّر بثمن من أهل البيت الكرام:<br><br>
+      <strong>إلى والديَّ الكريمَين</strong> — جزاهما الله عني خير الجزاء، ورفع درجتيهما، وأدامهما ذخرًا ومحبةً. دعاؤهما كان ويبقى السند الأقوى.<br><br>
+      <strong>إلى زوجتي الفاضلة</strong> — شريكة الطريق التي احتضنت هذا العمل بصبرها ودعمها الدائم، بارك الله فيها وأسعدها.<br><br>
+      <strong>إلى أبنائي وبناتي الأحبة</strong> — نور بيتي وبهجة عيني، جعلهم الله قرّة أعين وصالحين في الدنيا والآخرة.<br><br>
+      أسأل الله أن يجعل هذا العمل في ميزان حسناتهم جميعًا، وأن يجمعنا في الفردوس الأعلى.
+    </div>
+  </div>
+
+  <!-- ── تواصل واقتراح ── -->
+  <div class="section">
+    <div class="section-title">✉️ اقتراحاتك تُثري الموقع</div>
+    <div class="contact-card">
+      <div style="font-size:1.4rem;margin-bottom:12px;color:#f5e6c8;">الموقع في خدمة كتاب الله — ورأيك يُكمل المسيرة</div>
+      <p>
+        إن رأيتَ خطأً في جذرٍ أو كلمة، أو لديك اقتراحٌ لتصنيف حقل دلالي،
+        أو تودّ الإشارة إلى ملاحظة لغوية أو تقنية — فبابنا مفتوح.
+        كل رسالة بنّاءة هي إسهامٌ في خدمة كلام الله عزّ وجلّ.
+      </p>
+      <a href="https://forms.gle/Uub3PD5d8bxh4ZtM9" target="_blank" rel="noopener noreferrer" class="contact-btn">
+        📬 راسلنا أو أرسل اقتراحك
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="about-footer">
+  مستكشف القرآن العظيم — <span>١٤٤٧ هـ / ٢٠٢٦ م</span><br>
+  <span style="font-size:0.85rem;opacity:0.8;">﴿ رَبَّنَا تَقَبَّلْ مِنَّا ۖ إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ ﴾</span>
+</div>
+
+<script>
+</script>
+</body>
+</html>

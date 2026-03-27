@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لماذا هذا الموقع؟ — مستكشف القرآن العظيم</title>
+  <meta name="description" content="فلسفة الجذور ونفي الترادف والحقول الدلالية — لماذا يختلف هذا الموقع في علاقته بالنص القرآني." />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGJW3108XZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-DGJW3108XZ');
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Amiri+Quran&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════
+       ROOT VARIABLES — light mode (default)
+    ═══════════════════════════════════════ */
+    :root {
+      --bg:          #f5f0e8;
+      --bg2:         #ede8de;
+      --bg3:         #e3ddd1;
+      --surface:     #d8d1c4;
+      --gold:        #7a4f00;
+      --gold-light:  #4a2a0a;
+      --gold-bg:     rgba(201,168,76,0.10);
+      --gold-border: rgba(201,168,76,0.38);
+      --text:        #2c1a0e;
+      --text-soft:   #5a3a18;
+      --text-dim:    #8a7a6a;
+      --card-border: rgba(44,26,14,0.12);
+      --radius-sm:   10px;
+      --radius-md:   14px;
+      --radius-lg:   20px;
+      --font-arabic: 'Amiri', serif;
+      --font-quran:  'Amiri Quran', serif;
+    }
+
+    /* dark mode */
+    body.dark {
+      --bg:          #1a1208;
+      --bg2:         #221508;
+      --bg3:         #2a1c0a;
+      --surface:     #2a1c0a;
+      --gold:        #c9a84c;
+      --gold-light:  #f5d080;
+      --gold-bg:     rgba(201,168,76,0.09);
+      --gold-border: rgba(201,168,76,0.28);
+      --text:        #e8d8b8;
+      --text-soft:   #d4b896;
+      --text-dim:    #7a6a5a;
+      --card-border: rgba(255,255,255,0.055);
+    }
+
+    /* ═══════════════════════════════════════
+       BASE
+    ═══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-arabic);
+      font-size: 18px;
+      line-height: 1.95;
+      min-height: 100vh;
+      direction: rtl;
+    }
+
+    /* ===== Header (shared across site) ===== */
+    .header { background: linear-gradient(135deg, #6b3a1f, #3d1f0a); border-bottom: 3px solid #c9a84c; padding: 16px 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .header-title { font-size: 1.5rem; color: #f5e6c8; }
+    .header-sub { color: #d4b896; font-size: 0.85rem; margin-top: 2px; }
+    .header-controls { display: flex; gap: 8px; align-items: center; }
+    .hc-btn { background: #ffffff22; border: 1px solid #ffffff33; border-radius: 8px; color: #f5e6c8; padding: 6px 12px; cursor: pointer; font-size: 0.95rem; text-decoration: none; transition: background .2s; font-family: inherit; }
+    .hc-btn:hover { background: #ffffff33; }
+
+    /* ═══════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════ */
+    .hero {
+      text-align: center;
+      padding: 72px 24px 56px;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg2);
+      border-bottom: 2px solid var(--gold-border);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 55% at 50% -5%,
+        rgba(201,168,76,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      color: var(--gold);
+      font-size: 13px;
+      padding: 5px 18px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      letter-spacing: 0.03em;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 5.5vw, 54px);
+      font-weight: 700;
+      color: var(--gold-light);
+      line-height: 1.35;
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    .hero-subtitle {
+      max-width: 660px;
+      margin: 0 auto 40px;
+      color: var(--text-soft);
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.85;
+    }
+
+    /* Quran verse block */
+    .quran-verse {
+      display: inline-block;
+      font-family: var(--font-quran);
+      font-size: clamp(22px, 3.5vw, 32px);
+      color: var(--gold);
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--radius-md);
+      padding: 18px 36px;
+      line-height: 2.1;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .quran-verse::before,
+    .quran-verse::after {
+      content: '﴾';
+      color: var(--gold-border);
+      font-size: 0.7em;
+      vertical-align: middle;
+    }
+    .quran-verse::before { content: '﴿'; margin-left: 8px; }
+    .quran-verse::after  { margin-right: 8px; }
+
+    .verse-ref {
+      display: block;
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-top: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ═══════════════════════════════════════
+       DIVIDER
+    ═══════════════════════════════════════ */
+    .ornament-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 860px;
+      margin: 0 auto 64px;
+      padding: 0 32px;
+    }
+    .ornament-divider::before,
+    .ornament-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to left, transparent, var(--gold-border));
+    }
+    .ornament-divider::after {
+      background: linear-gradient(to right, transparent, var(--gold-border));
+    }
+    .ornament-divider span {
+      color: var(--gold);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════
+       INTRO BANNER
+    ═══════════════════════════════════════ */
+    .intro-banner {
+      max-width: 860px;
+      margin: 0 auto 56px;
+      padding: 0 24px;
+    }
+
+    .intro-box {
+      background: var(--bg2);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--radius-lg);
+      padding: 40px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .intro-box::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(to bottom, var(--gold), transparent 80%);
+    }
+
+    .intro-box p {
+      color: var(--text-soft);
+      font-size: 18px;
+      line-height: 2;
+      margin-bottom: 20px;
+    }
+    .intro-box p:last-child { margin-bottom: 0; }
+
+    .intro-box strong {
+      color: var(--gold-light);
+      font-weight: 700;
+    }
+
+    /* ═══════════════════════════════════════
+       SECTION CARDS
+    ═══════════════════════════════════════ */
+    .sections-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .sec-card {
+      background: var(--bg2);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 44px 48px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s, box-shadow .3s;
+    }
+
+    .sec-card:hover {
+      border-color: var(--gold-border);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    }
+
+    /* accent stripe on right */
+    .sec-card::after {
+      content: '';
+      position: absolute;
+      top: 24px; right: 0;
+      width: 3px;
+      height: calc(100% - 48px);
+      background: linear-gradient(to bottom, var(--gold) 0%, transparent 100%);
+      border-radius: 0 2px 2px 0;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .sec-card:hover::after { opacity: 1; }
+
+    /* section number badge */
+    .sec-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .sec-num {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sec-icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .sec-card h2 {
+      font-size: clamp(20px, 2.5vw, 26px);
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .sec-tagline {
+      font-size: 14px;
+      color: var(--gold);
+      letter-spacing: 0.03em;
+      margin-bottom: 22px;
+      font-style: italic;
+    }
+
+    .sec-card p {
+      color: var(--text-soft);
+      font-size: 17px;
+      line-height: 2;
+      margin-bottom: 18px;
+    }
+    .sec-card p:last-of-type { margin-bottom: 0; }
+
+    .sec-card strong { color: var(--text); font-weight: 700; }
+
+    /* insight box inside section */
+    .insight-box {
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--radius-sm);
+      padding: 16px 22px;
+      margin-top: 24px;
+      color: var(--gold-light);
+      font-size: 16px;
+      line-height: 1.85;
+    }
+
+    .insight-box .insight-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .example-pair {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .example-chip {
+      background: var(--bg3);
+      border: 1px solid var(--gold-border);
+      border-radius: 8px;
+      padding: 5px 14px;
+      font-size: 15px;
+      color: var(--gold-light);
+      font-family: var(--font-arabic);
+    }
+
+    /* ═══════════════════════════════════════
+       QUOTE BLOCK
+    ═══════════════════════════════════════ */
+    .closing-quote {
+      max-width: 860px;
+      margin: 60px auto 0;
+      padding: 0 24px;
+    }
+
+    .closing-quote-inner {
+      background: linear-gradient(135deg, var(--bg3) 0%, rgba(201,168,76,0.04) 100%);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--radius-lg);
+      padding: 52px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .closing-quote-inner::before {
+      content: '❝';
+      position: absolute;
+      top: 16px; right: 32px;
+      font-size: 80px;
+      color: var(--gold-border);
+      line-height: 1;
+      font-family: Georgia, serif;
+    }
+
+    .closing-quote-inner blockquote {
+      font-size: clamp(18px, 2.5vw, 24px);
+      color: var(--gold-light);
+      line-height: 1.9;
+      margin-bottom: 28px;
+      font-style: italic;
+      position: relative;
+    }
+
+    .closing-pillars {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+
+    .pillar {
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 20px;
+      color: var(--gold);
+      font-size: 15px;
+    }
+
+    .cta-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: #fff8f0;
+      padding: 13px 30px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      font-family: var(--font-arabic);
+      border: none;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+    .btn-gold:hover { background: #e5c060; transform: translateY(-2px); }
+    body.dark .btn-gold { color: #1a1208; }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--gold-light);
+      padding: 13px 30px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-size: 16px;
+      font-family: var(--font-arabic);
+      border: 1px solid var(--gold-border);
+      transition: background .2s, transform .2s;
+    }
+    .btn-outline:hover { background: var(--gold-bg); transform: translateY(-2px); }
+
+    /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+    footer {
+      text-align: center;
+      padding: 40px 24px 32px;
+      margin-top: 80px;
+      border-top: 1px solid #e0d0b8;
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+    body.dark footer { border-color: #3a2a10; }
+
+    footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    /* ═══════════════════════════════════════
+       SCROLL FADE-IN
+    ═══════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .65s ease, transform .65s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* stagger delays */
+    .reveal:nth-child(2) { transition-delay: .08s; }
+    .reveal:nth-child(3) { transition-delay: .16s; }
+    .reveal:nth-child(4) { transition-delay: .24s; }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media (max-width: 640px) {
+      .hero { padding: 48px 16px 40px; }
+      .sec-card, .intro-box, .closing-quote-inner { padding: 28px 22px; }
+      .quran-verse { padding: 14px 22px; font-size: 20px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<div class="header">
+  <div>
+    <div class="header-title">💡 لماذا هذا الموقع؟</div>
+    <div class="header-sub">مستكشف القرآن العظيم</div>
+  </div>
+  <div class="header-controls">
+    <a href="index.html" class="hc-btn">🔍 البحث</a>
+    <button class="hc-btn" onclick="toggleDark()" id="darkBtn" title="وضع ليلي">🌙</button>
+  </div>
+</div>
+
+<script src="nav.js"></script>
+
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<section class="hero">
+  <div class="hero-eyebrow">💡 فلسفة المشروع</div>
+
+  <h1>لماذا هذا الموقع؟</h1>
+
+  <p class="hero-subtitle">
+    نقطة الانطلاق ليست إعطاءك إجابات جاهزة —
+    بل وضع <strong>مفاتيح اللسان</strong> بين يديك،
+    لتفتح بها أبواباً من التدبّر لا تُفتح إلا بالنظر المباشر في كلام الله.
+  </p>
+
+  <div class="quran-verse">
+    أَفَلَا يَتَدَبَّرُونَ الْقُرْآنَ
+  </div>
+  <span class="verse-ref">سورة النساء: ٨٢ &nbsp;·&nbsp; سورة محمد: ٢٤</span>
+</section>
+
+
+<!-- ══════════════════ DIVIDER ══════════════════ -->
+<div class="ornament-divider"><span>✦</span></div>
+
+
+<!-- ══════════════════ INTRO ══════════════════ -->
+<div class="intro-banner reveal">
+  <div class="intro-box">
+    <p>
+      القرآن الكريم <strong>ليس نصاً للقراءة فحسب</strong> — بل هو منظومة بيانية مُحكمة، لا توجد فيها كلمة وُضعت عبثاً، ولا حرف يحل محل آخر. لكن علاقتنا بهذا النص باتت في الغالب علاقة <strong>استقبال</strong>: نتلقّى التفسير الجاهز، ونقرأ الشرح المكتوب، ثم ننصرف.
+    </p>
+    <p>
+      هذا الموقع يدعوك إلى نقلة مختلفة — من <strong>تلقّي التفسير</strong> إلى <strong>المشاركة في استنباط المعنى</strong>. أدواته ليست بديلاً عن العلماء، بل هي بوابة تُعيدك إلى المادة الخام: الجذر، الكلمة، السياق، التكرار — لتبني فهمك بنفسك، على أسس لغوية راسخة.
+    </p>
+  </div>
+</div>
+
+
+<!-- ══════════════════ SECTIONS ══════════════════ -->
+<div class="sections-wrap">
+
+
+  <!-- 1. فلسفة الجذور -->
+  <div class="sec-card reveal">
+    <div class="sec-badge">
+      <div class="sec-num">١</div>
+      <div class="sec-icon">🌳</div>
+    </div>
+    <h2>فلسفة الجذور — البصمة الوراثية للكلمة</h2>
+    <p class="sec-tagline">"لا تبحث عن كلمة، بل تبحث عن جوهر"</p>
+
+    <p>
+      في اللسان العربي، الكلمة ليست وحدة منعزلة قائمة بذاتها — بل هي <strong>غصن في شجرة</strong>.
+      الجذر هو الأصل الذي تتفرّع منه كل صيغ الكلمة ومشتقاتها، وهو الذي يحمل "البصمة المعنوية"
+      الثابتة مهما تبدّلت الأوزان.
+    </p>
+    <p>
+      حين تبحث عن جذر مثل <strong>س-ل-م</strong>، أنت لا تبحث عن مجرد كلمة —
+      بل تتتبّع جوهراً واحداً يجمع: السِّلم والإسلام والسَّلامة والمُسالمة والاستسلام.
+      هذه الكلمات مختلفة الصيغة، لكنها تنبع من نبع واحد وتشترك في صميم المعنى.
+    </p>
+    <p>
+      الموقع يُتيح لك تتبّع هذا الجوهر في كل مواضعه القرآنية — فتُدرك كيف يتشكّل المعنى
+      انطلاقاً من أصله الثابت، بعيداً عن التأويلات التي تتغيّر من عصر لآخر.
+    </p>
+
+    <div class="insight-box">
+      <span class="insight-label">مثال تطبيقي</span>
+      جذر <strong>س-ل-م</strong> — تتبّعه في القرآن فتجد: السِّلم · الإسلام · السَّلامة · السَّلام · المُسالمة · الاستسلام
+      <div class="example-pair">
+        <span class="example-chip">سَلِمَ</span>
+        <span class="example-chip">يُسَلِّم</span>
+        <span class="example-chip">مُسْلِمٌ</span>
+        <span class="example-chip">سَلَامٌ</span>
+        <span class="example-chip">الإِسْلَام</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 2. نفي الترادف -->
+  <div class="sec-card reveal">
+    <div class="sec-badge">
+      <div class="sec-num">٢</div>
+      <div class="sec-icon">⚖️</div>
+    </div>
+    <h2>نفي الترادف — دقة اللسان التي لا تقبل التطابق</h2>
+    <p class="sec-tagline">"تغاير الألفاظ يعني حتماً تغاير المعاني"</p>
+
+    <p>
+      من أكثر العوائق خطورةً في تدبّر القرآن: الاعتقاد بأن بعض الكلمات
+      <strong>تؤدي نفس المعنى</strong> وأن أيّها وُضع في موضع الآخر لم يتغيّر شيء.
+      هذا الاعتقاد يُغلق أبواباً من الفهم قبل أن تُفتح.
+    </p>
+    <p>
+      القاعدة الذهبية في اللسان القرآني: <strong>لو كانت كلمتان متطابقتين تماماً في المعنى،
+      لكان وجود إحداهما تكراراً — والتكرار بلا فائدة يخلّ بإعجاز النص</strong>.
+      فحين يستعمل القرآن "جاء" في موضع و"أتى" في آخر، أو "ضياء" هنا و"نور" هناك —
+      فلكل منهما ظلّ دلالي خاص لا يسدّ الآخر مسدّه.
+    </p>
+    <p>
+      من خلال خاصية <strong>الحصر الإحصائي والمقارنة</strong>، يمكنك أن تضع الكلمات
+      المتقاربة جنباً إلى جنب، وتكتشف من خلال سياقاتها الفوارق الدقيقة التي تجعل
+      كل مفردة فريدة في موضعها.
+    </p>
+
+    <div class="insight-box">
+      <span class="insight-label">أمثلة على ما يبدو مترادفاً وليس كذلك</span>
+      <div class="example-pair">
+        <span class="example-chip">جَاءَ &nbsp;≠&nbsp; أَتَى</span>
+        <span class="example-chip">سَنَة &nbsp;≠&nbsp; عَام</span>
+        <span class="example-chip">ضِيَاء &nbsp;≠&nbsp; نُور</span>
+        <span class="example-chip">الخَوْف &nbsp;≠&nbsp; الرَّهْبَة</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 3. الحقول الدلالية -->
+  <div class="sec-card reveal">
+    <div class="sec-badge">
+      <div class="sec-num">٣</div>
+      <div class="sec-icon">🕸️</div>
+    </div>
+    <h2>الحقول الدلالية — هندسة المعنى الموضوعي</h2>
+    <p class="sec-tagline">"لا تبحث عن آية — ابحث عن مفهوم كامل"</p>
+
+    <p>
+      القرآن لا يتحدث في موضوعات مشتتة متفرقة — بل يبني <strong>عوالم من المفاهيم</strong>.
+      كلمات الطبيعة لها عالمها، وكلمات النفس لها عالمها، وكلمات التشريع لها عالمها.
+      هذه العوالم ليست مجرد تصنيفات ببليوغرافية — بل هي شبكات معنوية تتكامل فيما بينها
+      لتشكّل رؤية كونية متكاملة.
+    </p>
+    <p>
+      صفحة الحقول الدلالية في الموقع تمنحك <strong>رؤية شمولية</strong>:
+      تنظر إلى الحقل الواحد فترى كيف تجمع جذوره المتعددة في حزمة معنوية واحدة،
+      وكيف يكشف هذا التجميع عن مقاصد كلية لم تكن لتظهر لو نظرتَ إلى كل جذر وحده.
+    </p>
+    <p>
+      هذا هو التحوّل الأعمق: بدلاً من البحث عن آية واحدة تعزز فكرة بعينها،
+      أنت تستوعب <strong>مفهوماً قرآنياً في كليّته</strong> — وتدرك كيف تترابط أجزاء النص
+      لتبني صورة لا ترى بعضها إلا من هذه الزاوية.
+    </p>
+
+    <div class="insight-box">
+      <span class="insight-label">مثال: حقل "الطمأنينة والسكينة"</span>
+      يجمع جذوراً مثل: سكن · طمأن · أنس · وكن · هدأ — وحين تراها معاً في سياقاتها،
+      تكتشف تدرّجاً دقيقاً في معاني الاستقرار القلبي لم تكن تدركه بالنظر إلى كل جذر وحده.
+    </div>
+  </div>
+
+
+  <!-- 4. الرسم القرآني -->
+  <div class="sec-card reveal">
+    <div class="sec-badge">
+      <div class="sec-num">٤</div>
+      <div class="sec-icon">🖊️</div>
+    </div>
+    <h2>الرسم القرآني — ما تراه العين يدركه العقل</h2>
+    <p class="sec-tagline">"الرسم توقيفي — وكل حرف فيه قصد"</p>
+
+    <p>
+      الرسم العثماني للقرآن ليس مجرد طريقة قديمة للكتابة يمكن استبدالها بأحدث منها —
+      بل هو <strong>رسم توقيفي</strong> ثبت بالتواتر ويحمل دلالات لا تظهر في غيره.
+    </p>
+    <p>
+      حذف حرف أو إثباته في كلمة معينة، كتابة كلمتين ملتصقتين أو منفصلتين،
+      استعمال صيغة بعينها في موضع دون آخر — كل هذا يُثير تساؤلات عميقة:
+      <strong>لماذا كُتبت هذه الكلمة بهذا الشكل في هذا الموضع؟
+      وكيف يخدم هذا الشكل المقصد التدبّري للآية؟</strong>
+    </p>
+    <p>
+      الموقع يحافظ على <strong>الارتباط بالرسم واللفظ الأصلي</strong>،
+      مما يجعل الباحث في مواجهة مباشرة مع النص كما أُنزل — لا مع نص مُبسَّط
+      سُوّيت فيه الفوارق وطُمست التفاصيل.
+    </p>
+
+    <div class="insight-box">
+      <span class="insight-label">سؤال تدبّري</span>
+      كلمة "بَصْطَة" كُتبت بالصاد في موضع، وبالسين في آخر — والموضعان مختلفان في المعنى والسياق.
+      لماذا؟ هذا النوع من التساؤل لا يُولد إلا حين تنظر إلى الرسم الأصلي مباشرة.
+    </div>
+  </div>
+
+
+</div><!-- /sections-wrap -->
+
+
+<!-- ══════════════════ CLOSING QUOTE ══════════════════ -->
+<div class="closing-quote reveal">
+  <div class="closing-quote-inner">
+
+    <blockquote>
+      "إن هدفنا ليس إعطاءك إجابات نهائية —<br>
+      بل تزويدك بالأدوات التي تجعلك تطرح الأسئلة الصحيحة."
+    </blockquote>
+
+    <div class="closing-pillars">
+      <div class="pillar">🔍 مراجعة المورث التفسيري</div>
+      <div class="pillar">🧠 بناء ملكة الاستنباط</div>
+      <div class="pillar">📊 الدقة العلمية بالاستقراء التام</div>
+    </div>
+
+    <p style="color: var(--text-soft); font-size: 17px; max-width: 600px; margin: 0 auto 32px; line-height: 1.9;">
+      هذا الموقع دعوة لكل عقل يبحث عن النور، ولكل قلب يريد الاتصال المباشر ببيان الله.
+      العودة للمادة الخام — الجذر، الكلمة، السياق — تُعيد بناء علاقتك بالنص من أساسها.
+    </p>
+
+    <div class="cta-row">
+      <a href="index.html" class="btn-gold">🔍 ابدأ البحث الآن</a>
+      <a href="fields.html" class="btn-outline">🏷️ تصفّح الحقول الدلالية</a>
+      <a href="roots.html" class="btn-outline">🌿 استكشف الجذور</a>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <p>مستكشف القرآن العظيم &nbsp;·&nbsp; <a href="about.html">عن الموقع</a> &nbsp;·&nbsp; <a href="https://forms.gle/Uub3PD5d8bxh4ZtM9" target="_blank">تواصل معنا</a></p>
+  <p style="margin-top: 8px; font-size: 12px; color: var(--text-dim);">﴿ وَمَا تَوْفِيقِي إِلَّا بِاللَّهِ ﴾</p>
+</footer>
+
+
+<!-- ══════════════════ JS ══════════════════ -->
+<script>
+  /* ── Scroll reveal ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
