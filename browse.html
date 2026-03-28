@@ -40,6 +40,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
 <style>
   @font-face { font-family: 'KFGQPC HAFS Uthmanic Script Regular'; src: url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.woff2') format('woff2'), url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Me Quran'; src: url('https://static-cdn.tarteel.ai/qul/fonts/me_quran_volt_newmet.ttf') format('truetype'); font-display: swap; }
+  :root { --quran-font: 'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Amiri', 'Traditional Arabic', serif; background: #f5f0e8; color: #2c1a0e; min-height: 100vh; direction: rtl; }
   body.dark { background: #1a1208; color: #e8d8b8; }
@@ -90,7 +92,8 @@
   .main-content::-webkit-scrollbar-thumb { background: #c9a84c66; border-radius: 4px; }
 
   /* Sura Header — compact collapsible */
-  .sura-header-card { background: linear-gradient(180deg, #fdf5e6, #f5f0e8); border-bottom: 2px solid #c9a84c44; transition: all .3s ease; }
+  .sura-header-card { background: linear-gradient(180deg, #fdf5e6, #f5f0e8); border-bottom: 2px solid #c9a84c44; transition: top .3s ease; position: sticky; top: 0; z-index: 20; }
+  .sura-header-card.header-hidden { top: -120px; }
   body.dark .sura-header-card { background: linear-gradient(180deg, #2a1c0a, #1a1208); border-color: #7a5c3a44; }
 
   .sura-header-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; cursor: pointer; user-select: none; gap: 12px; }
@@ -101,28 +104,40 @@
   .sura-header-toggle { font-size: 0.75rem; color: #7a4e00; background: #c9a84c22; border: 1px solid #c9a84c55; border-radius: 6px; padding: 3px 8px; flex-shrink: 0; transition: transform .3s; }
   body.dark .sura-header-toggle { color: #c9a84c; }
   .sura-header-card.expanded .sura-header-toggle { transform: rotate(180deg); }
-  .sura-header-name { font-size: 2rem; color: #6b3a1f; margin-bottom: 4px; }
+  .sura-header-name { font-family: var(--quran-font); font-size: 2rem; color: #6b3a1f; margin-bottom: 4px; text-align: center; padding: 14px 20px 4px; }
   body.dark .sura-header-name { color: #c9a84c; }
   .sura-header-meta { font-size: 0.9rem; color: #9a7a5a; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-  .bismillah { font-family: 'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif; font-size: 1.5rem; color: #8b4513; margin-top: 12px; }
+  .bismillah { font-family: var(--quran-font); font-size: 1.5rem; color: #8b4513; text-align: center; padding: 12px 20px 8px; }
   body.dark .bismillah { color: #c9a84c; }
 
   .sura-header-expanded { display: none; padding: 4px 20px 16px; text-align: center; }
 
   /* Font bar — merged into header bar on mobile */
-  .font-bar-browse { padding: 6px 20px 10px; max-width: 900px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 10px; font-size: .82rem; color: #7a5c3a; border-bottom: 1px solid #c9a84c22; }
+  .font-bar-browse { padding: 6px 20px 10px; max-width: 900px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 10px; font-size: .82rem; color: #7a5c3a; border-bottom: 1px solid #c9a84c22; flex-wrap: wrap; }
   body.dark .font-bar-browse { color: #b09070; }
   .font-bar-browse input[type=range] { flex: 1; accent-color: #c9a84c; max-width: 180px; }
+  /* Font picker */
+  .fbar-sep { color: #c9a84c44; user-select: none; }
+  .font-opts { display: flex; gap: 4px; flex-wrap: wrap; }
+  .font-opt { background: #fdf5e6; border: 1px solid #c9a84c44; border-radius: 8px; padding: 4px 9px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 1px; transition: all .15s; line-height: 1; }
+  .font-opt:hover { background: #f5e6cc; border-color: #c9a84c88; }
+  .font-opt.active { background: #c9a84c22; border-color: #c9a84c; box-shadow: 0 0 0 1.5px #c9a84c55; }
+  .fo-preview { font-size: 1.15rem; line-height: 1.3; }
+  .font-opt small { font-size: 0.6rem; color: #7a5c3a; white-space: nowrap; font-family: 'Amiri', serif; }
+  body.dark .font-opt { background: #2a1e0a; border-color: #c9a84c33; }
+  body.dark .font-opt.active { background: #c9a84c18; border-color: #c9a84c77; }
+  body.dark .font-opt small { color: #b09070; }
 
   /* Ayahs */
   .ayahs-container { padding: 20px 30px 60px; max-width: 900px; margin: 0 auto; width: 100%; }
   .ayah-row { padding: 6px 0; border-bottom: 1px solid #e8d8b822; display: flex; gap: 12px; align-items: flex-start; transition: background .2s; border-radius: 8px; }
   .ayah-row:hover { background: #fdf5e611; }
-  .ayah-number { min-width: 40px; height: 40px; background: linear-gradient(135deg, #c9a84c33, #c9a84c11); border: 1px solid #c9a84c44; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #8b4513; flex-shrink: 0; margin-top: 4px; cursor: pointer; transition: background .2s, border-color .2s, transform .15s; }
+  .ayah-number { min-width: 40px; height: 40px; background: linear-gradient(135deg, #c9a84c33, #c9a84c11); border: 1px solid #c9a84c44; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.85rem; color: #8b4513; flex-shrink: 0; margin-top: 4px; cursor: pointer; transition: background .2s, border-color .2s, transform .15s; }
+  .ayah-juz { font-size: 0.52rem; color: #9a7a5a; font-family: 'Amiri', serif; line-height: 1; margin-top: 1px; }
   .ayah-number:hover { background: linear-gradient(135deg, #c9a84c66, #c9a84c33); border-color: #c9a84c99; transform: scale(1.1); }
   body.dark .ayah-number { color: #c9a84c; background: linear-gradient(135deg, #c9a84c15, #c9a84c08); }
   .ayah-body { flex: 1; }
-  .ayah-text-browse { font-family: 'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif; font-size: 1.5rem; line-height: 1.5; color: #1a1a1a; word-break: break-word; overflow-wrap: break-word; }
+  .ayah-text-browse { font-family: var(--quran-font); font-size: 1.5rem; line-height: 1.5; color: #1a1a1a; word-break: break-word; overflow-wrap: break-word; }
   body.dark .ayah-text-browse { color: #e8d8b8; }
   .ayah-word { cursor: pointer; transition: color .15s, background .15s; padding: 2px 4px; border-radius: 4px; display: inline; }
   .ayah-word:hover { color: #c9a84c; background: #c9a84c15; }
@@ -130,11 +145,11 @@
   /* ===== Popup ===== */
   .word-popup-overlay { display: none; position: fixed; inset: 0; background: #00000066; z-index: 1000; align-items: center; justify-content: center; }
   .word-popup-overlay.open { display: flex; }
-  .word-popup { background: #fff8f0; border: 2px solid #c9a84c; border-radius: 16px; padding: 0; width: 400px; max-width: 92vw; box-shadow: 0 8px 40px #00000033; overflow: hidden; animation: popIn .25s ease-out; }
+  .word-popup { background: #fff8f0; border: 2px solid #c9a84c; border-radius: 16px; padding: 0; width: 400px; max-width: 92vw; box-shadow: 0 8px 40px #00000033; animation: popIn .25s ease-out; }
   body.dark .word-popup { background: #221508; border-color: #7a5c3a; }
   @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .popup-header { background: linear-gradient(135deg, #6b3a1f, #3d1f0a); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
-  .popup-word { font-family: 'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif; font-size: 1.8rem; color: #f5e6c8; }
+  .popup-header { background: linear-gradient(135deg, #6b3a1f, #3d1f0a); padding: 26px 20px 16px; display: flex; align-items: center; justify-content: space-between; border-radius: 14px 14px 0 0; }
+  .popup-word { font-family: var(--quran-font); font-size: 1.8rem; color: #f5e6c8; white-space: nowrap; max-width: calc(100% - 50px); overflow: visible; }
   .popup-close { background: #ffffff22; border: 1px solid #ffffff33; border-radius: 50%; width: 32px; height: 32px; color: #f5e6c8; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
   .popup-close:hover { background: #ffffff44; }
   .popup-body { padding: 20px; }
@@ -186,7 +201,7 @@
   }
 
   /* ===== Font Size ===== */
-  .font-bar-browse { padding: 8px 30px; max-width: 900px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 12px; font-size: .85rem; color: #7a5c3a; }
+  .font-bar-browse { padding: 8px 30px; max-width: 900px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 12px; font-size: .85rem; color: #7a5c3a; flex-wrap: wrap; }
   body.dark .font-bar-browse { color: #b09070; }
   .font-bar-browse input[type=range] { flex: 1; accent-color: #c9a84c; max-width: 200px; }
   .select-sura-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: #b09070; text-align: center; padding: 40px; }
@@ -254,7 +269,7 @@
   body.dark .smh span{color:#c9a84c;}
   .smh button{background:#f5ece0;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:1rem;color:#8b4513;}
   body.dark .smh button{background:#3a2a10;color:#c9a84c;}
-  .sm-prev{margin:12px 20px 4px;background:#fdf8f0;border-right:4px solid #c9a84c;border-radius:8px;padding:12px 16px;font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif;font-size:1.05rem;line-height:2;color:#2c1a0e;max-height:120px;overflow:hidden;}
+  .sm-prev{margin:12px 20px 4px;background:#fdf8f0;border-right:4px solid #c9a84c;border-radius:8px;padding:12px 16px;font-family:var(--quran-font);font-size:1.05rem;line-height:2;color:#2c1a0e;max-height:120px;overflow:hidden;}
   body.dark .sm-prev{background:#2a1c0a;color:#e8d8b8;}
   .sm-ref{margin:0 20px 12px;font-size:0.82rem;color:#9a7a5a;}
   .sm-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 20px;}
@@ -289,7 +304,7 @@
   .fr-icon-btn:hover { background:#ffffff30; }
   body:not(.dark) .fr-icon-btn:hover { background:#6b3a1f30; }
   .fr-icon-btn.faved { color:#f5c842; border-color:#f5c84266; }
-  .fr-ayah { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; line-height:2.5; text-align:center; color:#1a1a1a; background:#fffdf8; border-radius:16px; padding:32px 36px; border:2px solid #c9a84c44; box-shadow:0 4px 32px #00000022; width:100%; }
+  .fr-ayah { font-family:var(--quran-font); line-height:2.5; text-align:center; color:#1a1a1a; background:#fffdf8; border-radius:16px; padding:32px 36px; border:2px solid #c9a84c44; box-shadow:0 4px 32px #00000022; width:100%; }
   body.dark .fr-ayah { background:#2a1c0a; color:#f0e4c0; border-color:#c9a84c33; }
   .fr-nav { display:flex; align-items:center; justify-content:space-between; width:100%; margin-top:22px; }
   .fr-nav-btn { background:#c9a84c22; border:2px solid #c9a84c55; border-radius:12px; color:#c9a84c; padding:10px 22px; cursor:pointer; font-family:'Amiri',serif; font-size:1.1rem; transition:all .2s; display:flex; align-items:center; gap:8px; }
@@ -319,7 +334,7 @@
   body.dark .fav-card-ref { color:#9a8060; }
   .fav-card-ref .badge { background:#fff8f0; border:1px solid #c9a84c55; border-radius:6px; padding:2px 10px; font-size:.8rem; color:#7a5c3a; }
   body.dark .fav-card-ref .badge { background:#2a1c0a; color:#9a8060; }
-  .fav-card-ayah { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; font-size:1.15rem; line-height:2.2; color:#1a1a1a; }
+  .fav-card-ayah { font-family:var(--quran-font); font-size:1.15rem; line-height:2.2; color:#1a1a1a; }
   body.dark .fav-card-ayah { color:#f0e4c0; }
   .fav-card-actions { display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
   .fav-action-btn { background:#fff8f0; border:1px solid #c9a84c66; border-radius:8px; padding:6px 12px; cursor:pointer; font-family:'Amiri',serif; font-size:.85rem; color:#8b4513; transition:all .2s; white-space:nowrap; }
@@ -390,21 +405,21 @@
   .mushaf-container { padding:24px 12px 60px; display:flex; flex-direction:column; align-items:center; gap:24px; }
   .mushaf-pages-wrap { display:flex; gap:20px; justify-content:center; align-items:flex-start; width:100%; }
 
-  /* الصفحة — مظهر المصحف الورقي */
+  /* الصفحة — مظهر المصحف */
   .mushaf-page {
-    background: linear-gradient(170deg, #fefdf6 0%, #fdfaf0 100%);
-    border: 1px solid #c9a84c55;
-    border-radius: 3px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.07), 0 12px 40px rgba(0,0,0,0.13), inset 0 0 0 8px rgba(201,168,76,0.05);
-    padding: 36px 36px 44px;
-    min-height: 800px;
-    display: flex;
-    flex-direction: column;
+    background: #fff;
+    border: 1px solid #d0c0a0;
+    border-radius: 2px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
+    padding: 28px 28px 36px;
+    display: flex; flex-direction: column;
     position: relative;
-    width: 100%;
-    max-width: 510px;
+    width: 100%; max-width: 540px;
+    /* ارتفاع ثابت: 15 سطر × حجم الخط × ارتفاع السطر + رأس/ذيل الصفحة */
+    min-height: calc(15 * var(--m-fs,28px) * 1.7 + 180px);
+    overflow: visible;
   }
-  body.dark .mushaf-page { background:linear-gradient(170deg,#1e1608,#1a1206); border-color:#7a5c3a44; }
+  body.dark .mushaf-page { background:#0f0d09; border-color:#3a2e1a; box-shadow:0 4px 18px rgba(0,0,0,0.5); }
 
   /* رأس الصفحة */
   .mushaf-page-header {
@@ -416,24 +431,8 @@
   }
   body.dark .mushaf-page-header { color:#c9a84c77; border-color:#7a5c3a33; }
 
-  /* رأس السورة — إطار مزخرف */
-  .mushaf-sura-header { text-align:center; margin:18px 0 10px; position:relative; z-index:1; }
-  .mushaf-sura-frame {
-    display:inline-block;
-    border:1.5px solid #c9a84c66;
-    border-radius:5px;
-    padding:10px 44px 8px;
-    background:linear-gradient(135deg,#fdf8ec,#fef9f0);
-    position:relative; min-width:220px;
-  }
-  body.dark .mushaf-sura-frame { background:linear-gradient(135deg,#2a1f0a,#221508); border-color:#7a5c3a55; }
-  .mushaf-sura-frame::before,.mushaf-sura-frame::after { content:'✦'; position:absolute; color:#c9a84c; font-size:9px; top:5px; }
-  .mushaf-sura-frame::before { right:10px; }
-  .mushaf-sura-frame::after  { left:10px; }
-  .mushaf-sura-name { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif; font-size:1.2rem; color:#3a2008; font-weight:bold; }
-  body.dark .mushaf-sura-name { color:#e5c97a; }
-  .mushaf-sura-info { font-family:'Amiri',serif; font-size:.75rem; color:#9a7a5a; margin-top:3px; }
-  body.dark .mushaf-sura-info { color:#7a6a5a; }
+  /* رأس السورة — إطار مزخرف مثل QUL */
+  .mushaf-sura-header { text-align:center; margin:8px 0 4px; position:relative; z-index:1; }
 
   /* البسملة */
   .mushaf-bismillah {
@@ -494,6 +493,59 @@
   .mushaf-word { cursor:pointer; transition:color .15s,background .15s; padding:1px 2px; border-radius:3px; }
   .mushaf-word:hover { color:#8b4513; background:rgba(201,168,76,0.14); }
   body.dark .mushaf-word:hover { color:#f5d080; background:rgba(201,168,76,0.12); }
+  /* كلمات QPC V4 Tajweed — حجم الخط متحكم به عبر متغير CSS */
+  .qpc-v4-word { font-size:var(--m-fs,28px); line-height:1.7; }
+
+  /* ===== تخطيط المصحف سطر بسطر ===== */
+  .mushaf-lines {
+    display:flex; flex-direction:column;
+    gap:2px; width:100%; overflow:hidden;
+  }
+  /* سطر آية عادي — row في وضع RTL يسير من اليمين لليسار تلقائياً */
+  .mushaf-line {
+    display:flex; flex-direction:row;
+    font-size:var(--m-fs,28px); line-height:1.7;
+    color:#120c04; width:100%;
+  }
+  body.dark .mushaf-line { color:#f0e8cc; }
+  /* سطر مركزي */
+  .mushaf-line-center { justify-content:center; text-align:center; }
+  /* سطر موزع */
+  .mushaf-line-just { justify-content:space-between; }
+  /* البسملة */
+  .mushaf-line-text {
+    font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif;
+    font-size:28px; color:#120c04; white-space:nowrap;
+  }
+  body.dark .mushaf-line-text { color:#f0e8cc; }
+  /* إطار اسم السورة — مثل QUL */
+  .mushaf-line-surah { display:flex; justify-content:center; margin:6px 0 4px; }
+  .mushaf-sura-frame {
+    position:relative; display:flex; align-items:center; justify-content:center;
+    width:100%; padding:10px 16px;
+    border:2px solid #120c04; border-radius:2px;
+    box-shadow:inset 0 0 0 3px #f5e8c8, inset 0 0 0 5px #120c04;
+    background:#fdf6e3;
+  }
+  body.dark .mushaf-sura-frame {
+    border-color:#e8d9b0; box-shadow:inset 0 0 0 3px #1e150a, inset 0 0 0 5px #e8d9b0;
+    background:#1a1208;
+  }
+  .mushaf-sura-frame::before, .mushaf-sura-frame::after {
+    content:''; position:absolute; top:50%; transform:translateY(-50%);
+    width:28px; height:28px; background:#120c04; border-radius:50%;
+    border:4px solid #fdf6e3;
+  }
+  body.dark .mushaf-sura-frame::before, body.dark .mushaf-sura-frame::after { background:#e8d9b0; border-color:#1a1208; }
+  .mushaf-sura-frame::before { left:-6px; }
+  .mushaf-sura-frame::after  { right:-6px; }
+  .mushaf-sura-name-ar {
+    font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif;
+    font-size:1.15rem; font-weight:bold; color:#120c04; text-align:center;
+  }
+  body.dark .mushaf-sura-name-ar { color:#f0e8cc; }
+  .mushaf-sura-info { font-size:.75rem; color:#7a5c3a; margin-top:2px; text-align:center; font-family:'Amiri',serif; }
+  body.dark .mushaf-sura-info { color:#9a7a5a; }
 
   /* تحميل الصفحة */
   .qcf-loading { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; flex:1; min-height:420px; color:#9a7a5a; font-family:'Amiri',serif; font-size:.95rem; }
@@ -620,9 +672,36 @@
 <script>
 var FILE_URL = './data.xlsx';
 var allData = [], suraMap = {}, suraOrder = [], ayahsBySura = {};
+var quranFull = null, _qfLoading = false, _qfCBs = [];
+var mushafPages = null, mushafWords = null, _mhLoading = false, _mhCBs = [];
+var _wordLocMap = null;
+var qpcV2Glyphs = null, _qpLoading = false, _qpCBs = [];
+var _qpcV2FontFaces = {};  // page -> FontFace promise
+var _mushafFontSize = 28; // حجم الخط الافتراضي بالبكسل
+
+function setMushafFontSize(px){
+  _mushafFontSize = Math.max(18, Math.min(42, px));
+  document.documentElement.style.setProperty('--m-fs', _mushafFontSize+'px');
+  // تحديث أزرار الحجم إن وجدت
+  var lbl = document.getElementById('mfs-label');
+  if(lbl) lbl.textContent = _mushafFontSize+'px';
+}
 var currentSura = null;
 var currentFontSize = 1.5;
 var popupData = {};
+
+// ===== Font Family =====
+var FONT_FAMILIES = {
+  'kfgqpc':   "'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif",
+  'me-quran': "'Me Quran', 'Amiri', serif"
+};
+var currentFont = localStorage.getItem('quranFont') || 'kfgqpc';
+// تطبيق الخط المحفوظ فوراً عند تحميل الصفحة
+(function(){
+  if(currentFont !== 'kfgqpc' && FONT_FAMILIES[currentFont]){
+    document.documentElement.style.setProperty('--quran-font', FONT_FAMILIES[currentFont]);
+  }
+})();
 
 // ===== Mobile Sidebar =====
 function toggleSidebar(){
@@ -633,6 +712,141 @@ function toggleSidebar(){
 function openDB(){ return new Promise(function(res,rej){ var r=indexedDB.open('QuranExplorer',2); r.onupgradeneeded=function(e){ var db=e.target.result; if(!db.objectStoreNames.contains('data'))db.createObjectStore('data'); }; r.onsuccess=function(e){res(e.target.result);}; r.onerror=function(e){rej(e.target.error);}; }); }
 function dbGet(k){ return openDB().then(function(db){ return new Promise(function(res,rej){ var r=db.transaction('data','readonly').objectStore('data').get(k); r.onsuccess=function(){res(r.result);}; r.onerror=function(e){rej(e.target.error);}; }); }); }
 function dbSet(k,v){ return openDB().then(function(db){ return new Promise(function(res,rej){ var tx=db.transaction('data','readwrite'); tx.objectStore('data').put(v,k); tx.oncomplete=function(){res();}; tx.onerror=function(e){rej(e.target.error);}; }); }); }
+
+// ===== Full Quran Data =====
+function loadQuranFull(cb){
+  if(quranFull){ if(cb) cb(); return; }
+  if(cb) _qfCBs.push(cb);
+  if(_qfLoading) return;
+  _qfLoading = true;
+  fetch('./data/quran-full.json')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      quranFull = data;
+      mergeQuranFull();
+      var cbs = _qfCBs.splice(0);
+      cbs.forEach(function(f){ try{ f(); }catch(e){} });
+    })
+    .catch(function(e){ console.warn('quran-full.json:', e); });
+}
+function mergeQuranFull(){
+  if(!quranFull) return;
+  for(var sura in quranFull){
+    var qd = quranFull[sura];
+    var arr = qd.a;
+    if(!suraMap[sura]){
+      suraMap[sura] = { num: sura, name: qd.n, ayahCount: arr.length };
+      suraOrder.push(sura);
+    } else {
+      suraMap[sura].ayahCount = arr.length;
+    }
+    if(!ayahsBySura[sura]) ayahsBySura[sura] = {};
+    for(var i=0; i<arr.length; i++){
+      var no = String(i+1), qa = arr[i];
+      if(!ayahsBySura[sura][no])
+        ayahsBySura[sura][no] = { text: qa.t, pos: no, words: [] };
+      ayahsBySura[sura][no].juz  = qa.j;
+      ayahsBySura[sura][no].page = qa.p;
+    }
+  }
+  suraOrder.sort(function(a,b){ return +a - +b; });
+}
+
+// ===== Mushaf Data =====
+function loadMushafData(cb){
+  if(mushafPages && mushafWords){ if(cb) cb(); return; }
+  if(cb) _mhCBs.push(cb);
+  if(_mhLoading) return;
+  _mhLoading = true;
+  Promise.all([
+    fetch('./data/mushaf-pages.json').then(function(r){ return r.json(); }),
+    fetch('./data/mushaf-words.json').then(function(r){ return r.json(); })
+  ]).then(function(res){
+    mushafPages = res[0];
+    mushafWords = res[1];
+    // بناء خريطة سورة ← أول صفحة
+    _buildSuraPageMap();
+    _buildWordLocationMap();
+    var cbs = _mhCBs.splice(0);
+    cbs.forEach(function(f){ try{ f(); }catch(e){} });
+    _mhLoading = false;
+  }).catch(function(e){ console.warn('mushaf data:', e); _mhLoading = false; });
+}
+// ===== QPC V2 Font Data =====
+function loadQPCV2Data(cb){
+  if(qpcV2Glyphs){ if(cb) cb(); return; }
+  if(cb) _qpCBs.push(cb);
+  if(_qpLoading) return;
+  _qpLoading = true;
+  fetch('./data/qpc-v2-glyphs.json')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      qpcV2Glyphs = d;
+      _qpLoading = false;
+      var cbs = _qpCBs.splice(0);
+      cbs.forEach(function(f){ try{ f(); }catch(e){} });
+    })
+    .catch(function(e){ console.warn('qpc-v2-glyphs.json:', e); _qpLoading = false; });
+}
+// يستخدم FontFace API + V4 Tajweed CDN + font-palette لكل صفحة
+function _loadQPCV2Font(pg){
+  if(_qpcV2FontFaces[pg]) return _qpcV2FontFaces[pg];
+  var fname = 'p'+pg+'-v4-tajweed';
+  var url = 'https://static-cdn.tarteel.ai/qul/fonts/quran_fonts/v4-tajweed/woff2/p'+pg+'.woff2?v=3.1';
+  function _oc(c){ var a=[]; for(var i=0;i<=17;i++) a.push(i+(i===12?' rgba(0,0,0,0)':' '+c)); return a.join(','); }
+  var s = document.createElement('style');
+  s.textContent =
+    '@font-palette-values --ML'+pg+'{font-family:"'+fname+'";base-palette:3;override-colors:'+_oc('#120c04')+';}'+
+    '@font-palette-values --MD'+pg+'{font-family:"'+fname+'";base-palette:3;override-colors:'+_oc('#f0e8cc')+';}'+
+    '[data-mpg="'+pg+'"] .qpc-v4-word{font-palette:--ML'+pg+';}'+
+    'body.dark [data-mpg="'+pg+'"] .qpc-v4-word{font-palette:--MD'+pg+';}';
+  document.head.appendChild(s);
+  var face = new FontFace(fname, 'url("'+url+'") format("woff2")');
+  var p = face.load().then(function(f){ document.fonts.add(f); return f; })
+               .catch(function(e){ console.warn('V4 font page',pg,e); });
+  _qpcV2FontFaces[pg] = p;
+  return p;
+}
+
+function _buildSuraPageMap(){
+  if(!mushafPages) return;
+  for(var pg in mushafPages){
+    var lines = mushafPages[pg];
+    for(var i=0; i<lines.length; i++){
+      var ln = lines[i];
+      if(ln.t === 's' && ln.sn && !_suraPageCache[ln.sn]){
+        _suraPageCache[ln.sn] = +pg;
+      }
+    }
+  }
+}
+
+function _buildWordLocationMap(){
+  if(!mushafPages || !mushafWords) return;
+  _wordLocMap = {};
+  var curSn = '';
+  var curAyahIdx = 0;
+  var pageKeys = Object.keys(mushafPages).sort(function(a,b){ return +a-+b; });
+  for(var pi=0; pi<pageKeys.length; pi++){
+    var lines = mushafPages[pageKeys[pi]];
+    for(var li=0; li<lines.length; li++){
+      var line = lines[li];
+      if(line.t === 's'){
+        curSn = String(line.sn);
+        curAyahIdx = 0;
+      } else if(line.t === 'a' && line.f && line.l){
+        for(var wid=line.f; wid<=line.l; wid++){
+          var wtext = mushafWords[String(wid)] || '';
+          _wordLocMap[String(wid)] = { sn: curSn, ayah: curAyahIdx + 1 };
+          // علامة نهاية الآية: أرقام عربية فقط
+          if(wtext && /^[\u0660-\u0669]+$/.test(wtext)){
+            curAyahIdx++;
+          }
+        }
+      }
+    }
+  }
+}
 
 // ===== Load =====
 window.addEventListener('load', function(){
@@ -709,6 +923,11 @@ function showApp(pSura){
   document.getElementById('appLayout').style.display = 'flex';
   renderSuraList();
   setupScrollListeners();
+  // تحميل بيانات القرآن الكامل في الخلفية
+  loadQuranFull(function(){
+    renderSuraList();
+    if(currentSura) renderSura(currentSura);
+  });
   // ② تذكّر آخر سورة وصفحة
   var params = new URLSearchParams(location.search);
   var sura = pSura || params.get('sura') || localStorage.getItem('qeLastSura') || suraOrder[0];
@@ -786,11 +1005,10 @@ function selectSura(suraNum, forcePage){
       '<div class="sura-header-toggle">▲</div>'+
     '</div>'+
     '<div class="sura-header-expanded" id="suraHeaderExpanded">'+
-      '<div class="sura-header-name">سورة '+s.name+'</div>'+
       '<div class="sura-header-meta"><span>رقم السورة: '+suraNum+'</span><span>عدد الآيات: '+s.ayahCount+'</span></div>'+
-      bismillahHtml+
     '</div>'+
-  '</div>';
+  '</div>'+
+  bismillahHtml;
 
   // Font bar
   // شريط تبديل وضع العرض
@@ -802,7 +1020,16 @@ function selectSura(suraNum, forcePage){
     '</div>';
   // شريط حجم الخط (فقط في وضع السطور)
   if(viewMode==='lines'){
-    html += '<div class="font-bar-browse"><span>🔡 حجم الخط:</span><input type="range" min="1.1" max="2.4" step="0.05" value="'+currentFontSize+'" oninput="changeFontSize(this.value)"><span id="fontVal2">'+getFontLabel(currentFontSize)+'</span>'+
+    html += '<div class="font-bar-browse">'+
+    '<span>🔡 حجم:</span><input type="range" min="1.1" max="2.4" step="0.05" value="'+currentFontSize+'" oninput="changeFontSize(this.value)"><span id="fontVal2">'+getFontLabel(currentFontSize)+'</span>'+
+    '<span class="fbar-sep">|</span>'+
+    '<span style="white-space:nowrap">🖋 خط:</span>'+
+    '<div class="font-opts">'+
+      '<button class="font-opt'+(currentFont==='kfgqpc'?' active':'')+'" data-font="kfgqpc" onclick="changeFontFamily(\'kfgqpc\')" title="عثماني حفص">'+
+        '<span class="fo-preview" style="font-family:\'KFGQPC HAFS Uthmanic Script Regular\',serif">بسم</span><small>حفص</small></button>'+
+      '<button class="font-opt'+(currentFont==='me-quran'?' active':'')+'" data-font="me-quran" onclick="changeFontFamily(\'me-quran\')" title="مدني">'+
+        '<span class="fo-preview" style="font-family:\'Me Quran\',serif">بسم</span><small>مدني</small></button>'+
+    '</div>'+
     '<div class="jump-ayah-wrap"><span style="font-size:.82rem;color:#7a5c3a;">انتقل لآية:</span>'+
     '<input class="jump-ayah-input" id="jumpAyahInput" type="number" min="1" max="'+s.ayahCount+'" placeholder="رقم" onkeydown="if(event.key===\'Enter\')jumpToAyah()">'+
     '<button class="jump-btn" onclick="jumpToAyah()">↵</button></div></div>';
@@ -814,8 +1041,9 @@ function selectSura(suraNum, forcePage){
     var wordsHtml = buildClickableAyah(ay, suraNum);
     var favKey = 'ayah::'+suraNum+'::'+ay.pos;
     var isFaved = isBookmarked(favKey);
+    var juzBadge = ay.juz ? '<span class="ayah-juz">ج'+ay.juz+'</span>' : '';
     html += '<div class="ayah-row" id="ayrow-'+suraNum+'-'+ay.pos+'">'+
-      '<div class="ayah-number" onclick="copyAyah(\''+esc(ay.text)+'\', this, \''+esc(s.name)+'\', \''+ay.pos+'\')" title="اضغط لنسخ الآية" style="cursor:pointer">'+ay.pos+'</div>'+
+      '<div class="ayah-number" onclick="copyAyah(\''+esc(ay.text)+'\', this, \''+esc(s.name)+'\', \''+ay.pos+'\')" title="اضغط لنسخ الآية" style="cursor:pointer">'+ay.pos+juzBadge+'</div>'+
       '<div class="ayah-body"><div class="ayah-text-browse" style="font-size:'+currentFontSize+'rem">'+wordsHtml+
       ' <button class="fav-inline-btn'+(isFaved?' faved':'')+'" title="'+(isFaved?'إزالة من المفضلة':'حفظ في المفضلة')+'" onclick="toggleAyahFav(this,\''+esc(favKey)+'\',\''+esc(s.name)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\')">'+(isFaved?'⭐':'☆')+'</button>'+
       ' <button class="share-inline-btn" onclick="openShareModal(\''+esc(ay.text)+'\',\''+esc(s.name)+'\',\''+ay.pos+'\')">📤</button>'+
@@ -1004,6 +1232,11 @@ function renderMushafView(page){
     '<button class="vm-btn'+(viewMode==='lines'?' active':'')+'" onclick="setViewMode(\'lines\')">📜 سطر بسطر</button>'+
     '<button class="vm-btn'+(viewMode==='page'?' active':'')+'" onclick="setViewMode(\'page\')">📄 صفحة مصحف</button>'+
     '<button class="vm-btn'+(viewMode==='twopage'?' active':'')+'" onclick="setViewMode(\'twopage\')">📖 صفحتان</button>'+
+    '<span style="margin-right:auto"></span>'+
+    '<span style="font-size:.78rem;color:#9a7a5a;">حجم الخط:</span>'+
+    '<button class="vm-btn" onclick="setMushafFontSize(_mushafFontSize-2)" title="تصغير الخط" style="padding:5px 10px;font-size:1rem;">A−</button>'+
+    '<span id="mfs-label" style="font-size:.82rem;color:#7a5c3a;min-width:36px;text-align:center;">'+_mushafFontSize+'px</span>'+
+    '<button class="vm-btn" onclick="setMushafFontSize(_mushafFontSize+2)" title="تكبير الخط" style="padding:5px 10px;font-size:1rem;">A+</button>'+
     '</div>';
 
   // تنقل علوي
@@ -1023,7 +1256,7 @@ function renderMushafView(page){
   var pagesHtml = '';
   for(var pi=0; pi<pages.length; pi++){
     var pg = pages[pi];
-    pagesHtml += '<div class="mushaf-page" id="qcf-ph-'+pg+'">'+
+    pagesHtml += '<div class="mushaf-page" id="qcf-ph-'+pg+'" data-mpg="'+pg+'">'+
       '<div class="qcf-loading">'+
         '<div class="qcf-spinner"></div>'+
         '<span>جاري تحميل صفحة '+toArabicNums(pg)+'…</span>'+
@@ -1039,9 +1272,9 @@ function renderMushafView(page){
     '</div>';
   main.scrollTop = 0;
 
-  // تحميل كل صفحة عبر QCF بشكل غير متزامن
+  // تحميل كل صفحة عبر المحرك المحلي KFGQPC
   for(var pj=0; pj<pages.length; pj++){
-    _loadQCFPage(pages[pj]);
+    _loadNewMushafPage(pages[pj]);
   }
 }
 
@@ -1274,6 +1507,81 @@ function _loadQCFPage(pg){
     });
 }
 // ===== نهاية نظام QCF =====
+
+// ===== محرك المصحف (QPC V2 Glyph + KFGQPC Unicode fallback) =====
+function _buildNewMushafPage(pg){
+  var lines = mushafPages[String(pg)];
+  if(!lines) return '<div style="padding:20px;text-align:center;color:#9a7a5a;">صفحة '+pg+' غير موجودة في البيانات</div>';
+  var pageAr = toArabicNums(pg);
+  var rootMap = _getQCFRootMap();
+
+  // رأس الصفحة
+  var pgSuras = [];
+  for(var li=0;li<lines.length;li++){ if(lines[li].t==='s'&&lines[li].sn) pgSuras.push(lines[li].sn); }
+  var hLeft  = pgSuras.length ? (suraMap[pgSuras[0]]?suraMap[pgSuras[0]].name:'') : '';
+  var hRight = pgSuras.length>1 ? (suraMap[pgSuras[pgSuras.length-1]]?suraMap[pgSuras[pgSuras.length-1]].name:'') : '';
+  var h = '<div class="mushaf-page-header">'+
+    '<span>'+hLeft+'</span><span>'+pageAr+'</span><span>'+hRight+'</span></div>';
+
+  h += '<div class="mushaf-lines">';
+  for(var i=0; i<lines.length; i++){
+    var line = lines[i];
+    if(line.t === 's'){
+      var sn = String(line.sn), sName = suraMap[sn] ? suraMap[sn].name : '';
+      var sAyahs = suraMap[sn] ? toArabicNums(suraMap[sn].ayahCount)+' آية' : '';
+      h += '<div class="mushaf-line-surah">'+
+        '<div class="mushaf-sura-frame">'+
+          '<div><div class="mushaf-sura-name-ar">'+sName+'</div>'+
+          '<div class="mushaf-sura-info">'+sAyahs+'</div></div>'+
+        '</div></div>';
+    } else if(line.t === 'b'){
+      h += '<div class="mushaf-line mushaf-line-center"><span class="mushaf-line-text">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</span></div>';
+    } else if(line.t === 'a' && line.f && line.l){
+      var isCtr = line.c;
+      var lineDiv = isCtr ? 'mushaf-line mushaf-line-center' : 'mushaf-line mushaf-line-just';
+      h += '<div class="'+lineDiv+'">';
+      for(var wid=line.f; wid<=line.l; wid++){
+        var wtext = mushafWords[String(wid)] || '';
+        if(!wtext) continue;
+        var wRoot = rootMap[_normArabic(wtext)] || '';
+        var glyph = qpcV2Glyphs ? qpcV2Glyphs[String(wid)] : null;
+        var loc = _wordLocMap ? _wordLocMap[String(wid)] : null;
+        var wSuraName = (loc && loc.sn && suraMap[loc.sn]) ? suraMap[loc.sn].name : '';
+        var wAyah = loc ? String(loc.ayah) : '';
+        var wAyahData = (loc && loc.sn && ayahsBySura[loc.sn]) ? ayahsBySura[loc.sn][wAyah] : null;
+        var wAyahText = wAyahData ? (wAyahData.text || '') : '';
+        if(glyph){
+          h += '<span class="mushaf-word qpc-v4-word" style="font-family:\'p'+pg+'-v4-tajweed\'" onclick="showWordPopup(\''+esc(wtext)+'\',\''+esc(wRoot)+'\',\''+esc(wSuraName)+'\',\''+esc(wAyah)+'\',\''+esc(wAyahText)+'\')">'+glyph+'</span>';
+        } else {
+          h += '<span class="mushaf-word" onclick="showWordPopup(\''+esc(wtext)+'\',\''+esc(wRoot)+'\',\''+esc(wSuraName)+'\',\''+esc(wAyah)+'\',\''+esc(wAyahText)+'\')">'+wtext+'</span>';
+        }
+      }
+      h += '</div>';
+    }
+  }
+  h += '</div>';
+  h += '<div class="mushaf-page-num">— '+pageAr+' —</div>';
+  return h;
+}
+
+function _loadNewMushafPage(pg){
+  var box = document.getElementById('qcf-ph-'+pg);
+  if(!box) return;
+  // ابدأ تحميل الخط مبكراً بالتوازي مع البيانات
+  var fontPromise = _loadQPCV2Font(pg);
+  loadMushafData(function(){
+    loadQPCV2Data(function(){
+      // انتظر تحميل الخط قبل الرسم لضمان عرض الرموز الصحيحة
+      (fontPromise || Promise.resolve()).then(function(){
+        var b = document.getElementById('qcf-ph-'+pg);
+        if(b) b.innerHTML = _buildNewMushafPage(pg);
+      }).catch(function(){
+        var b = document.getElementById('qcf-ph-'+pg);
+        if(b) b.innerHTML = _buildNewMushafPage(pg);
+      });
+    });
+  });
+}
 
 function toArabicNums(n){
   return String(n).replace(/[0-9]/g, function(d){ return '٠١٢٣٤٥٦٧٨٩'[d]; });
@@ -1691,6 +1999,15 @@ function getFontLabel(v){
   if(v < 2.0) return 'كبير';
   return 'كبير جداً';
 }
+function changeFontFamily(fontId){
+  if(!FONT_FAMILIES[fontId]) return;
+  currentFont = fontId;
+  localStorage.setItem('quranFont', fontId);
+  document.documentElement.style.setProperty('--quran-font', FONT_FAMILIES[fontId]);
+  document.querySelectorAll('.font-opt').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-font') === fontId);
+  });
+}
 function toArabicNumerals(n){
   return String(n).replace(/[0-9]/g, function(d){ return '٠١٢٣٤٥٦٧٨٩'[d]; });
 }
@@ -1959,10 +2276,22 @@ function scrollToTop(){
 function setupScrollListeners(){
   var mc = document.getElementById('mainContent');
   if(!mc) return;
+  var lastScrollTop = 0;
   mc.addEventListener('scroll', function(){
     // زر ارجع للأعلى
     var btn = document.getElementById('scrollTopBtn');
     if(btn) btn.classList.toggle('visible', mc.scrollTop > 300);
+    // إخفاء/إظهار هيدر السورة عند السكرول
+    var hdr = document.getElementById('suraHeaderCard');
+    if(hdr){
+      var st = mc.scrollTop;
+      if(st > 80 && st > lastScrollTop + 5){
+        hdr.classList.add('header-hidden');
+      } else if(st < lastScrollTop - 5 || st <= 80){
+        hdr.classList.remove('header-hidden');
+      }
+      lastScrollTop = Math.max(0, st);
+    }
     // ⑤ تقدم القراءة
     if(!currentSura) return;
     var prog = document.getElementById('readProgress');
