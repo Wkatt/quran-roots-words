@@ -1,6 +1,6 @@
 // ===== مستكشف القرآن العظيم — Service Worker =====
 // غيّر هذا الرقم مع كل deploy جديد لإجبار التحديث
-const CACHE_VERSION = 'quran-v4';
+const CACHE_VERSION = 'quran-v8';
 
 const STATIC_ASSETS = [
   '/', '/index.html', '/browse.html', '/roots.html', '/fields.html',

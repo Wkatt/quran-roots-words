@@ -13,6 +13,11 @@
 <meta property="og:description" content="تصفح القرآن الكريم آية بآية مع تحليل لغوي لكل كلمة وجذرها وحقلها الدلالي.">
 <meta property="og:locale" content="ar_SA">
 <meta property="og:site_name" content="مستكشف القرآن العظيم">
+<meta property="og:image" content="https://quranrootswords.netlify.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://quranrootswords.netlify.app/og-image.png">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DGJW3108XZ"></script>
 <script>
@@ -30,7 +35,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="مستكشف القرآن">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
+<script src="./xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
 <style>
@@ -859,7 +864,7 @@ function buildClickableAyah(ay, suraNum){
     var matched = null;
     for(var j=0;j<dataWords.length;j++){
       var dw = dataWords[j];
-      if(dw.word === tw || stripDiacriticsSimple(dw.word) === stripDiacriticsSimple(tw)){
+      if(dw.word.trim() === tw.trim() || stripDiacriticsSimple(dw.word).trim() === stripDiacriticsSimple(tw).trim()){
         matched = dw;
         dataWords.splice(j,1); // remove so we don't match again
         break;
@@ -879,6 +884,7 @@ function stripDiacriticsSimple(s){
   var r='';
   for(var i=0;i<s.length;i++){
     var c=s.charCodeAt(i);
+    if(c===0x0671){ r+='ا'; continue; } // ألف الوصل ٱ → ألف عادية
     if((c>=0x064B&&c<=0x065F)||c===0x0670||c===0x0640||(c>=0x06D6&&c<=0x06ED)||(c>=0x0610&&c<=0x061A)||c===0x200C||c===0x200D||c===0x200F)continue;
     r+=s[i];
   }
@@ -893,6 +899,8 @@ function _normArabic(s){
   for(var i=0;i<s.length;i++){
     var c=s.charCodeAt(i);
     if(c===0x0670){ r+='ا'; continue; } // ألف خنجرية → ألف عادية
+    if(c===0x0671){ r+='ا'; continue; } // ألف الوصل ٱ → ألف عادية
+    if(c===0x0649){ r+='ي'; continue; } // ألف مقصورة ى → ياء عادية
     if((c>=0x064B&&c<=0x065F)||c===0x0640||(c>=0x06D6&&c<=0x06ED)||(c>=0x0610&&c<=0x061A)||c===0x200C||c===0x200D||c===0x200F) continue;
     r+=s[i];
   }
@@ -1138,7 +1146,21 @@ function _getSuraFirstPageAsync(suraNum, cb){
 }
 
 // ===== نظام QCF للمصحف (mustafa0x + code_v1) =====
-var _qcfCache = {}, _qcfFontReg = {}, _qcfRootMap = null;
+var _qcfCache = {}, _qcfFontReg = {}, _qcfRootMap = null, _posRootMap = null;
+
+// خريطة ترتيبية: "سورة:آية" → [جذر_الكلمة_١, جذر_الكلمة_٢, ...]
+// تعتمد على ترتيب الكلمات لا على نصها — محصّنة ضد فروق Unicode
+function _getPosRootMap(){
+  if(_posRootMap) return _posRootMap;
+  _posRootMap = {};
+  for(var i=0;i<allData.length;i++){
+    var d = allData[i];
+    var k = d.sura_num + ':' + d.pos;
+    if(!_posRootMap[k]) _posRootMap[k] = [];
+    _posRootMap[k].push(d.root || '');
+  }
+  return _posRootMap;
+}
 
 function _getQCFRootMap(){
   if(_qcfRootMap) return _qcfRootMap;
@@ -1207,7 +1229,9 @@ function _buildQCFContent(pg, verses){
     }
     prevCh = chId;
     var sName = suraMap[String(chId)] ? suraMap[String(chId)].name : '';
-    var rootMap = _getQCFRootMap();
+    var posRootMap = _getPosRootMap();
+    var verseRoots = posRootMap[String(chId) + ':' + String(vNum)] || [];
+    var wordIdx = 0;
     var words = verse.words || [];
     for(var wi=0; wi<words.length; wi++){
       var w    = words[wi];
@@ -1220,8 +1244,9 @@ function _buildQCFContent(pg, verses){
       if(isEnd){
         h += '<span class="qcf-word qcf-end" title="آية '+toArabicNums(vNum)+'">'+qcfH+'</span> ';
       } else {
-        // البحث عن الجذر من البيانات المحلية
-        var wRoot = rootMap[_normArabic(uth)] || '';
+        // البحث بالترتيب — محصّن ضد فروق Unicode
+        var wRoot = verseRoots[wordIdx] || '';
+        wordIdx++;
         h += '<span class="qcf-word" onclick="showWordPopup(\''+esc(uth)+'\',\''+esc(wRoot)+'\',\''+esc(sName)+'\',\''+vNum+'\',\''+esc(verse.text_uthmani||'')+'\')">'+qcfH+'</span> ';
       }
     }
@@ -1267,7 +1292,7 @@ function buildClickableMushafAyah(ay, suraNum){
     var matched = null;
     for(var j=0; j<dataWords.length; j++){
       var dw = dataWords[j];
-      if(dw.word === tw || stripDiacriticsSimple(dw.word) === stripDiacriticsSimple(tw)){
+      if(dw.word.trim() === tw.trim() || stripDiacriticsSimple(dw.word).trim() === stripDiacriticsSimple(tw).trim()){
         matched = dw;
         dataWords.splice(j,1);
         break;
