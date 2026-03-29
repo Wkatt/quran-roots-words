@@ -470,8 +470,8 @@
   .mushaf-bismillah {
     text-align:center;
     font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri Quran','Amiri',serif;
-    font-size:2.5rem; color:#2c1a0e;
-    margin:10px 0 18px; line-height:1.8;
+    font-size:1.75rem; color:#2c1a0e;
+    margin:10px 0 14px; line-height:2;
     position:relative; z-index:1;
   }
   body.dark .mushaf-bismillah { color:#e8c87a; }
@@ -562,7 +562,7 @@
   }
   .mushaf-sura-name-ar {
     font-family:'surah-header','v4-surah-name',serif;
-    font-size:3.2rem; text-align:center; line-height:1.1; display:block;
+    font-size:7rem; text-align:center; line-height:1.1; display:block;
   }
 
   /* تحميل الصفحة */
@@ -740,7 +740,7 @@ function _getJuzForAyah(sn, ayahPos){
 }
 var qpcV2Glyphs = null, _qpLoading = false, _qpCBs = [];
 var _qpcV2FontFaces = {};  // page -> FontFace promise
-var _mushafFontSize = 16; // حجم الخط الافتراضي بالبكسل
+var _mushafFontSize = 25; // حجم الخط الافتراضي بالبكسل
 
 function setMushafFontSize(px){
   _mushafFontSize = Math.max(12, Math.min(36, +px));
@@ -1297,9 +1297,15 @@ var viewMode = localStorage.getItem('qeViewMode') || 'lines';
 var currentMushafPage = 1;
 
 function setViewMode(mode){
+  var prevMode = viewMode;
   viewMode = mode;
   localStorage.setItem('qeViewMode', mode);
-  if(currentSura) selectSura(currentSura);
+  // عند التنقل بين أوضاع المصحف (صفحة ↔ صفحتان): ابقَ على نفس الصفحة
+  if(mode !== 'lines' && prevMode !== 'lines' && currentMushafPage){
+    renderMushafView(currentMushafPage);
+  } else if(currentSura){
+    selectSura(currentSura);
+  }
 }
 
 function cycleMushafView(){
