@@ -464,14 +464,14 @@
   body.dark .mushaf-page-header { color:#c9a84c77; border-color:#7a5c3a33; }
 
   /* رأس السورة — إطار مزخرف مثل QUL */
-  .mushaf-sura-header { text-align:center; margin:8px 0 4px; position:relative; z-index:1; }
+  .mushaf-sura-header { text-align:center; margin:2px 0 0; position:relative; z-index:1; }
 
   /* البسملة */
   .mushaf-bismillah {
     text-align:center;
     font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri Quran','Amiri',serif;
     font-size:1.75rem; color:#2c1a0e;
-    margin:10px 0 14px; line-height:2;
+    margin:2px 0 6px; line-height:2;
     position:relative; z-index:1;
   }
   body.dark .mushaf-bismillah { color:#e8c87a; }
@@ -554,15 +554,17 @@
   }
   body.dark .mushaf-line-text { color:#f0e8cc; }
   /* إطار اسم السورة */
-  .mushaf-line-surah { display:flex; justify-content:center; margin:8px 0 6px; }
+  .mushaf-line-surah { display:flex; justify-content:center; margin:2px 0 0; }
   .mushaf-sura-frame {
     display:flex; align-items:center; justify-content:center;
-    width:100%; padding:4px 0;
+    width:100%; padding:0;
     background: transparent;
+    overflow: hidden;
   }
   .mushaf-sura-name-ar {
     font-family:'surah-header','v4-surah-name',serif;
-    font-size:7rem; text-align:center; line-height:1.1; display:block;
+    font-size:9rem; text-align:center; line-height:1.1; display:block;
+    flex-shrink: 0;
   }
 
   /* تحميل الصفحة */
