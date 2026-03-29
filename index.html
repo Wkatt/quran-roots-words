@@ -2129,31 +2129,7 @@ function smCopy(){
 }
 function smNative(){if(navigator.share)navigator.share({title:'مستكشف القرآن العظيم',text:_sd.txt}).then(closeShareModal).catch(function(){});}
 
-// ===== PWA: Service Worker + Auto Update =====
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/sw.js').then(function(reg){
-      // تحقق من تحديثات فوراً
-      reg.update();
-      // كل ما وُجد سيرفس ووركر جديد جاهز — حدّث الصفحة تلقائياً
-      reg.addEventListener('updatefound', function(){
-        var newWorker = reg.installing;
-        newWorker.addEventListener('statechange', function(){
-          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
-            // سيرفس ووركر جديد جاهز — أخبره يتولى السيطرة
-            newWorker.postMessage('skipWaiting');
-          }
-        });
-      });
-    }).catch(function(){});
-
-    // لما يتغير الكنترولر (بعد skipWaiting) — أعد تحميل الصفحة مرة واحدة
-    var refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', function(){
-      if(!refreshing){ refreshing = true; window.location.reload(); }
-    });
-  });
-}
+// SW registration handled by nav.js (مشترك بين كل الصفحات)
 
 // ===== PWA: Install Banner =====
 (function(){

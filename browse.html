@@ -47,6 +47,7 @@
   @font-face { font-family: 'qpc-nastaleeq'; src: url('./KFGQPCNastaleeq-Regular.woff2') format('woff2'); font-display: swap; }
   @font-face { font-family: 'quran-common'; src: url('./quran-common.woff') format('woff'); font-display: swap; }
   @font-face { font-family: 'v4-surah-name'; src: url('./surah_names.woff') format('woff'), url('./surah_names.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'surah-header'; src: url('https://static-cdn.tarteel.ai/qul/fonts/surah-names/surah-header/QCF_SurahHeader_COLOR-Regular.ttf') format('truetype'); font-display: swap; }
   :root { --quran-font: 'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Amiri', 'Traditional Arabic', serif; background: #f5f0e8; color: #2c1a0e; min-height: 100vh; direction: rtl; }
@@ -181,8 +182,9 @@
   .sura-header-name-font { font-family: 'v4-surah-name', serif; font-size: 3rem; text-align: center; padding: 8px 20px 4px; display: block; }
   body.dark .sura-header-name-font { }
   .popup-stats-row { background: #fdf8f0; border-radius: 8px; margin: 2px 0; }
-  body.dark .popup-stats-row { background: #1e1408; } font-size: 1.1rem; line-height: 2; color: #4a3a2a; background: #f5f0e8; border-radius: 8px; padding: 12px 16px; margin-top: 12px; border-right: 4px solid #c9a84c; }
-  body.dark .popup-ayah-preview { background: #1a1208; color: #c0a870; }
+  body.dark .popup-stats-row { background: #1e1408; }
+  .popup-ayah-preview { font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri Quran','Amiri',serif; font-size: 1.35rem; line-height: 2.2; color: #2c1a0e; background: #f5f0e8; border-radius: 8px; padding: 14px 16px; margin-top: 12px; border-right: 4px solid #c9a84c; direction: rtl; }
+  body.dark .popup-ayah-preview { background: #1a1208; color: #e8d8b0; }
   .popup-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
   .popup-btn { flex: 1; min-width: 100px; padding: 10px 14px; border-radius: 10px; border: none; font-family: inherit; font-size: 0.95rem; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
   .popup-btn-root { background: #2a7a55; color: #fff; }
@@ -429,14 +431,26 @@
     border: 1px solid #d0c0a0;
     border-radius: 2px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
-    padding: 28px 28px 36px;
+    padding: 28px 28px 20px;
     display: flex; flex-direction: column;
     position: relative;
     width: 100%; max-width: 540px;
-    /* ارتفاع ثابت: 15 سطر × حجم الخط × ارتفاع السطر + رأس/ذيل الصفحة */
-    min-height: calc(15 * var(--m-fs,28px) * 1.7 + 180px);
-    overflow: visible;
+    overflow: hidden;
   }
+  /* أزرار التكبير/التصغير — في أعلى الصفحة */
+  .mushaf-page-controls {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 4px 0 8px;
+    border-bottom: 1px solid #c9a84c22; margin-bottom: 10px;
+  }
+  .m-ctrl-btn {
+    background: #fff8f0; border: 1px solid #c9a84c55; border-radius: 6px;
+    padding: 2px 10px; font-family: 'Amiri', serif; font-size: .85rem;
+    color: #6b3a1f; cursor: pointer; transition: background .15s;
+  }
+  .m-ctrl-btn:hover { background: #c9a84c22; }
+  body.dark .m-ctrl-btn { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a55; }
+  .m-ctrl-lbl { font-size: .8rem; color: #9a7a5a; min-width: 36px; text-align: center; font-family: 'Amiri', serif; }
   body.dark .mushaf-page { background:#0f0d09; border-color:#3a2e1a; box-shadow:0 4px 18px rgba(0,0,0,0.5); }
 
   /* رأس الصفحة */
@@ -532,38 +546,31 @@
   .mushaf-line-just { justify-content:space-between; }
   /* البسملة */
   .mushaf-line-text {
-    font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif;
-    font-size:28px; color:#120c04; white-space:nowrap;
+    font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri Quran','Amiri',serif;
+    font-size:var(--m-fs,16px); color:#120c04; white-space:nowrap;
   }
   body.dark .mushaf-line-text { color:#f0e8cc; }
-  /* إطار اسم السورة — مثل QUL */
-  .mushaf-line-surah { display:flex; justify-content:center; margin:6px 0 4px; }
+  /* إطار اسم السورة */
+  .mushaf-line-surah { display:flex; justify-content:center; margin:8px 0 6px; }
   .mushaf-sura-frame {
     position:relative; display:flex; align-items:center; justify-content:center;
-    width:100%; padding:10px 16px;
+    width:100%; padding:4px 28px;
     border:2px solid #120c04; border-radius:2px;
-    box-shadow:inset 0 0 0 3px #f5e8c8, inset 0 0 0 5px #120c04;
-    background:#fdf6e3;
+    background: transparent;
   }
-  body.dark .mushaf-sura-frame {
-    border-color:#e8d9b0; box-shadow:inset 0 0 0 3px #1e150a, inset 0 0 0 5px #e8d9b0;
-    background:#1a1208;
-  }
+  body.dark .mushaf-sura-frame { border-color:#e8d9b0; }
   .mushaf-sura-frame::before, .mushaf-sura-frame::after {
     content:''; position:absolute; top:50%; transform:translateY(-50%);
-    width:28px; height:28px; background:#120c04; border-radius:50%;
-    border:4px solid #fdf6e3;
+    width:26px; height:26px; background:#120c04; border-radius:50%;
+    border:3px solid #fff;
   }
-  body.dark .mushaf-sura-frame::before, body.dark .mushaf-sura-frame::after { background:#e8d9b0; border-color:#1a1208; }
-  .mushaf-sura-frame::before { left:-6px; }
-  .mushaf-sura-frame::after  { right:-6px; }
+  body.dark .mushaf-sura-frame::before, body.dark .mushaf-sura-frame::after { background:#e8d9b0; border-color:#0f0d09; }
+  .mushaf-sura-frame::before { left:-7px; }
+  .mushaf-sura-frame::after  { right:-7px; }
   .mushaf-sura-name-ar {
-    font-family:'v4-surah-name',serif;
-    font-size:2.2rem; text-align:center; line-height:1.1;
+    font-family:'surah-header','v4-surah-name',serif;
+    font-size:3.2rem; text-align:center; line-height:1.1; display:block;
   }
-  body.dark .mushaf-sura-name-ar { }
-  .mushaf-sura-info { font-size:.75rem; color:#7a5c3a; margin-top:2px; text-align:center; font-family:'Amiri',serif; }
-  body.dark .mushaf-sura-info { color:#9a7a5a; }
 
   /* تحميل الصفحة */
   .qcf-loading { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; flex:1; min-height:420px; color:#9a7a5a; font-family:'Amiri',serif; font-size:.95rem; }
@@ -598,7 +605,7 @@
 
   @media (max-width:800px) {
     .mushaf-pages-wrap { flex-direction:column; align-items:center; }
-    .mushaf-page { max-width:100%; min-height:auto; padding:20px 16px 28px; }
+    .mushaf-page { max-width:100%; padding:20px 16px 16px; }
     .mushaf-ayahs-text { font-size:1.28rem; line-height:2.55; }
     .qcf-text { font-size:1.22rem; line-height:1.75; }
   }
@@ -662,8 +669,7 @@
       </div>
       <div class="popup-info-row" style="align-items:center;">
         <span class="popup-label">السورة:</span>
-        <span class="popup-surah-name-font" id="popupSura">—</span>
-        <span style="font-size:0.8rem;color:#9a7a5a;margin-right:6px;" id="popupSuraText"></span>
+        <span class="popup-value" id="popupSura">—</span>
       </div>
       <div class="popup-info-row">
         <span class="popup-label">الآية:</span>
@@ -741,14 +747,13 @@ function _getJuzForAyah(sn, ayahPos){
 }
 var qpcV2Glyphs = null, _qpLoading = false, _qpCBs = [];
 var _qpcV2FontFaces = {};  // page -> FontFace promise
-var _mushafFontSize = 22; // حجم الخط الافتراضي بالبكسل
+var _mushafFontSize = 16; // حجم الخط الافتراضي بالبكسل
 
 function setMushafFontSize(px){
-  _mushafFontSize = Math.max(14, Math.min(26, px));
+  _mushafFontSize = Math.max(12, Math.min(36, px));
   document.documentElement.style.setProperty('--m-fs', _mushafFontSize+'px');
-  // تحديث أزرار الحجم إن وجدت
-  var lbl = document.getElementById('mfs-label');
-  if(lbl) lbl.textContent = _mushafFontSize+'px';
+  // تحديث كل عناصر العرض داخل الصفحات
+  document.querySelectorAll('.m-ctrl-lbl').forEach(function(el){ el.textContent = _mushafFontSize+'px'; });
 }
 var currentSura = null;
 var currentFontSize = 1.5;
@@ -771,6 +776,8 @@ var currentFont = localStorage.getItem('quranFont') || 'kfgqpc';
   if(currentFont !== 'kfgqpc' && FONT_FAMILIES[currentFont]){
     document.documentElement.style.setProperty('--quran-font', FONT_FAMILIES[currentFont]);
   }
+  // تطبيق حجم خط المصحف الافتراضي
+  document.documentElement.style.setProperty('--m-fs', _mushafFontSize+'px');
 })();
 
 // ===== Mobile Sidebar =====
@@ -1333,17 +1340,12 @@ function renderMushafView(page){
   var prevPage = spreadStart - step;
   var nextPage = spreadStart + step;
 
-  // شريط وضع العرض
+  // شريط وضع العرض (بدون أزرار الخط — منقولة داخل الصفحة)
   var viewBar = '<div class="view-mode-bar">'+
     '<span style="font-size:.78rem;color:#9a7a5a;">وضع العرض:</span>'+
     '<button class="vm-btn'+(viewMode==='lines'?' active':'')+'" onclick="setViewMode(\'lines\')">📜 سطر بسطر</button>'+
     '<button class="vm-btn'+(viewMode==='page'?' active':'')+'" onclick="setViewMode(\'page\')">📄 صفحة مصحف</button>'+
     '<button class="vm-btn'+(viewMode==='twopage'?' active':'')+'" onclick="setViewMode(\'twopage\')">📖 صفحتان</button>'+
-    '<span style="margin-right:auto"></span>'+
-    '<span style="font-size:.78rem;color:#9a7a5a;">حجم الخط:</span>'+
-    '<button class="vm-btn" onclick="setMushafFontSize(_mushafFontSize-2)" title="تصغير الخط" style="padding:5px 10px;font-size:1rem;">A−</button>'+
-    '<span id="mfs-label" style="font-size:.82rem;color:#7a5c3a;min-width:36px;text-align:center;">'+_mushafFontSize+'px</span>'+
-    '<button class="vm-btn" onclick="setMushafFontSize(_mushafFontSize+2)" title="تكبير الخط" style="padding:5px 10px;font-size:1rem;">A+</button>'+
     '</div>';
 
   // تنقل علوي
@@ -1415,6 +1417,13 @@ function buildMushafPage(page){
   // بناء HTML الصفحة
   var html = '<div class="mushaf-page">';
 
+  // أزرار الحجم في الأعلى
+  html += '<div class="mushaf-page-controls">'+
+    '<button class="m-ctrl-btn" onclick="setMushafFontSize(_mushafFontSize-1)">A−</button>'+
+    '<span class="m-ctrl-lbl">'+_mushafFontSize+'px</span>'+
+    '<button class="m-ctrl-btn" onclick="setMushafFontSize(_mushafFontSize+1)">A+</button>'+
+  '</div>';
+
   // رأس الصفحة: اسم السورة الأولى والأخيرة ورقم الصفحة
   var firstSuraName = pageAyahs.length ? pageAyahs[0].suraName : '';
   var lastSuraName  = pageAyahs.length ? pageAyahs[pageAyahs.length-1].suraName : '';
@@ -1436,13 +1445,9 @@ function buildMushafPage(page){
 
     // رأس السورة عند بداية سورة جديدة من أولها (يبقى داخل الحاوية)
     if(item.sura !== prevSura && item.pos == 1){
-      var ayahCount = sm.ayahCount || '';
-      var nuzul = sm.type ? (sm.type === 'meccan' ? 'مكية' : 'مدنية') : '';
-      var surahInfo = [nuzul, ayahCount ? ayahCount+' آية' : ''].filter(Boolean).join(' · ');
       html += '<div class="mushaf-sura-header">'+
         '<div class="mushaf-sura-frame">'+
           '<div class="mushaf-sura-name-ar">'+_surahChar(item.sura)+'</div>'+
-          (surahInfo ? '<div class="mushaf-sura-info">'+surahInfo+'</div>' : '')+
         '</div>'+
       '</div>';
       // بسملة (ليس الفاتحة ولا التوبة)
@@ -1627,19 +1632,21 @@ function _buildNewMushafPage(pg){
   for(var li=0;li<lines.length;li++){ if(lines[li].t==='s'&&lines[li].sn) pgSuras.push(lines[li].sn); }
   var hLeft  = pgSuras.length ? (suraMap[pgSuras[0]]?suraMap[pgSuras[0]].name:'') : '';
   var hRight = pgSuras.length>1 ? (suraMap[pgSuras[pgSuras.length-1]]?suraMap[pgSuras[pgSuras.length-1]].name:'') : '';
-  var h = '<div class="mushaf-page-header">'+
+  var h = '<div class="mushaf-page-controls">'+
+    '<button class="m-ctrl-btn" onclick="setMushafFontSize(_mushafFontSize-1)">A−</button>'+
+    '<span class="m-ctrl-lbl">'+_mushafFontSize+'px</span>'+
+    '<button class="m-ctrl-btn" onclick="setMushafFontSize(_mushafFontSize+1)">A+</button>'+
+  '</div>';
+  h += '<div class="mushaf-page-header">'+
     '<span>'+hLeft+'</span><span>'+pageAr+'</span><span>'+hRight+'</span></div>';
 
   h += '<div class="mushaf-lines">';
   for(var i=0; i<lines.length; i++){
     var line = lines[i];
     if(line.t === 's'){
-      var sn = String(line.sn), sName = suraMap[sn] ? suraMap[sn].name : '';
-      var sAyahs = suraMap[sn] ? toArabicNums(suraMap[sn].ayahCount)+' آية' : '';
       h += '<div class="mushaf-line-surah">'+
         '<div class="mushaf-sura-frame">'+
-          '<div><div class="mushaf-sura-name-ar">'+_surahChar(line.sn)+'</div>'+
-          '<div class="mushaf-sura-info">'+sAyahs+'</div></div>'+
+          '<div class="mushaf-sura-name-ar">'+_surahChar(line.sn)+'</div>'+
         '</div></div>';
     } else if(line.t === 'b'){
       h += '<div class="mushaf-line mushaf-line-center"><span class="mushaf-line-text">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</span></div>';
@@ -2023,17 +2030,9 @@ function showWordPopup(word, root, suraName, ayahNum, ayahText, suraNum){
   popupData = { word:word, root:root, suraName:suraName, ayahNum:ayahNum, ayahText:ayahText, suraNum:suraNum };
   document.getElementById('popupWord').textContent = word;
   document.getElementById('popupRoot').textContent = root || '—';
-  // اسم السورة: الخط الجميل + النص العادي كنسخة احتياطية
+  // اسم السورة: نص عادي فقط
   var suraEl = document.getElementById('popupSura');
-  var suraTextEl = document.getElementById('popupSuraText');
-  if(suraNum){
-    suraEl.textContent = _surahChar(suraNum);
-    if(suraTextEl) suraTextEl.textContent = suraName || '';
-  } else {
-    suraEl.textContent = suraName || '—';
-    suraEl.style.fontFamily = '';
-    if(suraTextEl) suraTextEl.textContent = '';
-  }
+  suraEl.textContent = suraName || '—';
   document.getElementById('popupAyah').textContent = ayahNum || '—';
 
   // عرض الجزء
@@ -2493,26 +2492,7 @@ function smCopy(){
 }
 function smNative(){if(navigator.share)navigator.share({title:'مستكشف القرآن العظيم',text:_sd.txt}).then(closeShareModal).catch(function(){});}
 
-// ===== PWA: Service Worker + Auto Update =====
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/sw.js').then(function(reg){
-      reg.update();
-      reg.addEventListener('updatefound', function(){
-        var nw = reg.installing;
-        nw.addEventListener('statechange', function(){
-          if(nw.state==='installed' && navigator.serviceWorker.controller){
-            nw.postMessage('skipWaiting');
-          }
-        });
-      });
-    }).catch(function(){});
-    var refreshing=false;
-    navigator.serviceWorker.addEventListener('controllerchange',function(){
-      if(!refreshing){refreshing=true;window.location.reload();}
-    });
-  });
-}
+// SW registration handled by nav.js (مشترك بين كل الصفحات)
 </script>
 
 <!-- ===== Share Modal ===== -->

@@ -258,6 +258,37 @@
   }
 })();
 
+// ===== Service Worker Registration + Auto-Reload (مشترك بين كل الصفحات) =====
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').then(function (reg) {
+      // تحقّق من وجود تحديث فوراً عند كل تحميل
+      reg.update();
+
+      reg.addEventListener('updatefound', function () {
+        var newWorker = reg.installing;
+        newWorker.addEventListener('statechange', function () {
+          // لمّا يكون الـ SW الجديد جاهزاً — أعطه إشارة يتولى الآن
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            newWorker.postMessage('skipWaiting');
+          }
+        });
+      });
+    }).catch(function () {});
+
+    // لمّا يتغير الـ controller (يعني SW جديد استلم) — أعد تحميل الصفحة مرة واحدة
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
+  });
+})();
+
 // ===== Dark Mode (shared across all pages) =====
 (function () {
   // Apply class immediately — prevents flash of light mode
