@@ -41,6 +41,8 @@
 <style>
   @font-face { font-family: 'KFGQPC HAFS Uthmanic Script Regular'; src: url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.woff2') format('woff2'), url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.ttf') format('truetype'); font-display: swap; }
   @font-face { font-family: 'Me Quran'; src: url('https://static-cdn.tarteel.ai/qul/fonts/me_quran_volt_newmet.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'quran-common'; src: url('./quran-common.woff') format('woff'); font-display: swap; }
+  @font-face { font-family: 'v4-surah-name'; src: url('./surah_names.woff') format('woff'), url('./surah_names.ttf') format('truetype'); font-display: swap; }
   :root { --quran-font: 'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Amiri', 'Traditional Arabic', serif; background: #f5f0e8; color: #2c1a0e; min-height: 100vh; direction: rtl; }
@@ -162,6 +164,15 @@
   body.dark .popup-stat-badge { background: #c9a84c15; color: #c9a84c; border-color: #c9a84c33; }
   .popup-stat-root { background: #2a7a5522; color: #1a5c3a; border-color: #2a7a5544; }
   body.dark .popup-stat-root { background: #2a7a5515; color: #5abf8a; border-color: #2a7a5533; }
+  /* حاجز الجزء في وضع السطور */
+  .juz-divider { display:flex; align-items:center; gap:10px; margin:14px 0 6px; padding:7px 14px; background:linear-gradient(135deg,#c9a84c18,#c9a84c08); border:1px solid #c9a84c44; border-radius:10px; }
+  body.dark .juz-divider { background:linear-gradient(135deg,#c9a84c10,#c9a84c05); border-color:#c9a84c33; }
+  .juz-divider-label { font-size:0.88rem; color:#6b3a1f; font-family:'Amiri',serif; font-weight:700; }
+  body.dark .juz-divider-label { color:#c9a84c; }
+  .popup-surah-name-font { font-family: 'v4-surah-name', serif; font-size: 2.2rem; line-height: 1; }
+  body.dark .popup-surah-name-font { }
+  .sura-header-name-font { font-family: 'v4-surah-name', serif; font-size: 3rem; text-align: center; padding: 8px 20px 4px; display: block; }
+  body.dark .sura-header-name-font { }
   .popup-stats-row { background: #fdf8f0; border-radius: 8px; margin: 2px 0; }
   body.dark .popup-stats-row { background: #1e1408; } font-size: 1.1rem; line-height: 2; color: #4a3a2a; background: #f5f0e8; border-radius: 8px; padding: 12px 16px; margin-top: 12px; border-right: 4px solid #c9a84c; }
   body.dark .popup-ayah-preview { background: #1a1208; color: #c0a870; }
@@ -540,10 +551,10 @@
   .mushaf-sura-frame::before { left:-6px; }
   .mushaf-sura-frame::after  { right:-6px; }
   .mushaf-sura-name-ar {
-    font-family:'KFGQPC HAFS Uthmanic Script Regular','Amiri',serif;
-    font-size:1.15rem; font-weight:bold; color:#120c04; text-align:center;
+    font-family:'v4-surah-name',serif;
+    font-size:2.2rem; text-align:center; line-height:1.1;
   }
-  body.dark .mushaf-sura-name-ar { color:#f0e8cc; }
+  body.dark .mushaf-sura-name-ar { }
   .mushaf-sura-info { font-size:.75rem; color:#7a5c3a; margin-top:2px; text-align:center; font-family:'Amiri',serif; }
   body.dark .mushaf-sura-info { color:#9a7a5a; }
 
@@ -642,13 +653,17 @@
         <span class="popup-label">الجذر:</span>
         <span class="popup-value" id="popupRoot">—</span>
       </div>
-      <div class="popup-info-row">
+      <div class="popup-info-row" style="align-items:center;">
         <span class="popup-label">السورة:</span>
-        <span class="popup-value" id="popupSura">—</span>
+        <span class="popup-surah-name-font" id="popupSura">—</span>
+        <span style="font-size:0.8rem;color:#9a7a5a;margin-right:6px;" id="popupSuraText"></span>
       </div>
       <div class="popup-info-row">
         <span class="popup-label">الآية:</span>
         <span class="popup-value" id="popupAyah">—</span>
+      </div>
+      <div class="popup-info-row" id="popupJuzRow">
+        <span class="popup-value" id="popupJuzNum" style="font-weight:700;color:#6b3a1f;"></span>
       </div>
       <div class="popup-info-row popup-stats-row">
         <span class="popup-label">تكرار الكلمة:</span>
@@ -675,12 +690,54 @@ var allData = [], suraMap = {}, suraOrder = [], ayahsBySura = {};
 var quranFull = null, _qfLoading = false, _qfCBs = [];
 var mushafPages = null, mushafWords = null, _mhLoading = false, _mhCBs = [];
 var _wordLocMap = null;
+var juzData = null;
+
+/* ===== V4 Surah Name Font Character Map =====
+   Font starts at surah 22 (Al-Hajj) → sorted codepoint position 0,
+   so index N (1-based) = correct char for surah N.
+   Surahs 1-21 live at the END of the sorted range (U+FC45–U+FC64).
+   ===================================================== */
+var _SURAH_CHARS = [null,"ﱅ","ﱆ","ﱇ","ﱊ","ﱋ","ﱎ","ﱏ","ﱑ","ﱒ","ﱓ","ﱕ","ﱖ","ﱘ","ﱚ","ﱛ","ﱜ","ﱝ","ﱞ","ﱡ","ﱢ","ﱤ","ﭑ","ﭒ","ﭔ","ﭕ","ﭗ","ﭘ","ﭚ","ﭛ","ﭝ","ﭞ","ﭠ","ﭡ","ﭣ","ﭤ","ﭦ","ﭧ","ﭩ","ﭪ","ﭬ","ﭭ","ﭯ","ﭰ","ﭲ","ﭳ","ﭵ","ﭶ","ﭸ","ﭹ","ﭻ","ﭼ","ﭾ","ﭿ","ﮁ","ﮂ","ﮄ","ﮅ","ﮇ","ﮈ","ﮊ","ﮋ","ﮍ","ﮎ","ﮐ","ﮑ","ﮓ","ﮔ","ﮖ","ﮗ","ﮙ","ﮚ","ﮜ","ﮝ","ﮟ","ﮠ","ﮢ","ﮣ","ﮥ","ﮦ","ﮨ","ﮩ","ﮫ","ﮬ","ﮮ","ﮯ","ﮱ","﮲","﮴","﮵","﮷","﮸","﮺","﮻","﮽","﮾","﯀","﯁","ﯓ","ﯔ","ﯖ","ﯗ","ﯙ","ﯚ","ﯜ","ﯝ","ﯟ","ﯠ","ﯢ","ﯣ","ﯥ","ﯦ","ﯨ","ﯩ","ﯫ"];
+
+function _surahChar(n){ return (_SURAH_CHARS[+n] || ''); }
+
+function loadJuzData(cb){
+  if(juzData){ if(cb) cb(); return; }
+  fetch('./data/juz.json').then(function(r){ return r.json(); }).then(function(d){
+    juzData = d;
+    if(cb) cb();
+  }).catch(function(){ juzData = {}; if(cb) cb(); });
+}
+
+function _getJuzForAyah(sn, ayahPos){
+  // أولاً: من بيانات ayahsBySura المحملة
+  var sStr = String(sn);
+  var aStr = String(ayahPos);
+  if(ayahsBySura[sStr] && ayahsBySura[sStr][aStr] && ayahsBySura[sStr][aStr].juz){
+    return ayahsBySura[sStr][aStr].juz;
+  }
+  // ثانياً: من ملف بيانات الجزء
+  if(juzData){
+    for(var j=1; j<=30; j++){
+      var jd = juzData[String(j)];
+      if(!jd) continue;
+      var vm = jd.verse_mapping;
+      if(vm && vm[sStr]){
+        var range = vm[sStr].split('-');
+        var from = parseInt(range[0]), to = parseInt(range[1] || range[0]);
+        var aNum = parseInt(ayahPos);
+        if(aNum >= from && aNum <= to) return j;
+      }
+    }
+  }
+  return null;
+}
 var qpcV2Glyphs = null, _qpLoading = false, _qpCBs = [];
 var _qpcV2FontFaces = {};  // page -> FontFace promise
-var _mushafFontSize = 28; // حجم الخط الافتراضي بالبكسل
+var _mushafFontSize = 22; // حجم الخط الافتراضي بالبكسل
 
 function setMushafFontSize(px){
-  _mushafFontSize = Math.max(18, Math.min(42, px));
+  _mushafFontSize = Math.max(14, Math.min(26, px));
   document.documentElement.style.setProperty('--m-fs', _mushafFontSize+'px');
   // تحديث أزرار الحجم إن وجدت
   var lbl = document.getElementById('mfs-label');
@@ -850,6 +907,7 @@ function _buildWordLocationMap(){
 
 // ===== Load =====
 window.addEventListener('load', function(){
+  loadJuzData(); // تحميل بيانات الأجزاء في الخلفية
   var params = new URLSearchParams(location.search);
   var pSura = params.get('sura');
   dbGet('allData').then(function(saved){
@@ -997,14 +1055,19 @@ function selectSura(suraNum, forcePage){
 
   var bismillahHtml = (suraNum !== '1' && suraNum !== '9') ? '<div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>' : '';
 
+  var surahLig = _surahChar(suraNum);
   var html = '<div class="sura-header-card" id="suraHeaderCard">'+
     '<div class="sura-header-bar" onclick="toggleSuraHeader()">'+
-      '<div class="sura-header-title">سورة '+s.name+'</div>'+
+      '<div class="sura-header-title" style="display:flex;align-items:center;gap:8px;">'+
+        '<span style="font-family:\'v4-surah-name\',serif;font-size:1.6rem;line-height:1;">'+surahLig+'</span>'+
+        '<span style="font-size:0.78rem;opacity:0.7;">'+s.name+'</span>'+
+      '</div>'+
       '<div class="sura-header-meta-inline">'+suraNum+' · '+s.ayahCount+' آية</div>'+
       '<div class="reading-progress" id="readProgress">١ / '+s.ayahCount+'</div>'+
       '<div class="sura-header-toggle">▲</div>'+
     '</div>'+
     '<div class="sura-header-expanded" id="suraHeaderExpanded">'+
+      '<div class="sura-header-name-font">'+surahLig+'</div>'+
       '<div class="sura-header-meta"><span>رقم السورة: '+suraNum+'</span><span>عدد الآيات: '+s.ayahCount+'</span></div>'+
     '</div>'+
   '</div>'+
@@ -1036,8 +1099,14 @@ function selectSura(suraNum, forcePage){
   }
 
   html += '<div class="ayahs-container">';
+  var _prevJuz = null;
   for(var i=0;i<posArr.length;i++){
     var ay = ayahs[posArr[i]];
+    // حاجز الجزء عند بداية كل جزء جديد
+    if(ay.juz && ay.juz !== _prevJuz){
+      html += '<div class="juz-divider"><span class="juz-divider-label">الجزء '+toArabicNumerals(ay.juz)+'</span></div>';
+      _prevJuz = ay.juz;
+    }
     var wordsHtml = buildClickableAyah(ay, suraNum);
     var favKey = 'ayah::'+suraNum+'::'+ay.pos;
     var isFaved = isBookmarked(favKey);
@@ -1079,15 +1148,32 @@ function selectSura(suraNum, forcePage){
   history.replaceState(null, '', url);
 }
 
+// تطبيع النص لخط المدني (Me Quran) — يحذف الحروف الخاصة بخط حفص
+function _normForMadani(s){
+  if(!s) return s;
+  var out = '';
+  for(var i=0; i<s.length; i++){
+    var c = s.charCodeAt(i);
+    if(c === 0x0671) { out += '\u0627'; continue; } // ألف الوصل → ألف عادية
+    if(c >= 0x0656 && c <= 0x065F) continue;        // علامات حفص الخاصة
+    if(c >= 0x06D6 && c <= 0x06ED) continue;        // علامات وقف قرآنية
+    if(c === 0x0615 || (c >= 0x0617 && c <= 0x061A)) continue; // علامات ممتدة
+    out += s[i];
+  }
+  return out;
+}
+
 function buildClickableAyah(ay, suraNum){
   var text = ay.text;
   if(!text) return '';
   var textWords = text.split(' ');
   var dataWords = ay.words || [];
+  var useMadani = (currentFont === 'me-quran');
 
   var html = '';
   for(var i=0;i<textWords.length;i++){
     var tw = textWords[i];
+    var displayTw = useMadani ? _normForMadani(tw) : tw;
     // Try to find matching data word
     var matched = null;
     for(var j=0;j<dataWords.length;j++){
@@ -1099,9 +1185,9 @@ function buildClickableAyah(ay, suraNum){
       }
     }
     if(matched){
-      html += '<span class="ayah-word" onclick="showWordPopup(\''+esc(matched.word)+'\',\''+esc(matched.root)+'\',\''+esc(suraMap[suraNum].name)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\')">'+tw+'</span> ';
+      html += '<span class="ayah-word" data-orig="'+esc(tw)+'" onclick="showWordPopup(\''+esc(matched.word)+'\',\''+esc(matched.root)+'\',\''+esc(suraMap[suraNum].name)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\',\''+suraNum+'\')">'+displayTw+'</span> ';
     } else {
-      html += '<span class="ayah-word" onclick="showWordPopup(\''+esc(tw)+'\',\'\',\''+esc(suraMap[suraNum].name)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\')">'+tw+'</span> ';
+      html += '<span class="ayah-word" data-orig="'+esc(tw)+'" onclick="showWordPopup(\''+esc(tw)+'\',\'\',\''+esc(suraMap[suraNum].name)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\',\''+suraNum+'\')">'+displayTw+'</span> ';
     }
   }
   return html;
@@ -1334,7 +1420,7 @@ function buildMushafPage(page){
       var surahInfo = [nuzul, ayahCount ? ayahCount+' آية' : ''].filter(Boolean).join(' · ');
       html += '<div class="mushaf-sura-header">'+
         '<div class="mushaf-sura-frame">'+
-          '<div class="mushaf-sura-name">سورة '+item.suraName+'</div>'+
+          '<div class="mushaf-sura-name-ar">'+_surahChar(item.sura)+'</div>'+
           (surahInfo ? '<div class="mushaf-sura-info">'+surahInfo+'</div>' : '')+
         '</div>'+
       '</div>';
@@ -1480,7 +1566,7 @@ function _buildQCFContent(pg, verses){
         // البحث بالترتيب — محصّن ضد فروق Unicode
         var wRoot = verseRoots[wordIdx] || '';
         wordIdx++;
-        h += '<span class="qcf-word" onclick="showWordPopup(\''+esc(uth)+'\',\''+esc(wRoot)+'\',\''+esc(sName)+'\',\''+vNum+'\',\''+esc(verse.text_uthmani||'')+'\')">'+qcfH+'</span> ';
+        h += '<span class="qcf-word" onclick="showWordPopup(\''+esc(uth)+'\',\''+esc(wRoot)+'\',\''+esc(sName)+'\',\''+vNum+'\',\''+esc(verse.text_uthmani||'')+'\',\''+chId+'\')">'+qcfH+'</span> ';
       }
     }
   }
@@ -1531,7 +1617,7 @@ function _buildNewMushafPage(pg){
       var sAyahs = suraMap[sn] ? toArabicNums(suraMap[sn].ayahCount)+' آية' : '';
       h += '<div class="mushaf-line-surah">'+
         '<div class="mushaf-sura-frame">'+
-          '<div><div class="mushaf-sura-name-ar">'+sName+'</div>'+
+          '<div><div class="mushaf-sura-name-ar">'+_surahChar(line.sn)+'</div>'+
           '<div class="mushaf-sura-info">'+sAyahs+'</div></div>'+
         '</div></div>';
     } else if(line.t === 'b'){
@@ -1551,9 +1637,9 @@ function _buildNewMushafPage(pg){
         var wAyahData = (loc && loc.sn && ayahsBySura[loc.sn]) ? ayahsBySura[loc.sn][wAyah] : null;
         var wAyahText = wAyahData ? (wAyahData.text || '') : '';
         if(glyph){
-          h += '<span class="mushaf-word qpc-v4-word" style="font-family:\'p'+pg+'-v4-tajweed\'" onclick="showWordPopup(\''+esc(wtext)+'\',\''+esc(wRoot)+'\',\''+esc(wSuraName)+'\',\''+esc(wAyah)+'\',\''+esc(wAyahText)+'\')">'+glyph+'</span>';
+          h += '<span class="mushaf-word qpc-v4-word" style="font-family:\'p'+pg+'-v4-tajweed\'" onclick="showWordPopup(\''+esc(wtext)+'\',\''+esc(wRoot)+'\',\''+esc(wSuraName)+'\',\''+esc(wAyah)+'\',\''+esc(wAyahText)+'\',\''+esc(loc?loc.sn:'')+'\')">'+glyph+'</span>';
         } else {
-          h += '<span class="mushaf-word" onclick="showWordPopup(\''+esc(wtext)+'\',\''+esc(wRoot)+'\',\''+esc(wSuraName)+'\',\''+esc(wAyah)+'\',\''+esc(wAyahText)+'\')">'+wtext+'</span>';
+          h += '<span class="mushaf-word" onclick="showWordPopup(\''+esc(wtext)+'\',\''+esc(wRoot)+'\',\''+esc(wSuraName)+'\',\''+esc(wAyah)+'\',\''+esc(wAyahText)+'\',\''+esc(loc?loc.sn:'')+'\')">'+wtext+'</span>';
         }
       }
       h += '</div>';
@@ -1607,9 +1693,9 @@ function buildClickableMushafAyah(ay, suraNum){
       }
     }
     if(matched){
-      html += '<span class="mushaf-word" onclick="showWordPopup(\''+esc(matched.word)+'\',\''+esc(matched.root)+'\',\''+esc(sName)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\')" title="'+esc(matched.word)+'">'+tw+'</span>';
+      html += '<span class="mushaf-word" onclick="showWordPopup(\''+esc(matched.word)+'\',\''+esc(matched.root)+'\',\''+esc(sName)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\',\''+suraNum+'\')" title="'+esc(matched.word)+'">'+tw+'</span>';
     } else {
-      html += '<span class="mushaf-word" onclick="showWordPopup(\''+esc(tw)+'\',\'\',\''+esc(sName)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\')" title="'+tw+'">'+tw+'</span>';
+      html += '<span class="mushaf-word" onclick="showWordPopup(\''+esc(tw)+'\',\'\',\''+esc(sName)+'\',\''+ay.pos+'\',\''+esc(ay.text)+'\',\''+suraNum+'\')" title="'+tw+'">'+tw+'</span>';
     }
   }
   return html;
@@ -1912,12 +1998,37 @@ function _brRenderFields(root){
 }
 
 
-function showWordPopup(word, root, suraName, ayahNum, ayahText){
-  popupData = { word:word, root:root, suraName:suraName, ayahNum:ayahNum, ayahText:ayahText };
+function showWordPopup(word, root, suraName, ayahNum, ayahText, suraNum){
+  popupData = { word:word, root:root, suraName:suraName, ayahNum:ayahNum, ayahText:ayahText, suraNum:suraNum };
   document.getElementById('popupWord').textContent = word;
   document.getElementById('popupRoot').textContent = root || '—';
-  document.getElementById('popupSura').textContent = suraName;
-  document.getElementById('popupAyah').textContent = ayahNum;
+  // اسم السورة: الخط الجميل + النص العادي كنسخة احتياطية
+  var suraEl = document.getElementById('popupSura');
+  var suraTextEl = document.getElementById('popupSuraText');
+  if(suraNum){
+    suraEl.textContent = _surahChar(suraNum);
+    if(suraTextEl) suraTextEl.textContent = suraName || '';
+  } else {
+    suraEl.textContent = suraName || '—';
+    suraEl.style.fontFamily = '';
+    if(suraTextEl) suraTextEl.textContent = '';
+  }
+  document.getElementById('popupAyah').textContent = ayahNum || '—';
+
+  // عرض الجزء
+  var juzRow = document.getElementById('popupJuzRow');
+  var juzNumEl = document.getElementById('popupJuzNum');
+  if(suraNum && ayahNum){
+    var juzNum = _getJuzForAyah(suraNum, ayahNum);
+    if(juzNum){
+      juzNumEl.textContent = 'الجزء ' + toArabicNumerals(juzNum);
+      juzRow.style.display = '';
+    } else {
+      juzRow.style.display = 'none';
+    }
+  } else {
+    juzRow.style.display = 'none';
+  }
 
   // حساب تكرار الكلمة والجذر من allData
   var wordStripped = _normArabic(word);
@@ -2006,6 +2117,10 @@ function changeFontFamily(fontId){
   document.documentElement.style.setProperty('--quran-font', FONT_FAMILIES[fontId]);
   document.querySelectorAll('.font-opt').forEach(function(btn){
     btn.classList.toggle('active', btn.getAttribute('data-font') === fontId);
+  });
+  // تطبيع نص الكلمات فوراً عند تغيير الخط
+  document.querySelectorAll('.ayah-word[data-orig]').forEach(function(el){
+    el.textContent = (fontId === 'me-quran') ? _normForMadani(el.dataset.orig) : el.dataset.orig;
   });
 }
 function toArabicNumerals(n){
