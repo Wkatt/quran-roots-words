@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الجذور — مستكشف القرآن العظيم</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DGJW3108XZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DGJW3108XZ');
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@font-face { font-family: 'KFGQPC HAFS Uthmanic Script Regular'; src: url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.woff2') format('woff2'), url('https://cdn.jsdelivr.net/gh/thetruetruth/quran-data-kfgqpc@main/hafs/font/hafs.18.ttf') format('truetype'); font-display: swap; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Amiri', 'Traditional Arabic', serif; background: #f5f0e8; color: #2c1a0e; min-height: 100vh; direction: rtl; }
+body.dark { background: #1a1208; color: #e8d8b8; }
+
+/* ===== Header ===== */
+.header { background: linear-gradient(135deg, #6b3a1f, #3d1f0a); border-bottom: 3px solid #c9a84c; padding: 16px 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.header-title { font-size: 1.5rem; color: #f5e6c8; }
+.header-sub { color: #d4b896; font-size: 0.85rem; margin-top: 2px; }
+.header-controls { display: flex; gap: 8px; align-items: center; }
+.hc-btn { background: #ffffff22; border: 1px solid #ffffff33; border-radius: 8px; color: #f5e6c8; padding: 6px 12px; cursor: pointer; font-size: 0.95rem; text-decoration: none; transition: background .2s; font-family: inherit; }
+.hc-btn:hover { background: #ffffff33; }
+
+/* ===== Letter Filter Bar ===== */
+.letter-bar { max-width: 960px; margin: 16px auto 0; padding: 0 20px; display: none; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.letter-btn { background: #fff8f0; border: 1px solid #c9a84c55; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-family: inherit; font-size: 1.05rem; color: #8b4513; transition: all .15s; min-width: 34px; text-align: center; }
+body.dark .letter-btn { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a44; }
+.letter-btn:hover { background: #fdf0dc; border-color: #c9a84c; }
+.letter-btn.active { background: #8b4513; color: #fff; border-color: #8b4513; }
+body.dark .letter-btn.active { background: #c9a84c; color: #1a1208; border-color: #c9a84c; }
+.letter-btn-all { background: #fff8f0; border: 1px solid #2a7a5566; border-radius: 8px; padding: 4px 14px; cursor: pointer; font-family: inherit; font-size: 0.9rem; color: #2a7a55; transition: all .15s; }
+body.dark .letter-btn-all { background: #2a1c0a; color: #4ab880; border-color: #2a7a5544; }
+.letter-btn-all.active { background: #2a7a55; color: #fff; border-color: #2a7a55; }
+
+/* ===== Controls ===== */
+.controls { max-width: 960px; margin: 12px auto 16px; padding: 0 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.sort-btn { background: #fff8f0; border: 1px solid #c9a84c66; border-radius: 20px; padding: 7px 20px; cursor: pointer; font-family: inherit; font-size: 1rem; color: #8b4513; transition: all .2s; }
+body.dark .sort-btn { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a55; }
+.sort-btn.active { background: #8b4513; color: #fff; border-color: #8b4513; }
+.search-box { flex: 1; min-width: 180px; background: #fff8f0; border: 1px solid #c9a84c88; border-radius: 20px; padding: 7px 18px; font-family: inherit; font-size: 1rem; color: #2c1a0e; outline: none; direction: rtl; }
+body.dark .search-box { background: #2a1c0a; color: #e8d8b8; border-color: #7a5c3a; }
+.search-box::placeholder { color: #b09070; }
+.count-label { font-size: 0.85rem; color: #9a7a5a; white-space: nowrap; }
+body.dark .count-label { color: #7a6050; }
+
+/* ===== Roots Grid ===== */
+.roots-grid { max-width: 960px; margin: 0 auto; padding: 0 20px 60px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.root-card { background: #fff; border: 1px solid #e0d0b8; border-radius: 12px; padding: 14px 12px; cursor: pointer; transition: all .2s; text-align: center; position: relative; overflow: hidden; }
+body.dark .root-card { background: #221508; border-color: #4a3520; }
+.root-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px #c9a84c22; border-color: #c9a84c88; }
+.root-card.open { border-color: #c9a84c; box-shadow: 0 4px 16px #c9a84c33; background: #fffdf5; }
+body.dark .root-card.open { background: #2a1f0a; }
+.root-bar { position: absolute; bottom: 0; right: 0; height: 3px; background: linear-gradient(90deg, #c9a84c, #a07830); border-radius: 0 0 12px 12px; transition: width .4s; }
+.root-word { font-size: 1.5rem; color: #8b4513; font-weight: bold; margin-bottom: 4px; }
+body.dark .root-word { color: #c9a84c; }
+.root-count { font-size: 0.8rem; color: #9a7a5a; }
+.root-rank { position: absolute; top: 6px; left: 8px; font-size: 0.7rem; color: #c9a84c88; }
+
+/* ===== No Data ===== */
+.no-data { text-align: center; padding: 80px 20px; color: #9a7a5a; }
+.no-data a { color: #c9a84c; }
+
+/* ===== Drawer ===== */
+.drawer-overlay { display: none; position: fixed; inset: 0; background: #00000055; z-index: 500; }
+.drawer-overlay.open { display: block; }
+
+.drawer {
+  position: fixed; top: 0; right: 0;
+  width: 440px; max-width: 100vw; height: 100vh;
+  background: #fff8f0;
+  border-left: 3px solid #c9a84c;
+  z-index: 501;
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+  box-shadow: -4px 0 32px #0003;
+  overflow: hidden;
+}
+body.dark .drawer { background: #1e1408; border-left-color: #7a5c3a; }
+.drawer.open { transform: translateX(0); }
+
+@media (max-width: 640px) { .drawer { width: 100vw; border-left: none; } }
+
+/* Drawer header */
+.drawer-head { background: linear-gradient(135deg, #6b3a1f, #3d1f0a); border-bottom: 2px solid #c9a84c; padding: 14px 20px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.drawer-root { font-size: 2.4rem; color: #f5e6c8; font-weight: bold; flex: 1; letter-spacing: .04em; }
+.drawer-close { background: #ffffff22; border: 1px solid #ffffff44; border-radius: 8px; color: #f5e6c8; padding: 7px 14px; cursor: pointer; font-size: 1rem; font-family: inherit; flex-shrink: 0; transition: background .2s; }
+.drawer-close:hover { background: #ffffff44; }
+
+/* Drawer meta bar */
+.drawer-meta { padding: 10px 18px; background: #fdf5e6; border-bottom: 1px solid #e8d8b8; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+body.dark .drawer-meta { background: #2a1c0a; border-color: #4a3520; }
+.dmeta-badge { background: #fff; border: 1px solid #c9a84c66; border-radius: 16px; padding: 3px 14px; font-size: 0.85rem; color: #8b4513; }
+body.dark .dmeta-badge { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a55; }
+.dmeta-spacer { flex: 1; }
+.dmeta-btn { background: #fff; border: 1px solid #c9a84c66; border-radius: 8px; padding: 5px 12px; cursor: pointer; font-family: inherit; font-size: 0.82rem; color: #8b4513; transition: all .2s; white-space: nowrap; }
+body.dark .dmeta-btn { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a55; }
+.dmeta-btn:hover { background: #fdf0dc; border-color: #c9a84c; }
+.dmeta-btn.share { color: #1a6b4a; border-color: #2a7a5566; }
+body.dark .dmeta-btn.share { color: #4ab880; border-color: #2a7a5544; }
+.dmeta-btn.share:hover { background: #f0faf5; }
+
+/* Word chips */
+.word-chips { padding: 10px 18px; display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid #f0e0c8; flex-shrink: 0; }
+body.dark .word-chips { border-color: #3a2a10; }
+.word-chip { background: #fff8f0; border: 1px solid #c9a84c66; border-radius: 16px; padding: 4px 14px; font-size: 0.95rem; color: #8b4513; cursor: pointer; transition: all .15s; user-select: none; }
+body.dark .word-chip { background: #2a1c0a; color: #c9a84c; border-color: #7a5c3a55; }
+.word-chip:hover, .word-chip.active { background: #8b4513; color: #fff; border-color: #8b4513; }
+
+/* Sura bar chart */
+.sura-chart { padding: 12px 18px 10px; border-bottom: 1px solid #f0e0c8; flex-shrink: 0; }
+body.dark .sura-chart { border-color: #3a2a10; }
+.chart-title { font-size: 0.8rem; color: #9a7a5a; margin-bottom: 8px; }
+body.dark .chart-title { color: #7a6050; }
+.chart-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; font-size: 0.78rem; }
+.chart-lbl { width: 75px; text-align: right; color: #7a5c3a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+body.dark .chart-lbl { color: #9a8060; }
+.chart-track { flex: 1; background: #e8d8b8; border-radius: 3px; height: 11px; overflow: hidden; }
+body.dark .chart-track { background: #3a2a10; }
+.chart-fill { height: 100%; background: linear-gradient(90deg, #c9a84c, #a07830); border-radius: 3px; transition: width .4s; }
+.chart-val { width: 22px; text-align: left; color: #8b4513; flex-shrink: 0; font-size: 0.75rem; }
+body.dark .chart-val { color: #c9a84c; }
+
+/* Font size control */
+.font-ctrl { padding: 8px 18px; border-bottom: 1px solid #f0e0c8; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+body.dark .font-ctrl { border-color: #3a2a10; }
+.font-ctrl label { font-size: 0.8rem; color: #9a7a5a; white-space: nowrap; }
+.font-ctrl input[type=range] { flex: 1; accent-color: #c9a84c; max-width: 130px; }
+.font-ctrl span { font-size: 0.8rem; color: #7a4e00; min-width: 30px; }
+body.dark .font-ctrl span { color: #c9a84c; }
+
+/* Ayah list */
+.ayah-list { flex: 1; overflow-y: auto; }
+.ayah-list::-webkit-scrollbar { width: 5px; }
+.ayah-list::-webkit-scrollbar-thumb { background: #c9a84c55; border-radius: 3px; }
+.ayah-row { padding: 11px 18px; border-bottom: 1px solid #f5ede0; display: flex; gap: 10px; align-items: flex-start; }
+body.dark .ayah-row { border-color: #2a1c0a; }
+.ayah-row:last-child { border-bottom: none; }
+.ayah-ref { font-size: 0.72rem; color: #9a7a5a; min-width: 72px; flex-shrink: 0; padding-top: 6px; line-height: 1.5; }
+body.dark .ayah-ref { color: #7a6050; }
+.ayah-ref-num { font-weight: bold; color: #7a4e00; font-size: 0.78rem; }
+body.dark .ayah-ref-num { color: #c9a84c; }
+.ayah-txt { font-family: 'KFGQPC HAFS Uthmanic Script Regular', 'Amiri', serif; font-size: var(--ayah-fs, 1.1rem); line-height: 2.1; color: #2c1a0e; flex: 1; }
+body.dark .ayah-txt { color: #e8d8b8; }
+.ayah-browse-btn { background: none; border: 1px solid #c9a84c55; border-radius: 6px; padding: 3px 7px; color: #c9a84c99; font-size: 0.8rem; cursor: pointer; flex-shrink: 0; margin-top: 5px; white-space: nowrap; transition: all .15s; text-decoration: none; display: inline-block; line-height: 1.4; }
+.ayah-browse-btn:hover { background: #c9a84c; color: #fff; border-color: #c9a84c; }
+
+/* Toast */
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(16px); background: #2a7a55; color: #fff; padding: 10px 26px; border-radius: 20px; font-size: 0.95rem; opacity: 0; transition: all .3s; z-index: 1000; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">🌿 الجذور</div>
+    <div class="header-sub">مستكشف القرآن العظيم</div>
+  </div>
+  <div class="header-controls">
+    <a href="index.html" class="hc-btn">🔍 البحث</a>
+    <button class="hc-btn" onclick="toggleDark()" id="darkBtn" title="وضع ليلي">🌙</button>
+  </div>
+</div>
+
+<!-- Letter filter bar -->
+<div class="letter-bar" id="letterBar"></div>
+
+<!-- Controls -->
+<div class="controls" id="controls" style="display:none">
+  <button class="sort-btn" id="btnFreqDesc" onclick="setSort('freqDesc')">الأكثر وروداً ↓</button>
+  <button class="sort-btn active" id="btnFreqAsc" onclick="setSort('freqAsc')">الأقل وروداً ↑</button>
+  <button class="sort-btn" id="btnAlphaAsc" onclick="setSort('alphaAsc')">أبجدي أ←ي</button>
+  <button class="sort-btn" id="btnAlphaDesc" onclick="setSort('alphaDesc')">أبجدي ي←أ</button>
+  <input class="search-box" id="filterInput" placeholder="ابحث في الجذور..." oninput="applyFilter()">
+  <span class="count-label" id="countLabel"></span>
+</div>
+
+<!-- Grid -->
+<div class="roots-grid" id="rootsGrid"></div>
+
+<!-- No data -->
+<div class="no-data" id="noData" style="display:none">
+  <p style="font-size:1.2rem;margin-bottom:16px;">⚠️ لا توجد بيانات محفوظة</p>
+  <p style="font-size:0.95rem;margin-bottom:20px;">إذا كنت على نفس الموقع يرجى <a href="index.html">تحميل البيانات أولاً</a> من الصفحة الرئيسية</p>
+  <div style="border-top:1px solid #e0d0b8;padding-top:20px;margin-top:4px;">
+    <p style="font-size:0.9rem;color:#8b4513;margin-bottom:10px;">أو ارفع ملف data.xlsx مباشرة:</p>
+    <label for="localFileInputRoots" style="display:inline-block;background:linear-gradient(135deg,#c9a84c,#a07830);color:#fff;border-radius:10px;padding:10px 28px;cursor:pointer;font-size:1rem;">📂 اختر الملف</label>
+    <input type="file" id="localFileInputRoots" accept=".xlsx,.xls" style="display:none;" onchange="loadLocalFile(this)">
+    <div id="loadProgress" style="margin-top:14px;font-size:0.9rem;color:#8b6a4a;display:none;"></div>
+  </div>
+</div>
+
+<!-- Drawer overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDetail()"></div>
+
+<!-- Drawer -->
+<div class="drawer" id="drawer">
+  <div class="drawer-head" id="drawerHead"></div>
+  <div class="drawer-meta" id="drawerMeta"></div>
+  <div class="word-chips" id="drawerChips" style="display:none"></div>
+  <div class="sura-chart" id="drawerChart" style="display:none"></div>
+  <div class="font-ctrl" id="drawerFontCtrl" style="display:none">
+    <label>حجم الخط:</label>
+    <input type="range" min="0.85" max="1.7" step="0.05" value="1.1" id="fontSlider" oninput="updateFont(this.value)">
+    <span id="fontVal">1.1</span>
+  </div>
+  <div class="ayah-list" id="drawerAyahs"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var rootsMap = {}, currentSort = 'freqAsc', filterText = '', filterLetter = '', openRoot = null, openWordFilter = null;
+var maxCount = 1;
+var ARABIC_LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
+
+
+/* ── Toast ── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function () { t.classList.remove('show'); }, 2400);
+}
+
+/* ── Letter bar ── */
+function buildLetterBar() {
+  var bar = document.getElementById('letterBar');
+  bar.innerHTML = '';
+  bar.style.display = 'flex';
+  var all = document.createElement('button');
+  all.className = 'letter-btn-all' + (filterLetter === '' ? ' active' : '');
+  all.textContent = 'الكل';
+  all.onclick = function () { setLetter(''); };
+  bar.appendChild(all);
+  ARABIC_LETTERS.forEach(function (l) {
+    var btn = document.createElement('button');
+    btn.className = 'letter-btn' + (filterLetter === l ? ' active' : '');
+    btn.textContent = l;
+    btn.onclick = function () { setLetter(l); };
+    bar.appendChild(btn);
+  });
+}
+
+function setLetter(l) {
+  filterLetter = l;
+  var btns = document.getElementById('letterBar').querySelectorAll('button');
+  btns[0].classList.toggle('active', l === '');
+  ARABIC_LETTERS.forEach(function (letter, i) { btns[i + 1].classList.toggle('active', letter === l); });
+  closeDetail();
+  render();
+}
+
+/* ── Load: JSON first, then IndexedDB ── */
+window.addEventListener('load', function () {
+  fetch('./data/roots-detail.json')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      rootsMap = {};
+      var roots = Object.keys(data);
+      for (var i = 0; i < roots.length; i++) {
+        var root = roots[i];
+        var entries = data[root];
+        rootsMap[root] = [];
+        for (var j = 0; j < entries.length; j++) {
+          var e = entries[j];
+          rootsMap[root].push({ root: root, word: e.w, ayah_text: e.t, sura_name: e.sn, sura_num: e.s, pos: e.p });
+        }
+      }
+      maxCount = 0;
+      for (var i = 0; i < roots.length; i++) if (rootsMap[roots[i]].length > maxCount) maxCount = rootsMap[roots[i]].length;
+      init();
+    })
+    .catch(function () { tryIndexedDB(); });
+});
+
+function init() {
+  buildLetterBar();
+  render();
+  document.getElementById('controls').style.display = 'flex';
+  // open root from URL if present
+  var params = new URLSearchParams(window.location.search);
+  var sharedRoot = params.get('root');
+  if (sharedRoot && rootsMap[sharedRoot]) { toggleDetail(sharedRoot); }
+}
+
+function tryIndexedDB() {
+  function openDB() { return new Promise(function (res, rej) { var r = indexedDB.open('QuranExplorer', 2); r.onupgradeneeded = function (e) { var db = e.target.result; if (!db.objectStoreNames.contains('data')) db.createObjectStore('data'); }; r.onsuccess = function (e) { res(e.target.result); }; r.onerror = function (e) { rej(e.target.error); }; }); }
+  function dbGet(k) { return openDB().then(function (db) { return new Promise(function (res, rej) { var r = db.transaction('data', 'readonly').objectStore('data').get(k); r.onsuccess = function () { res(r.result); }; r.onerror = function (e) { rej(e.target.error); }; }); }); }
+  dbGet('allData').then(function (saved) {
+    if (saved && saved.length) {
+      rootsMap = {};
+      for (var i = 0; i < saved.length; i++) {
+        var r = saved[i];
+        if (!r.root) continue;
+        if (!rootsMap[r.root]) rootsMap[r.root] = [];
+        rootsMap[r.root].push(r);
+      }
+      var roots = Object.keys(rootsMap);
+      maxCount = 0;
+      for (var i = 0; i < roots.length; i++) if (rootsMap[roots[i]].length > maxCount) maxCount = rootsMap[roots[i]].length;
+      init();
+    } else { document.getElementById('noData').style.display = 'block'; }
+  }).catch(function () { document.getElementById('noData').style.display = 'block'; });
+}
+
+/* ── Sorting & filtering ── */
+function getSortedRoots() {
+  var roots = Object.keys(rootsMap);
+  if (filterLetter) roots = roots.filter(function (r) { return r.charAt(0) === filterLetter; });
+  if (filterText) roots = roots.filter(function (r) { return r.indexOf(filterText) >= 0; });
+  if (currentSort === 'freqDesc') roots.sort(function (a, b) { return rootsMap[b].length - rootsMap[a].length; });
+  else if (currentSort === 'freqAsc') roots.sort(function (a, b) { return rootsMap[a].length - rootsMap[b].length; });
+  else if (currentSort === 'alphaAsc') roots.sort(function (a, b) { return a.localeCompare(b, 'ar'); });
+  else roots.sort(function (a, b) { return b.localeCompare(a, 'ar'); });
+  return roots;
+}
+
+function setSort(s) {
+  currentSort = s;
+  ['btnFreqDesc','btnFreqAsc','btnAlphaAsc','btnAlphaDesc'].forEach(function(id){
+    document.getElementById(id).classList.remove('active');
+  });
+  var map = { freqDesc:'btnFreqDesc', freqAsc:'btnFreqAsc', alphaAsc:'btnAlphaAsc', alphaDesc:'btnAlphaDesc' };
+  if (map[s]) document.getElementById(map[s]).classList.add('active');
+  closeDetail();
+  render();
+}
+
+function applyFilter() {
+  filterText = document.getElementById('filterInput').value.trim();
+  closeDetail();
+  render();
+}
+
+/* ── Render grid ── */
+function render() {
+  var roots = getSortedRoots();
+  document.getElementById('countLabel').textContent = roots.length + ' جذر';
+  var html = '';
+  for (var i = 0; i < roots.length; i++) {
+    var root = roots[i];
+    var count = rootsMap[root].length;
+    var pct = Math.round(count / maxCount * 100);
+    var rank = (currentSort === 'freqDesc' || currentSort === 'freqAsc') ? '#' + (i + 1) : '';
+    html += '<div class="root-card' + (openRoot === root ? ' open' : '') + '" onclick="toggleDetail(\'' + esc(root) + '\')" id="card_' + esc(root) + '">'
+      + '<div class="root-rank">' + rank + '</div>'
+      + '<div class="root-word">' + root + '</div>'
+      + '<div class="root-count">' + count + ' موضع</div>'
+      + '<div class="root-bar" style="width:' + pct + '%"></div>'
+      + '</div>';
+  }
+  document.getElementById('rootsGrid').innerHTML = html;
+}
+
+/* ── Drawer open/close ── */
+function toggleDetail(root) {
+  if (openRoot === root) { closeDetail(); return; }
+  openRoot = root;
+  openWordFilter = null;
+  render();
+  showDetail(root);
+  // push root to URL
+  var url = new URL(window.location.href);
+  url.searchParams.set('root', root);
+  history.replaceState(null, '', url.toString());
+}
+
+function closeDetail() {
+  if (!openRoot) return;
+  openRoot = null; openWordFilter = null;
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  var url = new URL(window.location.href);
+  url.searchParams.delete('root');
+  history.replaceState(null, '', url.toString());
+  render();
+}
+
+/* ── Populate drawer ── */
+function showDetail(root) {
+  var entries = rootsMap[root]; if (!entries) return;
+  var sorted = entries.slice().sort(function (a, b) { return (+a.sura_num - +b.sura_num) || (+a.pos - +b.pos); });
+
+  // word frequency
+  var wc = {};
+  for (var i = 0; i < sorted.length; i++) if (sorted[i].word) wc[sorted[i].word] = (wc[sorted[i].word] || 0) + 1;
+  var we = Object.keys(wc).sort(function (a, b) { return wc[b] - wc[a]; });
+
+  // sura stats
+  var sc = {};
+  var suras = {};
+  for (var i = 0; i < sorted.length; i++) {
+    var sn = sorted[i].sura_name || ('سورة ' + sorted[i].sura_num);
+    sc[sn] = (sc[sn] || 0) + 1;
+    suras[sorted[i].sura_num] = 1;
+  }
+  var suraCount = Object.keys(suras).length;
+
+  /* Head */
+  document.getElementById('drawerHead').innerHTML =
+    '<div class="drawer-root">' + root + '</div>'
+    + '<button class="drawer-close" onclick="closeDetail()">✕ إغلاق</button>';
+
+  /* Meta bar */
+  document.getElementById('drawerMeta').innerHTML =
+    '<span class="dmeta-badge">⟲ ' + sorted.length + ' موضع</span>'
+    + '<span class="dmeta-badge">📖 ' + suraCount + ' سورة</span>'
+    + '<span class="dmeta-spacer"></span>'
+    + '<button class="dmeta-btn share" onclick="shareRoot(\'' + esc(root) + '\')">🔗 مشاركة</button>'
+    + '<button class="dmeta-btn" onclick="copyRoot(\'' + esc(root) + '\')">📋 نسخ الكل</button>';
+
+  /* Word chips */
+  var chipsEl = document.getElementById('drawerChips');
+  if (we.length > 1) {
+    var chipsHtml = '';
+    for (var i = 0; i < we.length; i++) {
+      chipsHtml += '<span class="word-chip' + (openWordFilter === we[i] ? ' active' : '') + '" onclick="filterWord(\'' + esc(root) + '\',\'' + esc(we[i]) + '\')">'
+        + we[i] + ' <small style="opacity:.65">(' + wc[we[i]] + ')</small></span>';
+    }
+    chipsEl.innerHTML = chipsHtml;
+    chipsEl.style.display = 'flex';
+  } else { chipsEl.style.display = 'none'; }
+
+  /* Sura bar chart */
+  var chartEl = document.getElementById('drawerChart');
+  var scArr = Object.keys(sc).map(function (k) { return { name: k, count: sc[k] }; }).sort(function (a, b) { return b.count - a.count; });
+  if (scArr.length > 1) {
+    var top = scArr.slice(0, 8);
+    var maxC = top[0].count;
+    var chartHtml = '<div class="chart-title">📊 التوزيع على السور (أعلى ' + top.length + ')</div>';
+    for (var i = 0; i < top.length; i++) {
+      var pct2 = Math.round(top[i].count / maxC * 100);
+      chartHtml += '<div class="chart-row">'
+        + '<span class="chart-lbl">' + top[i].name + '</span>'
+        + '<div class="chart-track"><div class="chart-fill" style="width:' + pct2 + '%"></div></div>'
+        + '<span class="chart-val">' + top[i].count + '</span>'
+        + '</div>';
+    }
+    chartEl.innerHTML = chartHtml;
+    chartEl.style.display = 'block';
+  } else { chartEl.style.display = 'none'; }
+
+  /* Font ctrl */
+  document.getElementById('drawerFontCtrl').style.display = 'flex';
+
+  /* Ayah list */
+  var display = openWordFilter ? sorted.filter(function (r) { return r.word === openWordFilter; }) : sorted;
+  var ayahsHtml = '';
+  for (var i = 0; i < display.length; i++) {
+    var e = display[i];
+    var txt = highlight(e.ayah_text, e.word);
+    var browseLink = 'browse.html?sura=' + encodeURIComponent(e.sura_num);
+    ayahsHtml += '<div class="ayah-row">'
+      + '<span class="ayah-ref">' + (e.sura_name || '') + '<br><span class="ayah-ref-num">' + e.sura_num + ':' + e.pos + '</span></span>'
+      + '<span class="ayah-txt">' + txt + '</span>'
+      + '<a href="' + browseLink + '" class="ayah-browse-btn" title="افتح السورة في المتصفح" target="_blank">📖</a>'
+      + '</div>';
+  }
+  document.getElementById('drawerAyahs').innerHTML = ayahsHtml;
+  document.getElementById('drawerAyahs').scrollTop = 0;
+
+  /* Open drawer */
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+
+function filterWord(root, word) {
+  openWordFilter = (openWordFilter === word) ? null : word;
+  showDetail(root);
+}
+
+function highlight(text, word) {
+  if (!word || !text) return text || '';
+  var idx = text.indexOf(word);
+  if (idx >= 0) return text.substring(0, idx) + '<span style="color:#cc0000;font-weight:bold;">' + word + '</span>' + text.substring(idx + word.length);
+  return text;
+}
+
+/* ── Share root link ── */
+function shareRoot(root) {
+  var url = new URL(window.location.href);
+  url.searchParams.set('root', root);
+  var link = url.toString();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(function () { showToast('✅ تم نسخ رابط الجذر'); });
+  } else {
+    var el = document.createElement('input'); el.value = link;
+    document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+    showToast('✅ تم نسخ رابط الجذر');
+  }
+}
+
+/* ── Copy root + ayahs ── */
+function copyRoot(root) {
+  var entries = rootsMap[root]; if (!entries) return;
+  var sorted = entries.slice().sort(function (a, b) { return (+a.sura_num - +b.sura_num) || (+a.pos - +b.pos); });
+  var display = openWordFilter ? sorted.filter(function (r) { return r.word === openWordFilter; }) : sorted;
+  var text = 'جذر: ' + root + '\n';
+  text += '─'.repeat(30) + '\n\n';
+  for (var i = 0; i < display.length; i++) {
+    var e = display[i];
+    text += (e.sura_name || '') + ' (' + e.sura_num + ':' + e.pos + ')\n';
+    text += e.ayah_text + '\n\n';
+  }
+  text = text.trim();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { showToast('✅ تم النسخ — ' + display.length + ' آية'); });
+  } else {
+    var el = document.createElement('textarea'); el.value = text;
+    document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+    showToast('✅ تم النسخ — ' + display.length + ' آية');
+  }
+}
+
+/* ── Font slider ── */
+function updateFont(val) {
+  document.getElementById('drawerAyahs').style.setProperty('--ayah-fs', val + 'rem');
+  document.getElementById('fontVal').textContent = parseFloat(val).toFixed(1);
+}
+
+function esc(s) { return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+
+/* ── Load from local XLSX file ── */
+function loadLocalFile(input) {
+  if (!input.files || !input.files[0]) return;
+  var prog = document.getElementById('loadProgress');
+  prog.style.display = 'block'; prog.textContent = 'جاري قراءة الملف...';
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    prog.textContent = 'جاري معالجة البيانات...';
+    try {
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      processAndShow(rows);
+      prog.textContent = '';
+    } catch (err) { prog.textContent = 'خطأ: ' + err.message; }
+  };
+  reader.onerror = function () { prog.textContent = 'تعذّر قراءة الملف'; };
+  reader.readAsArrayBuffer(input.files[0]);
+}
+
+function processAndShow(rows) {
+  if (!rows.length) return;
+  var keys = Object.keys(rows[0]);
+  function find() { for (var i = 0; i < arguments.length; i++) { var c = arguments[i].toLowerCase().replace(/[\s_]/g, ''); var k = keys.find(function (k) { return k.toLowerCase().replace(/[\s_]/g, '').indexOf(c) >= 0; }); if (k) return k; } return null; }
+  var kRoot = find('root'), kWord = find('word_uthmani_tashkeel', 'word_uthmani', 'word'), kAyah = find('ayah_text_tashkeel', 'ayah_text_ta', 'ayah_text', 'text'), kSuraName = find('sura_name', 'surah_name'), kSuraNum = find('sura_num', 'sura', 'surah'), kPos = find('ayah_pos_su', 'ayah_pos', 'pos');
+  rootsMap = {};
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var root = String(r[kRoot] || '').trim(); if (!root) continue;
+    if (!rootsMap[root]) rootsMap[root] = [];
+    rootsMap[root].push({ root: root, word: String(r[kWord] || '').trim(), ayah_text: String(r[kAyah] || '').trim(), sura_name: String(r[kSuraName] || '').trim(), sura_num: String(r[kSuraNum] || '').trim(), pos: String(r[kPos] || '').trim() });
+  }
+  maxCount = 0;
+  var allRoots = Object.keys(rootsMap);
+  for (var i = 0; i < allRoots.length; i++) if (rootsMap[allRoots[i]].length > maxCount) maxCount = rootsMap[allRoots[i]].length;
+  document.getElementById('noData').style.display = 'none';
+  init();
+}
+</script>
+<script src="nav.js?v=5"></script>
+</body>
+</html>
